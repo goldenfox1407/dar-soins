@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Package, Users, Receipt, Pencil, Trash2, ImagePlus, X, Check, LogOut } from 'lucide-react';
+import { Plus, Package, Users, Receipt, Pencil, Trash2, ImagePlus, X, Check, LogOut, Coins, ShieldAlert, Award, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -109,122 +109,258 @@ export default function AdminDashboard() {
     { id: 'finances', label: 'Devis & Factures', icon: <Receipt size={18} /> },
   ];
 
+  // Calculations for stats cards
+  const totalRevenue = factures.reduce((sum, item) => sum + Number(item.montant_total || 0), 0);
+  const availableNurses = personnel.filter(p => p.est_disponible).length;
+
   return (
-    <div className="animate-fade-in">
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
+    <div className="animate-fade-in text-slate-200">
+      
+      {/* Stat Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        {/* Card 1: Revenue */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden shadow-lg backdrop-blur-md">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-semibold text-slate-400">Chiffre d'Affaires</span>
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/25">
+              <Coins className="text-emerald-400" size={20} />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-white">{totalRevenue.toLocaleString('fr-FR')} MAD</p>
+          <p className="text-xs text-slate-500 mt-2">Cumulé sur toutes les factures</p>
+        </div>
+
+        {/* Card 2: Staff */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden shadow-lg backdrop-blur-md">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-semibold text-slate-400">Personnel Infirmier</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/25">
+              <Users className="text-blue-400" size={20} />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-white">{personnel.length}</p>
+          <p className="text-xs text-slate-500 mt-2">{availableNurses} disponibles actuellement</p>
+        </div>
+
+        {/* Card 3: Products */}
+        <div className="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-6 relative overflow-hidden shadow-lg backdrop-blur-md">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-semibold text-slate-400">Produits & Soins</span>
+            <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/25">
+              <Package className="text-violet-400" size={20} />
+            </div>
+          </div>
+          <p className="text-3xl font-extrabold text-white">{produits.length}</p>
+          <p className="text-xs text-slate-500 mt-2">Soins & gardes configurés</p>
+        </div>
+      </div>
+
+      {/* Tabs Menu */}
+      <div className="flex gap-2 mb-8 bg-slate-900/60 p-1.5 rounded-2xl border border-slate-800 shadow-inner">
         {tabs.map(t => (
-          <button key={t.id} onClick={() => { setActiveTab(t.id); setShowForm(false); }} className="btn-primary"
-            style={{ width: 'auto', background: activeTab === t.id ? 'var(--primary-color)' : 'transparent', border: `1px solid ${activeTab === t.id ? 'var(--primary-color)' : 'var(--glass-border)'}`, display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '10px 20px' }}>
-            {t.icon} {t.label}
+          <button 
+            key={t.id} 
+            onClick={() => { setActiveTab(t.id); setShowForm(false); }} 
+            className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-semibold transition-all border-none cursor-pointer ${
+              activeTab === t.id 
+                ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md' 
+                : 'text-slate-400 hover:bg-slate-800 hover:text-white bg-transparent'
+            }`}
+          >
+            {t.icon}
+            <span>{t.label}</span>
           </button>
         ))}
       </div>
 
       {/* ===================== TAB PRODUITS ===================== */}
       {activeTab === 'produits' && (
-        <>
+        <div className="animate-fade-in">
+          {/* Header Actions */}
+          {!showForm && (
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+                <Package size={22} className="text-blue-500" />
+                <span>Catalogue des soins</span>
+              </h2>
+              <button 
+                onClick={openAddForm}
+                className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5"
+              >
+                <Plus size={18} />
+                <span>Ajouter un produit</span>
+              </button>
+            </div>
+          )}
+
           {/* Formulaire Ajouter / Modifier */}
           {showForm && (
-            <div className="glass-panel" style={{ padding: '2rem', marginBottom: '2rem' }}>
-              <h2 style={{ fontSize: '1.4rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {editingId ? <Pencil color="var(--primary-color)" size={22} /> : <Plus color="var(--primary-color)" size={22} />}
-                {editingId ? 'Modifier le Produit' : 'Ajouter un Produit'}
+            <div className="bg-slate-850/60 border border-slate-700/40 rounded-2xl p-6 lg:p-8 mb-8 animate-scale-in shadow-xl">
+              <h2 className="text-xl font-bold mb-6 flex items-center gap-2 text-white border-b border-slate-800 pb-4">
+                {editingId ? <Pencil className="text-blue-500" size={22} /> : <Plus className="text-emerald-500" size={22} />}
+                <span>{editingId ? 'Modifier le Produit' : 'Ajouter un Produit'}</span>
               </h2>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 220px', gap: '2rem' }}>
-
-                {/* Colonne gauche */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Nom du Produit *</label>
-                    <input name="nom" value={formData.nom} onChange={handleInputChange} className="glass-input" placeholder="Ex: Injection sous-cutanée..." />
-                  </div>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Description</label>
-                    <textarea name="description" value={formData.description} onChange={handleInputChange} rows="3" className="glass-input" placeholder="Description affichée sur le site public..."></textarea>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Code-barres / SKU</label>
-                      <input name="code_barres" value={formData.code_barres} onChange={handleInputChange} className="glass-input" placeholder="SKU-001..." />
+              <div className="grid md:grid-cols-3 gap-8">
+                
+                {/* Column left/middle (Form inputs) */}
+                <div className="md:col-span-2 space-y-5">
+                  <div className="grid md:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-400">Nom du Produit *</label>
+                      <input 
+                        name="nom" 
+                        value={formData.nom} 
+                        onChange={handleInputChange} 
+                        className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all" 
+                        placeholder="Ex: Injection sous-cutanée..." 
+                        required
+                      />
                     </div>
-                    <div>
-                      <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Type de Produit *</label>
-                      <select name="type" value={formData.type} onChange={handleInputChange} className="glass-input">
-                        <option style={{ color: 'black' }} value="soin">Soin (Payé à l'acte)</option>
-                        <option style={{ color: 'black' }} value="garde">Garde (Salarié)</option>
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-400">Code-barres / SKU</label>
+                      <input 
+                        name="code_barres" 
+                        value={formData.code_barres} 
+                        onChange={handleInputChange} 
+                        className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all" 
+                        placeholder="SKU-001..." 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-xs font-semibold text-slate-400">Description</label>
+                    <textarea 
+                      name="description" 
+                      value={formData.description} 
+                      onChange={handleInputChange} 
+                      rows="3" 
+                      className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all resize-none" 
+                      placeholder="Description affichée sur le site public..."
+                    />
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-5">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-400">Type de Produit *</label>
+                      <select 
+                        name="type" 
+                        value={formData.type} 
+                        onChange={handleInputChange} 
+                        className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all"
+                      >
+                        <option value="soin">Soin (Payé à l'acte)</option>
+                        <option value="garde">Garde (Salarié)</option>
                       </select>
                     </div>
+
+                    <div className="flex flex-col gap-1.5">
+                      <label className="text-xs font-semibold text-slate-400">Prix Client (MAD) *</label>
+                      <input 
+                        type="number" 
+                        name="prix_client" 
+                        value={formData.prix_client} 
+                        onChange={handleInputChange} 
+                        className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all" 
+                        placeholder="0.00" 
+                        required
+                      />
+                    </div>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '1.2rem', border: '1px solid var(--glass-border)' }}>
-                    <h3 style={{ fontSize: '1rem', marginBottom: '1rem', color: 'var(--secondary-color)' }}>Tarification & Remises</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Prix Client (MAD) *</label>
-                        <input type="number" name="prix_client" value={formData.prix_client} onChange={handleInputChange} className="glass-input" placeholder="0.00" />
-                      </div>
+
+                  <div className="p-5 bg-slate-900/30 border border-slate-800 rounded-xl space-y-4">
+                    <h3 className="text-sm font-semibold text-slate-300">Rémunération & Remises</h3>
+                    
+                    <div className="grid md:grid-cols-3 gap-4">
                       {formData.type === 'soin' && (
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Rémunération Infirmier</label>
-                          <input type="number" name="remuneration_soignant" value={formData.remuneration_soignant} onChange={handleInputChange} className="glass-input" placeholder="0.00" />
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold text-slate-400">Rémunération Infirmier (MAD)</label>
+                          <input 
+                            type="number" 
+                            name="remuneration_soignant" 
+                            value={formData.remuneration_soignant} 
+                            onChange={handleInputChange} 
+                            className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all" 
+                            placeholder="0.00" 
+                          />
                         </div>
                       )}
-                    </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                      <div>
-                        <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Type de Remise</label>
-                        <select name="type_remise" value={formData.type_remise} onChange={handleInputChange} className="glass-input">
-                          <option style={{ color: 'black' }} value="none">Aucune</option>
-                          <option style={{ color: 'black' }} value="percent">Pourcentage (%)</option>
-                          <option style={{ color: 'black' }} value="fixed">Montant Fixe (MAD)</option>
+
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-xs font-semibold text-slate-400">Type de Remise</label>
+                        <select 
+                          name="type_remise" 
+                          value={formData.type_remise} 
+                          onChange={handleInputChange} 
+                          className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all"
+                        >
+                          <option value="none">Aucune</option>
+                          <option value="percent">Pourcentage (%)</option>
+                          <option value="fixed">Montant Fixe (MAD)</option>
                         </select>
                       </div>
+
                       {formData.type_remise !== 'none' && (
-                        <div>
-                          <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-semibold text-slate-400">
                             Valeur ({formData.type_remise === 'percent' ? '%' : 'MAD'})
                           </label>
-                          <input type="number" name="valeur_remise" value={formData.valeur_remise} onChange={handleInputChange} className="glass-input" placeholder="0" />
+                          <input 
+                            type="number" 
+                            name="valeur_remise" 
+                            value={formData.valeur_remise} 
+                            onChange={handleInputChange} 
+                            className="bg-slate-900/40 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all" 
+                            placeholder="0" 
+                          />
                         </div>
                       )}
                     </div>
                   </div>
                 </div>
 
-                {/* Colonne droite: Photo */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                  <label style={{ display: 'block', fontSize: '0.9rem', color: 'var(--text-muted)' }}>Photo du Produit</label>
+                {/* Column right (Product Image) */}
+                <div className="flex flex-col gap-3">
+                  <label className="text-xs font-semibold text-slate-400">Photo du Produit</label>
                   <div
                     onClick={() => fileInputRef.current.click()}
-                    style={{ width: '100%', height: '200px', borderRadius: '12px', border: '2px dashed var(--glass-border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden', background: 'rgba(0,0,0,0.2)', transition: 'border-color 0.2s' }}
-                    onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
-                    onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--glass-border)'}
+                    className="w-full h-56 rounded-2xl border-2 border-dashed border-slate-700 hover:border-blue-500 flex flex-col items-center justify-center cursor-pointer overflow-hidden bg-slate-900/50 hover:bg-slate-900/80 transition-all shadow-inner"
                   >
                     {imagePreview ? (
-                      <img src={imagePreview} alt="Aperçu" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={imagePreview} alt="Aperçu" className="w-full h-full object-cover" />
                     ) : (
                       <>
-                        <ImagePlus size={36} color="var(--text-muted)" style={{ marginBottom: '0.5rem' }} />
-                        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem', textAlign: 'center' }}>Cliquer pour uploader</span>
+                        <ImagePlus size={36} className="text-slate-500 mb-2" />
+                        <span className="text-slate-500 text-xs text-center px-4">Cliquer pour uploader une image</span>
                       </>
                     )}
                   </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+                  <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                   {imagePreview && (
-                    <button onClick={() => { setImagePreview(null); setImageFile(null); }} style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-muted)', padding: '6px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem' }}>
+                    <button 
+                      onClick={() => { setImagePreview(null); setImageFile(null); }} 
+                      className="w-full bg-slate-900/60 border border-slate-700 text-slate-400 hover:text-white py-2 rounded-xl cursor-pointer text-xs transition-colors"
+                    >
                       Retirer l'image
                     </button>
                   )}
                 </div>
               </div>
 
-              <div style={{ marginTop: '2rem', borderTop: '1px solid var(--glass-border)', paddingTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-                <button onClick={() => setShowForm(false)} style={{ background: 'transparent', border: '1px solid var(--glass-border)', color: 'var(--text-muted)', padding: '10px 24px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <X size={16} /> Annuler
+              {/* Actions footer */}
+              <div className="mt-8 border-t border-slate-800 pt-6 flex justify-end gap-3">
+                <button 
+                  onClick={() => setShowForm(false)} 
+                  className="flex items-center gap-2 bg-slate-900/60 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-700 px-5 py-2.5 rounded-xl font-semibold transition-all cursor-pointer"
+                >
+                  <X size={16} /> <span>Annuler</span>
                 </button>
-                <button onClick={handleSave} className="btn-primary" style={{ width: 'auto', padding: '10px 28px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                  <Check size={16} /> {editingId ? 'Enregistrer les modifications' : 'Créer le Produit'}
+                <button 
+                  onClick={handleSave} 
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+                >
+                  <Check size={16} /> <span>{editingId ? 'Enregistrer les modifications' : 'Créer le Produit'}</span>
                 </button>
               </div>
             </div>
@@ -232,151 +368,186 @@ export default function AdminDashboard() {
 
           {/* Liste des Produits */}
           {!showForm && (
-            <div className="glass-panel" style={{ overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                <thead>
-                  <tr style={{ borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)' }}>
-                    <th style={{ padding: '1rem 1.2rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Photo</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Produit</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Type</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Prix Client</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Rémunération</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Remise</th>
-                    <th style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {produits.map((p, i) => (
-                    <tr key={p.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)', transition: 'background 0.2s' }}
-                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                      onMouseLeave={e => e.currentTarget.style.background = i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)'}
-                    >
-                      {/* Photo */}
-                      <td style={{ padding: '0.8rem 1.2rem' }}>
-                        {p.image ? (
-                          <img src={BACKEND_URL + p.image} alt={p.nom} style={{ width: '52px', height: '52px', borderRadius: '10px', objectFit: 'cover', border: '1px solid var(--glass-border)' }} />
-                        ) : (
-                          <div style={{ width: '52px', height: '52px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--glass-border)' }}>
-                            <Package size={22} color="var(--text-muted)" />
-                          </div>
-                        )}
-                      </td>
-                      {/* Nom + desc */}
-                      <td style={{ padding: '0.8rem 1rem' }}>
-                        <div style={{ fontWeight: '600', marginBottom: '0.2rem' }}>{p.nom}</div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: '240px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.description || '—'}</div>
-                      </td>
-                      {/* Type */}
-                      <td style={{ padding: '0.8rem 1rem' }}>
-                        <span style={{ background: p.type === 'soin' ? 'rgba(14,165,233,0.15)' : 'rgba(16,185,129,0.15)', color: p.type === 'soin' ? 'var(--primary-color)' : 'var(--secondary-color)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.8rem', fontWeight: '600' }}>
-                          {p.type === 'soin' ? 'Soin' : 'Garde'}
-                        </span>
-                      </td>
-                      {/* Prix */}
-                      <td style={{ padding: '0.8rem 1rem', fontWeight: 'bold', fontSize: '1.05rem' }}>{Number(p.prix_client).toFixed(2)} MAD</td>
-                      {/* Rémunération */}
-                      <td style={{ padding: '0.8rem 1rem', color: 'var(--text-muted)' }}>
-                        {p.type === 'soin' ? `${Number(p.remuneration_soignant || 0).toFixed(2)} MAD` : <span style={{ fontSize: '0.8rem' }}>Salarié</span>}
-                      </td>
-                      {/* Remise */}
-                      <td style={{ padding: '0.8rem 1rem' }}>
-                        {p.type_remise === 'none' ? <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Aucune</span>
-                          : <span style={{ background: 'rgba(239,68,68,0.15)', color: '#f87171', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem' }}>
-                            -{p.valeur_remise}{p.type_remise === 'percent' ? '%' : ' MAD'}
-                          </span>}
-                      </td>
-                      {/* Actions */}
-                      <td style={{ padding: '0.8rem 1rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button onClick={() => openEditForm(p)} style={{ background: 'rgba(14,165,233,0.15)', border: '1px solid rgba(14,165,233,0.3)', color: 'var(--primary-color)', padding: '7px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
-                            <Pencil size={14} /> Modifier
-                          </button>
-                          <button onClick={() => handleDelete(p.id, p.nom)} style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', color: '#f87171', padding: '7px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.85rem' }}>
-                            <Trash2 size={14} /> Supprimer
-                          </button>
-                        </div>
-                      </td>
+            <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-slate-700/60 bg-slate-900/30">
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pl-6">Photo</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Produit</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Type</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Prix Client</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Rémunération</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Remise</th>
+                      <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pr-6">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-slate-800/50">
+                    {produits.map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-750/30 transition-colors">
+                        {/* Photo */}
+                        <td className="p-4 pl-6">
+                          {p.image ? (
+                            <img src={BACKEND_URL + p.image} alt={p.nom} className="w-12 h-12 rounded-xl object-cover border border-slate-700" />
+                          ) : (
+                            <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center border border-slate-800">
+                              <Package size={20} className="text-slate-600" />
+                            </div>
+                          )}
+                        </td>
+                        {/* Nom + desc */}
+                        <td className="p-4">
+                          <div className="font-bold text-white mb-0.5">{p.nom}</div>
+                          <div className="text-xs text-slate-500 max-w-xs truncate">{p.description || '—'}</div>
+                        </td>
+                        {/* Type */}
+                        <td className="p-4">
+                          <span className={`status-badge-dark ${p.type === 'soin' ? 'info' : 'success'}`}>
+                            {p.type === 'soin' ? 'Soin' : 'Garde'}
+                          </span>
+                        </td>
+                        {/* Prix */}
+                        <td className="p-4 font-bold text-white">{Number(p.prix_client).toFixed(2)} MAD</td>
+                        {/* Rémunération */}
+                        <td className="p-4 text-slate-300">
+                          {p.type === 'soin' ? `${Number(p.remuneration_soignant || 0).toFixed(2)} MAD` : <span className="text-xs text-slate-500">Salarié</span>}
+                        </td>
+                        {/* Remise */}
+                        <td className="p-4">
+                          {p.type_remise === 'none' ? <span className="text-xs text-slate-500">Aucune</span>
+                            : <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">
+                              -{p.valeur_remise}{p.type_remise === 'percent' ? '%' : ' MAD'}
+                            </span>}
+                        </td>
+                        {/* Actions */}
+                        <td className="p-4 pr-6">
+                          <div className="flex gap-2">
+                            <button 
+                              onClick={() => openEditForm(p)} 
+                              className="bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 text-blue-400 p-2 rounded-lg cursor-pointer transition-colors"
+                              title="Modifier"
+                            >
+                              <Pencil size={14} />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(p.id, p.nom)} 
+                              className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 p-2 rounded-lg cursor-pointer transition-colors"
+                              title="Supprimer"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               {produits.length === 0 && (
-                <div style={{ padding: '4rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                  <Package size={48} style={{ margin: '0 auto 1rem', display: 'block' }} />
-                  <p>Aucun produit. Cliquez sur "Ajouter un Produit" pour commencer.</p>
+                <div className="py-16 text-center text-slate-500">
+                  <Package size={48} className="mx-auto mb-4 text-slate-600" />
+                  <p>Aucun produit disponible. Cliquez sur "Ajouter un produit" pour commencer.</p>
                 </div>
               )}
             </div>
           )}
-        </>
+        </div>
       )}
 
       {/* ===================== TAB PERSONNEL ===================== */}
       {activeTab === 'personnel' && (
-        <div className="glass-panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>Gestion des Infirmiers</h2>
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md animate-fade-in">
+          <div className="p-6 border-b border-slate-700/60 bg-slate-900/30">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+              <Users size={22} className="text-blue-500" />
+              <span>Gestion des Infirmiers</span>
+            </h2>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)' }}>
-                {['Nom', 'Email', 'Disponibilité', 'Statut SaaS'].map(h => (
-                  <th key={h} style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {personnel.map(inf => (
-                <tr key={inf.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <td style={{ padding: '1rem', fontWeight: 'bold' }}>{inf.user?.nom}</td>
-                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{inf.user?.email}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{ background: inf.est_disponible ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.1)', color: inf.est_disponible ? '#10b981' : '#f87171', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>
-                      {inf.est_disponible ? '✓ Disponible' : '✗ Indisponible'}
-                    </span>
-                  </td>
-                  <td style={{ padding: '1rem' }}>
-                    <span style={{ background: 'rgba(14,165,233,0.15)', color: 'var(--primary-color)', padding: '4px 12px', borderRadius: '20px', fontSize: '0.85rem' }}>Actif</span>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-700/60 bg-slate-900/30">
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pl-6">Nom</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Email</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Disponibilité</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pr-6">Statut SaaS</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {personnel.map((inf) => (
+                  <tr key={inf.id} className="hover:bg-slate-750/30 transition-colors">
+                    <td className="p-4 pl-6 font-bold text-white">{inf.user?.nom}</td>
+                    <td className="p-4 text-slate-300">{inf.user?.email}</td>
+                    <td className="p-4">
+                      <span className={`status-badge-dark ${inf.est_disponible ? 'success' : 'danger'}`}>
+                        {inf.est_disponible ? '✓ Disponible' : '✗ Indisponible'}
+                      </span>
+                    </td>
+                    <td className="p-4 pr-6">
+                      <span className="status-badge-dark info">Actif</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {personnel.length === 0 && (
+            <div className="py-16 text-center text-slate-500">
+              <Users size={48} className="mx-auto mb-4 text-slate-600" />
+              <p>Aucun infirmier disponible dans le personnel.</p>
+            </div>
+          )}
         </div>
       )}
 
       {/* ===================== TAB FINANCES ===================== */}
       {activeTab === 'finances' && (
-        <div className="glass-panel" style={{ overflow: 'hidden' }}>
-          <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold' }}>Historique des Factures</h2>
+        <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md animate-fade-in">
+          <div className="p-6 border-b border-slate-700/60 bg-slate-900/30">
+            <h2 className="text-xl font-bold flex items-center gap-2 text-white">
+              <Receipt size={22} className="text-blue-500" />
+              <span>Historique des Factures</span>
+            </h2>
           </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)' }}>
-                {['Patient', 'Produit', 'Montant TTC', 'Date', 'Télécharger'].map(h => (
-                  <th key={h} style={{ padding: '1rem', color: 'var(--text-muted)', fontWeight: '600', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {factures.map(fac => (
-                <tr key={fac.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                  <td style={{ padding: '1rem', fontWeight: '600' }}>{fac.intervention?.client?.user?.nom || '—'}</td>
-                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{fac.intervention?.produit?.nom || '—'}</td>
-                  <td style={{ padding: '1rem', fontWeight: 'bold', color: 'var(--secondary-color)', fontSize: '1.05rem' }}>{fac.montant_total} MAD</td>
-                  <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{new Date(fac.date_emission).toLocaleDateString('fr-FR')}</td>
-                  <td style={{ padding: '1rem' }}>
-                    <a href={`http://localhost:8000/api/factures/${fac.id}/pdf`} target="_blank" rel="noreferrer"
-                      style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.3)', color: 'var(--secondary-color)', padding: '7px 14px', borderRadius: '8px', textDecoration: 'none', fontSize: '0.85rem', display: 'inline-block' }}>
-                      ↓ PDF
-                    </a>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse text-left">
+              <thead>
+                <tr className="border-b border-slate-700/60 bg-slate-900/30">
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pl-6">Patient</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Produit</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Montant TTC</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
+                  <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pr-6">Télécharger</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {factures.length === 0 && <p style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Aucune facture pour l'instant.</p>}
+              </thead>
+              <tbody className="divide-y divide-slate-800/50">
+                {factures.map((fac) => (
+                  <tr key={fac.id} className="hover:bg-slate-750/30 transition-colors">
+                    <td className="p-4 pl-6 font-bold text-white">{fac.intervention?.client?.user?.nom || '—'}</td>
+                    <td className="p-4 text-slate-300">{fac.intervention?.produit?.nom || '—'}</td>
+                    <td className="p-4 font-bold text-emerald-400">{fac.montant_total} MAD</td>
+                    <td className="p-4 text-slate-400">{new Date(fac.date_emission).toLocaleDateString('fr-FR')}</td>
+                    <td className="p-4 pr-6">
+                      <a 
+                        href={`http://localhost:8000/api/factures/${fac.id}/pdf`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-block no-underline"
+                      >
+                        ↓ PDF
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {factures.length === 0 && (
+            <div className="py-16 text-center text-slate-500">
+              <Receipt size={48} className="mx-auto mb-4 text-slate-600" />
+              <p>Aucune facture enregistrée pour le moment.</p>
+            </div>
+          )}
         </div>
       )}
     </div>
