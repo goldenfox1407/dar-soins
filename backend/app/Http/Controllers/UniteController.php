@@ -1,0 +1,38 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Unite;
+use Illuminate\Http\Request;
+
+class UniteController extends Controller
+{
+    public function index()
+    {
+        return response()->json(Unite::all());
+    }
+
+    public function store(Request $request)
+    {
+        $item = Unite::create($request->all());
+        return response()->json($item, 201);
+    }
+
+    public function show($id)
+    {
+        return response()->json(Unite::findOrFail($id));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $item = Unite::findOrFail($id);
+        $item->update($request->all());
+        return response()->json($item);
+    }
+
+    public function destroy($id)
+    {
+        Unite::destroy($id);
+        return response()->json(['message' => 'Deleted']);
+    }
+}

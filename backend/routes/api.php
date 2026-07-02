@@ -1,0 +1,80 @@
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\RateLimiter;
+use App\Http\Controllers\AuthController;
+use Illuminate\Http\Response;
+
+// Rate Limiting Configuration
+RateLimiter::for('api', function (Request $request) {
+    return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+});
+
+RateLimiter::for('auth', function (Request $request) {
+    return \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by($request->ip());
+});
+
+// Public routes with rate limiting
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:auth');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:auth');
+
+// Public routes
+Route::get('/produits', [App\Http\Controllers\ProduitController::class, 'index']);
+
+Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
+    Route::get('/user', [AuthController::class, 'user']);
+    
+    // Admin Routes
+    Route::post('/produits', [App\Http\Controllers\ProduitController::class, 'store']);
+    Route::put('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'update']);
+    Route::delete('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'destroy']);
+    
+    // Interventions
+    Route::get('/interventions', [App\Http\Controllers\InterventionController::class, 'index']);
+    Route::post('/interventions/commander', [App\Http\Controllers\InterventionController::class, 'commanderSoin']);
+    Route::post('/interventions/{id}/cloturer', [App\Http\Controllers\InterventionController::class, 'cloturerIntervention']);
+
+    // Factures
+    Route::get('/factures', [App\Http\Controllers\FactureController::class, 'index']);
+    Route::get('/factures/{id}/pdf', [App\Http\Controllers\FactureController::class, 'genererPdf']);
+
+    // Personnel
+    Route::get('/personnel', [App\Http\Controllers\PersonnelController::class, 'index']);
+    
+    // User Management (Stocky Clone)
+    Route::apiResource('users', App\Http\Controllers\UserController::class);
+    Route::apiResource('roles', App\Http\Controllers\RoleController::class);
+    Route::apiResource('permissions', App\Http\Controllers\PermissionController::class)->only(['index']);
+
+    // ERP Routes Generated
+    Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
+    Route::apiResource('fournisseurs', \App\Http\Controllers\FournisseurController::class);
+    Route::apiResource('categories', \App\Http\Controllers\CategorieController::class);
+    Route::apiResource('marques', \App\Http\Controllers\MarqueController::class);
+    Route::apiResource('unites', \App\Http\Controllers\UniteController::class);
+    Route::apiResource('unites-bases', \App\Http\Controllers\UniteBaseController::class);
+    Route::apiResource('variations', \App\Http\Controllers\VariationController::class);
+    Route::apiResource('entrepots', \App\Http\Controllers\EntrepotController::class);
+    Route::apiResource('achats', \App\Http\Controllers\AchatController::class);
+    Route::apiResource('achat-lignes', \App\Http\Controllers\AchatLigneController::class);
+    Route::apiResource('ventes', \App\Http\Controllers\VenteController::class);
+
+    // New Routes for Workflow V2
+    Route::get('/interventions/{id}/infirmiers-proches', [\App\Http\Controllers\InterventionController::class, 'infirmiersProches']);
+    Route::post('/interventions/{id}/affecter-manuellement', [\App\Http\Controllers\InterventionController::class, 'affecterManuellement']);
+    Route::post('/interventions/{id}/generer-devis', [\App\Http\Controllers\InterventionController::class, 'genererDevis']);
+    Route::post('/interventions/{id}/envoyer-devis', [\App\Http\Controllers\InterventionController::class, 'envoyerDevis']);
+    Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
+
+    Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
+    Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
+
+    Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
+    Route::apiResource('devis', \App\Http\Controllers\DevisController::class);
+    Route::apiResource('vente-lignes', \App\Http\Controllers\VenteLigneController::class);
+    Route::apiResource('employes', \App\Http\Controllers\EmployeController::class);
+    Route::apiResource('presences', \App\Http\Controllers\PresenceController::class);
+    Route::apiResource('compte-bancaires', \App\Http\Controllers\CompteBancaireController::class);
+    Route::apiResource('transaction-financieres', \App\Http\Controllers\TransactionFinanciereController::class);
+});
