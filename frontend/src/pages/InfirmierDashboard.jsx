@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, CheckCircle, XCircle, MapPin, Camera, ClipboardList, Plus, Trash2, CheckSquare } from 'lucide-react';
+import { LogOut, CheckCircle, XCircle, MapPin, Camera, ClipboardList, Plus, Trash2, CheckSquare, Calendar, TrendingUp, Clock } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import Navbar from '../components/Navbar';
 import SignatureCanvas from 'react-signature-canvas';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -180,55 +181,83 @@ export default function InfirmierDashboard() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-[#1E293B]">
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold tracking-tight text-[#1E293B]">Espace Soignant</span>
-          </div>
-          
-          <div className="flex items-center gap-6">
-            <div className="text-right">
-              <p className="text-sm font-semibold text-[#1E293B]">{user?.name || 'Infirmier'}</p>
+      <Navbar />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8 animate-fade-in">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-3xl font-extrabold mb-1 text-[#1E293B]">Espace Soignant 👩‍⚕️</h1>
+          <p className="text-slate-500">Gérez vos missions et interventions</p>
+        </header>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="stat-card">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-slate-500">Nouvelles</span>
+              <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                <Clock size={20} className="text-violet-500" />
+              </div>
             </div>
-            <button onClick={handleLogout} className="flex items-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-4 py-2 rounded-md font-medium text-sm">
-              <LogOut size={16} /> Déconnexion
-            </button>
+            <p className="text-3xl font-extrabold text-slate-800">{pendingMissions.length}</p>
+            <p className="text-xs text-slate-400 mt-1">Demandes en attente</p>
+          </div>
+
+          <div className="stat-card accent-green">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-slate-500">À venir</span>
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Calendar size={20} className="text-emerald-500" />
+              </div>
+            </div>
+            <p className="text-3xl font-extrabold text-slate-800">{upcomingMissions.length}</p>
+            <p className="text-xs text-slate-400 mt-1">Missions planifiées</p>
+          </div>
+
+          <div className="stat-card accent-orange">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold text-slate-500">Terminées</span>
+              <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <TrendingUp size={20} className="text-amber-500" />
+              </div>
+            </div>
+            <p className="text-3xl font-extrabold text-slate-800">{historiqueMissions.length}</p>
+            <p className="text-xs text-slate-400 mt-1">Total missions</p>
           </div>
         </div>
-      </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex gap-4 mb-8 overflow-x-auto pb-2">
+        {/* Tabs */}
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm">
           <button 
             onClick={() => setActiveTab('missions')}
-            className={`px-6 py-2 rounded-md font-semibold whitespace-nowrap ${activeTab === 'missions' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap text-sm transition-all ${activeTab === 'missions' ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
           >
-            Nouvelles demandes
+            Nouvelles demandes {pendingMissions.length > 0 && <span className="ml-1.5 bg-white/20 px-1.5 py-0.5 rounded-full text-xs">{pendingMissions.length}</span>}
           </button>
           <button 
             onClick={() => setActiveTab('upcoming')}
-            className={`px-6 py-2 rounded-md font-semibold whitespace-nowrap ${activeTab === 'upcoming' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap text-sm transition-all ${activeTab === 'upcoming' ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             Missions à venir
           </button>
           <button 
             onClick={() => setActiveTab('historique')}
-            className={`px-6 py-2 rounded-md font-semibold whitespace-nowrap ${activeTab === 'historique' ? 'bg-blue-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}
+            className={`px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap text-sm transition-all ${activeTab === 'historique' ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
           >
             Historique
           </button>
           {activeIntervention && (
             <button 
               onClick={() => setActiveTab('active')}
-              className={`px-6 py-2 rounded-md font-semibold whitespace-nowrap flex items-center gap-2 ${activeTab === 'active' ? 'bg-emerald-600 text-white' : 'bg-white border border-slate-300 text-slate-700'}`}
+              className={`px-5 py-2.5 rounded-lg font-semibold whitespace-nowrap text-sm flex items-center gap-2 transition-all ${activeTab === 'active' ? 'bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50'}`}
             >
-              <CheckSquare size={18} /> Mission En Cours
+              <CheckSquare size={16} /> Mission En Cours
             </button>
           )}
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+          <div className="flex flex-col items-center justify-center py-16 gap-4"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div><p className="text-sm text-slate-400">Chargement des missions...</p></div>
         ) : activeTab === 'active' && activeIntervention ? (
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden max-w-4xl mx-auto">
             <div className="bg-slate-800 text-white p-6 flex justify-between items-start">
@@ -329,10 +358,10 @@ export default function InfirmierDashboard() {
               <p className="text-slate-500">Aucune nouvelle demande en attente.</p>
             ) : (
               pendingMissions.map(mission => (
-                <div key={mission.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div key={mission.id} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex justify-between mb-4">
                     <h3 className="font-bold text-lg">{mission.produit?.nom}</h3>
-                    <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">Nouvelle</span>
+                    <span className="status-badge info">Nouvelle</span>
                   </div>
                   <p className="text-sm text-slate-600 mb-2"><strong>Patient:</strong> {mission.client?.user?.name}</p>
                   <p className="text-sm text-slate-600 mb-2"><strong>Date demandée:</strong> {new Date(mission.date_heure).toLocaleString('fr-FR')}</p>
@@ -342,10 +371,10 @@ export default function InfirmierDashboard() {
                   </div>
 
                   <div className="flex gap-3 mt-4 pt-4 border-t border-slate-100">
-                    <button onClick={() => repondreMission(mission.id, true)} className="flex-1 bg-emerald-600 text-white py-2 rounded flex justify-center gap-2 font-semibold">
+                    <button onClick={() => repondreMission(mission.id, true)} className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl flex justify-center gap-2 font-semibold transition-colors shadow-md shadow-emerald-500/20">
                       <CheckCircle size={18} /> Accepter
                     </button>
-                    <button onClick={() => repondreMission(mission.id, false)} className="flex-1 bg-red-100 text-red-600 py-2 rounded flex justify-center gap-2 font-semibold">
+                    <button onClick={() => repondreMission(mission.id, false)} className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2.5 rounded-xl flex justify-center gap-2 font-semibold transition-colors">
                       <XCircle size={18} /> Refuser
                     </button>
                   </div>

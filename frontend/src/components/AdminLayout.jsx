@@ -607,7 +607,7 @@ export default function AdminLayout() {
         .erp-content-container {
           max-width: 1400px;
           margin: 0 auto;
-          color: #1e293b;
+          color: #e2e8f0;
         }
 
         /* SCROLLBAR */
