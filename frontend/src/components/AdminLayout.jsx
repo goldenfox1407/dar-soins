@@ -231,15 +231,20 @@ export default function AdminLayout() {
         /* SIDEBAR */
         .erp-sidebar {
           width: 280px;
+          min-width: 280px;
+          flex-shrink: 0;
           background: #0b1120; /* Slate 950 */
           border-right: 1px solid rgba(255, 255, 255, 0.05);
           display: flex;
           flex-direction: column;
-          transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           z-index: 50;
+          overflow: hidden;
         }
         .erp-sidebar.closed {
           width: 0;
+          min-width: 0;
+          border-right: none;
           transform: translateX(-100%);
           opacity: 0;
         }
