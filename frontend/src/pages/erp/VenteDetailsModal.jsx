@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import { X, Map, FileText, Send, UserCheck, AlertCircle } from 'lucide-react';
+import { X, Map, FileText, Send, UserCheck, AlertCircle, Calendar, User, Package, Coins } from 'lucide-react';
 import api from '../../services/api';
 
 export default function VenteDetailsModal({ intervention, onClose, onRefresh }) {
@@ -97,80 +97,129 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto text-slate-800">
+    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto text-slate-200 shadow-2xl animate-scale-in">
         
-        <div className="flex justify-between items-center p-6 border-b border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800">Détails de la demande #{intervention.id}</h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={24} /></button>
+        {/* Modal Header */}
+        <div className="flex justify-between items-center p-6 border-b border-slate-800">
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <FileText size={22} className="text-blue-500" />
+            <span>Détails de la demande #{intervention.id}</span>
+          </h2>
+          <button 
+            onClick={onClose} 
+            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
+          >
+            <X size={24} />
+          </button>
         </div>
 
+        {/* Modal Content */}
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          
           {/* Infos Client */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-700 uppercase text-xs tracking-wider">Informations Patient & Demande</h3>
-            <div className="bg-slate-50 text-slate-700 p-4 rounded-lg border border-slate-100 space-y-2">
-              <p><strong>Nom:</strong> {intervention.client?.user ? `${intervention.client.user.nom} ${intervention.client.user.prenom || ''}` : 'Inconnu'}</p>
-              <p><strong>Email:</strong> {intervention.client?.user?.email || 'Non spécifié'}</p>
-              <p><strong>Date demandée:</strong> {new Date(intervention.date_heure).toLocaleString('fr-FR')}</p>
-              <p><strong>Soin demandé:</strong> {intervention.produit?.nom}</p>
-              <p><strong>Prix unitaire (Soin):</strong> {intervention.produit?.prix_client} MAD</p>
-              <p><strong>Description:</strong> {intervention.description_probleme || 'Aucune description fournie'}</p>
+            <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider">Informations Patient & Demande</h3>
+            <div className="bg-slate-950/40 text-slate-300 p-5 rounded-xl border border-slate-800 space-y-3 shadow-inner">
+              <p className="flex items-center gap-2">
+                <User size={14} className="text-slate-500" />
+                <span><strong>Nom:</strong> {intervention.client?.user ? `${intervention.client.user.nom} ${intervention.client.user.prenom || ''}` : 'Inconnu'}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <FileText size={14} className="text-slate-500" />
+                <span><strong>Email:</strong> {intervention.client?.user?.email || 'Non spécifié'}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Calendar size={14} className="text-slate-500" />
+                <span><strong>Date demandée:</strong> {new Date(intervention.date_heure).toLocaleString('fr-FR')}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Package size={14} className="text-slate-500" />
+                <span><strong>Soin demandé:</strong> {intervention.produit?.nom}</span>
+              </p>
+              <p className="flex items-center gap-2">
+                <Coins size={14} className="text-slate-500" />
+                <span><strong>Prix unitaire (Soin):</strong> {intervention.produit?.prix_client} MAD</span>
+              </p>
+              <div className="border-t border-slate-800/80 pt-3">
+                <p><strong>Description du problème:</strong></p>
+                <p className="text-slate-400 text-sm mt-1 bg-slate-950/50 p-3 rounded-lg border border-slate-850">{intervention.description_probleme || 'Aucune description fournie'}</p>
+              </div>
               {intervention.fichier_joint && (
-                <p>
-                  <strong>Fichier joint (Ordonnance): </strong> 
-                  <a href={`http://localhost:8000/storage/${intervention.fichier_joint}`} target="_blank" rel="noreferrer" className="text-blue-600 hover:underline">
+                <div className="pt-2">
+                  <strong>Ordonnance / Pièce jointe:</strong>
+                  <a 
+                    href={`http://localhost:8000/storage/${intervention.fichier_joint}`} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="block text-blue-400 hover:text-blue-300 transition-colors mt-1 font-semibold text-sm hover:underline"
+                  >
                     Voir la pièce jointe
                   </a>
-                </p>
+                </div>
               )}
             </div>
           </div>
 
           {/* Actions & Status */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-700 uppercase text-xs tracking-wider">Statut & Actions</h3>
-            <div className="bg-slate-50 p-4 rounded-lg border border-slate-100 space-y-4">
-              <p><strong>Statut actuel:</strong> <span className="text-blue-600 font-semibold">{intervention.statut}</span></p>
+            <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider">Statut & Actions</h3>
+            <div className="bg-slate-950/40 p-5 rounded-xl border border-slate-800 space-y-4 shadow-inner">
+              <p><strong>Statut actuel:</strong> <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">{intervention.statut}</span></p>
               
-              {intervention.statut === 'infirmier_accepte' && (
-                <button disabled={actionLoading} onClick={genererDevis} className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded flex items-center justify-center gap-2">
-                  <FileText size={18} /> {actionLoading ? 'Génération...' : 'Générer Devis (PDF)'}
-                </button>
-              )}
+              <div className="space-y-2 pt-2">
+                {intervention.statut === 'infirmier_accepte' && (
+                  <button 
+                    disabled={actionLoading} 
+                    onClick={genererDevis} 
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
+                  >
+                    <FileText size={18} /> <span>{actionLoading ? 'Génération...' : 'Générer Devis (PDF)'}</span>
+                  </button>
+                )}
 
-              {intervention.statut === 'devis_genere' && (
-                <button disabled={actionLoading} onClick={envoyerDevis} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded flex items-center justify-center gap-2">
-                  <Send size={18} /> {actionLoading ? 'Envoi...' : 'Envoyer Devis au Client'}
-                </button>
-              )}
+                {intervention.statut === 'devis_genere' && (
+                  <button 
+                    disabled={actionLoading} 
+                    onClick={envoyerDevis} 
+                    className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
+                  >
+                    <Send size={18} /> <span>{actionLoading ? 'Envoi...' : 'Envoyer Devis au Client'}</span>
+                  </button>
+                )}
 
-              {intervention.devis && (
-                <button onClick={() => consulterPdf(intervention.devis.id)} className="w-full bg-slate-100 hover:bg-slate-200 text-blue-600 border border-blue-200 py-2 rounded flex items-center justify-center gap-2 font-semibold transition-colors mt-2">
-                  <FileText size={18} /> Consulter le Devis (PDF)
-                </button>
-              )}
+                {intervention.devis && (
+                  <button 
+                    onClick={() => consulterPdf(intervention.devis.id)} 
+                    className="w-full bg-slate-950 hover:bg-slate-850 text-blue-400 hover:text-blue-300 border border-blue-500/20 py-3 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
+                  >
+                    <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
+                  </button>
+                )}
 
-              {['en_attente_reponse_infirmier', 'en_attente_reponse_client', 'acceptee', 'terminee'].includes(intervention.statut) && (
-                <div className="text-sm text-slate-500 flex items-center gap-2 mt-2">
-                  <AlertCircle size={16} /> Aucune action requise pour le moment.
-                </div>
-              )}
+                {['en_attente_reponse_infirmier', 'en_attente_reponse_client', 'acceptee', 'terminee'].includes(intervention.statut) && (
+                  <div className="text-sm text-slate-500 flex items-center gap-2 p-3 bg-slate-900/40 rounded-lg border border-slate-850 mt-2">
+                    <AlertCircle size={16} className="text-slate-400" /> 
+                    <span>Aucune action requise pour le moment.</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Carte d'affectation (Uniquement si en attente d'affectation) */}
           {intervention.statut === 'en_attente_affectation' && (
-            <div className="md:col-span-2 mt-4">
-              <h3 className="font-semibold text-slate-700 uppercase text-xs tracking-wider mb-4 flex items-center gap-2">
-                <Map size={16} /> Affectation Géolocalisée
+            <div className="md:col-span-2 mt-4 space-y-4">
+              <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider flex items-center gap-2">
+                <Map size={16} /> <span>Affectation Géolocalisée</span>
               </h3>
               
               {loading ? (
-                <p>Chargement de la carte...</p>
+                <p className="text-center py-6 text-slate-500">Chargement de la carte et des infirmiers...</p>
               ) : mapData ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="lg:col-span-2 h-96 bg-slate-100 rounded-lg overflow-hidden border border-slate-300">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {/* Map container */}
+                  <div className="lg:col-span-2 h-96 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
                     <MapContainer center={[mapData.client_localisation.latitude, mapData.client_localisation.longitude]} zoom={13} style={{ height: '100%', width: '100%' }}>
                       <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                       
@@ -191,68 +240,78 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
                     </MapContainer>
                   </div>
                   
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-sm">Infirmiers disponibles</h4>
-                    {mapData.infirmiers.length === 0 ? (
-                      <p className="text-sm text-red-500">Aucun infirmier disponible.</p>
-                    ) : (
-                      <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
-                        {mapData.infirmiers.map(inf => (
-                          <label key={inf.id} className={`flex items-start gap-3 p-3 rounded border cursor-pointer transition-colors ${selectedInfirmier === inf.id ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'}`}>
-                            <input 
-                              type="radio" 
-                              name="infirmier" 
-                              className="mt-1"
-                              checked={selectedInfirmier === inf.id}
-                              onChange={() => setSelectedInfirmier(inf.id)}
-                            />
-                            <div>
-                              <p className="font-semibold text-sm">{inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}</p>
-                              <p className="text-xs text-slate-500">{inf.distance_km} km de distance</p>
-                            </div>
-                          </label>
-                        ))}
-                      </div>
-                    )}
+                  {/* Nurse selection panel */}
+                  <div className="space-y-4 flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <h4 className="font-bold text-sm text-white">Infirmiers disponibles</h4>
+                      {mapData.infirmiers.length === 0 ? (
+                        <p className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">Aucun infirmier disponible dans le secteur.</p>
+                      ) : (
+                        <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
+                          {mapData.infirmiers.map(inf => (
+                            <label 
+                              key={inf.id} 
+                              className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                                selectedInfirmier === inf.id 
+                                  ? 'border-blue-500 bg-blue-500/10' 
+                                  : 'border-slate-800 bg-slate-950/20 hover:bg-slate-800/40 text-slate-300'
+                              }`}
+                            >
+                              <input 
+                                type="radio" 
+                                name="infirmier" 
+                                className="mt-1"
+                                checked={selectedInfirmier === inf.id}
+                                onChange={() => setSelectedInfirmier(inf.id)}
+                              />
+                              <div>
+                                <p className="font-semibold text-sm text-white">{inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}</p>
+                                <p className="text-xs text-slate-500">{inf.distance_km} km de distance</p>
+                              </div>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
                     {/* TABLEAU SIMULATION DEVIS */}
                     {selectedInfirmier && (
-                      <div className="bg-white border border-slate-200 rounded-lg p-3 shadow-sm text-sm mt-4">
-                        <h4 className="font-bold text-slate-700 mb-3 uppercase tracking-wider text-xs">Simulation du Devis</h4>
+                      <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4 shadow-sm text-sm">
+                        <h4 className="font-bold text-slate-400 mb-3 uppercase tracking-wider text-xs">Simulation du Devis</h4>
                         <div className="space-y-2">
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-600">Prix du Soin</span>
-                            <span className="font-medium">{intervention.produit?.prix_client || 0} MAD</span>
+                            <span className="text-slate-500">Prix du Soin</span>
+                            <span className="font-medium text-white">{intervention.produit?.prix_client || 0} MAD</span>
                           </div>
                           
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-600">Distance (km)</span>
+                            <span className="text-slate-500">Distance (km)</span>
                             <input 
                               type="number" 
                               value={distanceManuelle} 
                               onChange={(e) => setDistanceManuelle(e.target.value)} 
-                              className="w-20 px-2 py-1 border rounded text-right bg-slate-50"
+                              className="w-20 px-2 py-1 border border-slate-700 rounded bg-slate-900 text-white text-right outline-none focus:border-blue-500 text-xs"
                             />
                           </div>
 
                           <div className="flex justify-between items-center">
-                            <span className="text-slate-600">Tarif par km</span>
+                            <span className="text-slate-500">Tarif par km</span>
                             <div className="flex items-center gap-1">
                               <input 
                                 type="number" 
                                 value={tarifKmManuel} 
                                 onChange={(e) => setTarifKmManuel(e.target.value)} 
-                                className="w-20 px-2 py-1 border rounded text-right bg-slate-50"
-                              /> MAD
+                                className="w-20 px-2 py-1 border border-slate-700 rounded bg-slate-900 text-white text-right outline-none focus:border-blue-500 text-xs"
+                              /> <span className="text-xs text-slate-400">MAD</span>
                             </div>
                           </div>
 
-                          <div className="flex justify-between items-center text-slate-500 pt-1">
+                          <div className="flex justify-between items-center text-slate-500 pt-1 text-xs">
                             <span>Frais de déplacement</span>
                             <span>{((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0)).toFixed(2)} MAD</span>
                           </div>
 
-                          <div className="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center font-bold text-base text-emerald-600">
+                          <div className="border-t border-slate-800 pt-2 mt-2 flex justify-between items-center font-bold text-sm text-emerald-400">
                             <span>Total Estimé (TTC)</span>
                             <span>{(((parseFloat(intervention.produit?.prix_client) || 0) + ((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0))) * 1.20).toFixed(2)} MAD</span>
                           </div>
@@ -263,14 +322,14 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
                     <button 
                       onClick={affecterManuellement}
                       disabled={!selectedInfirmier || actionLoading}
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-bold flex items-center justify-center gap-2 mt-4 disabled:opacity-50"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 mt-4 disabled:opacity-50 transition-all cursor-pointer shadow-md shadow-blue-500/20"
                     >
-                      <UserCheck size={18} /> {actionLoading ? 'Affectation...' : 'Confirmer l\'affectation'}
+                      <UserCheck size={18} /> <span>{actionLoading ? 'Affectation...' : 'Confirmer l\'affectation'}</span>
                     </button>
                   </div>
                 </div>
               ) : (
-                <p>Erreur lors du chargement des données de la carte.</p>
+                <p className="text-slate-500 text-center">Erreur lors du chargement des données de la carte.</p>
               )}
             </div>
           )}
