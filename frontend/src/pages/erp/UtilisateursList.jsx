@@ -487,24 +487,24 @@ export default function UtilisateursList() {
                     <div>
                       <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '4px' }}>CIN Recto</p>
                       {viewUser.infirmier.photo_cin_recto ? (
-                        <a href={`http://localhost:8000/storage/${viewUser.infirmier.photo_cin_recto}`} target="_blank" rel="noreferrer">
-                          <img src={`http://localhost:8000/storage/${viewUser.infirmier.photo_cin_recto}`} alt="CIN Recto" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                        <a href={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_cin_recto}`} target="_blank" rel="noreferrer">
+                          <img src={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_cin_recto}`} alt="CIN Recto" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                         </a>
                       ) : <span style={{ color: '#94a3b8' }}>Non fourni</span>}
                     </div>
                     <div>
                       <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '4px' }}>CIN Verso</p>
                       {viewUser.infirmier.photo_cin_verso ? (
-                        <a href={`http://localhost:8000/storage/${viewUser.infirmier.photo_cin_verso}`} target="_blank" rel="noreferrer">
-                          <img src={`http://localhost:8000/storage/${viewUser.infirmier.photo_cin_verso}`} alt="CIN Verso" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                        <a href={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_cin_verso}`} target="_blank" rel="noreferrer">
+                          <img src={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_cin_verso}`} alt="CIN Verso" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                         </a>
                       ) : <span style={{ color: '#94a3b8' }}>Non fourni</span>}
                     </div>
                     <div>
                       <p style={{ fontSize: '0.85rem', color: '#475569', marginBottom: '4px' }}>Diplôme</p>
                       {viewUser.infirmier.photo_diplome ? (
-                        <a href={`http://localhost:8000/storage/${viewUser.infirmier.photo_diplome}`} target="_blank" rel="noreferrer">
-                          <img src={`http://localhost:8000/storage/${viewUser.infirmier.photo_diplome}`} alt="Diplôme" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
+                        <a href={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_diplome}`} target="_blank" rel="noreferrer">
+                          <img src={`http://127.0.0.1:8000/storage/${viewUser.infirmier.photo_diplome}`} alt="Diplôme" style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #e2e8f0' }} />
                         </a>
                       ) : <span style={{ color: '#94a3b8' }}>Non fourni</span>}
                     </div>

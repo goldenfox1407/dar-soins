@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Infirmier extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id', 'specialite', 'est_disponible', 'latitude', 'longitude', 
         'adresse_residence', 'cin', 'photo_cin_recto', 'photo_cin_verso', 

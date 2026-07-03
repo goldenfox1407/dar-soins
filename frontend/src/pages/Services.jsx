@@ -142,7 +142,7 @@ export default function Services() {
                     <div className="h-48 w-full bg-slate-100 relative overflow-hidden">
                       {produit.image ? (
                         <img 
-                          src={`http://localhost:8000/storage/${produit.image}`} 
+                          src={`http://127.0.0.1:8000/storage/${produit.image}`} 
                           alt={produit.nom}
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         />

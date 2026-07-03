@@ -14,6 +14,13 @@ class VenteLigneController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'vente_id' => 'required|exists:ventes,id',
+            'produit_id' => 'required|exists:produits,id',
+            'quantite' => 'required|integer|min:1',
+            'prix_unitaire' => 'required|numeric|min:0',
+            'sous_total' => 'required|numeric|min:0',
+        ]);
         $item = VenteLigne::create($request->all());
         return response()->json($item, 201);
     }
@@ -26,6 +33,13 @@ class VenteLigneController extends Controller
     public function update(Request $request, $id)
     {
         $item = VenteLigne::findOrFail($id);
+        $request->validate([
+            'vente_id' => 'sometimes|required|exists:ventes,id',
+            'produit_id' => 'sometimes|required|exists:produits,id',
+            'quantite' => 'sometimes|required|integer|min:1',
+            'prix_unitaire' => 'sometimes|required|numeric|min:0',
+            'sous_total' => 'sometimes|required|numeric|min:0',
+        ]);
         $item->update($request->all());
         return response()->json($item);
     }

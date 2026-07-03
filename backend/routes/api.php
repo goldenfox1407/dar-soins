@@ -47,34 +47,37 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('roles', App\Http\Controllers\RoleController::class);
     Route::apiResource('permissions', App\Http\Controllers\PermissionController::class)->only(['index']);
 
-    // ERP Routes Generated
-    Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
-    Route::apiResource('fournisseurs', \App\Http\Controllers\FournisseurController::class);
-    Route::apiResource('categories', \App\Http\Controllers\CategorieController::class);
-    Route::apiResource('marques', \App\Http\Controllers\MarqueController::class);
-    Route::apiResource('unites', \App\Http\Controllers\UniteController::class);
-    Route::apiResource('unites-bases', \App\Http\Controllers\UniteBaseController::class);
-    Route::apiResource('variations', \App\Http\Controllers\VariationController::class);
-    Route::apiResource('entrepots', \App\Http\Controllers\EntrepotController::class);
-    Route::apiResource('achats', \App\Http\Controllers\AchatController::class);
-    Route::apiResource('achat-lignes', \App\Http\Controllers\AchatLigneController::class);
-    Route::apiResource('ventes', \App\Http\Controllers\VenteController::class);
+    // Gestionnaire-only ERP Routes
+    Route::middleware('role:gestionnaire')->group(function () {
+        // ERP Routes Generated
+        Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
+        Route::apiResource('fournisseurs', \App\Http\Controllers\FournisseurController::class);
+        Route::apiResource('categories', \App\Http\Controllers\CategorieController::class);
+        Route::apiResource('marques', \App\Http\Controllers\MarqueController::class);
+        Route::apiResource('unites', \App\Http\Controllers\UniteController::class);
+        Route::apiResource('unites-bases', \App\Http\Controllers\UniteBaseController::class);
+        Route::apiResource('variations', \App\Http\Controllers\VariationController::class);
+        Route::apiResource('entrepots', \App\Http\Controllers\EntrepotController::class);
+        Route::apiResource('achats', \App\Http\Controllers\AchatController::class);
+        Route::apiResource('achat-lignes', \App\Http\Controllers\AchatLigneController::class);
+        Route::apiResource('ventes', \App\Http\Controllers\VenteController::class);
 
-    // New Routes for Workflow V2
-    Route::get('/interventions/{id}/infirmiers-proches', [\App\Http\Controllers\InterventionController::class, 'infirmiersProches']);
-    Route::post('/interventions/{id}/affecter-manuellement', [\App\Http\Controllers\InterventionController::class, 'affecterManuellement']);
-    Route::post('/interventions/{id}/generer-devis', [\App\Http\Controllers\InterventionController::class, 'genererDevis']);
-    Route::post('/interventions/{id}/envoyer-devis', [\App\Http\Controllers\InterventionController::class, 'envoyerDevis']);
-    Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
+        // New Routes for Workflow V2
+        Route::get('/interventions/{id}/infirmiers-proches', [\App\Http\Controllers\InterventionController::class, 'infirmiersProches']);
+        Route::post('/interventions/{id}/affecter-manuellement', [\App\Http\Controllers\InterventionController::class, 'affecterManuellement']);
+        Route::post('/interventions/{id}/generer-devis', [\App\Http\Controllers\InterventionController::class, 'genererDevis']);
+        Route::post('/interventions/{id}/envoyer-devis', [\App\Http\Controllers\InterventionController::class, 'envoyerDevis']);
+        Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
 
-    Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
-    Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
+        Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
+        Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
 
-    Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
-    Route::apiResource('devis', \App\Http\Controllers\DevisController::class);
-    Route::apiResource('vente-lignes', \App\Http\Controllers\VenteLigneController::class);
-    Route::apiResource('employes', \App\Http\Controllers\EmployeController::class);
-    Route::apiResource('presences', \App\Http\Controllers\PresenceController::class);
-    Route::apiResource('compte-bancaires', \App\Http\Controllers\CompteBancaireController::class);
-    Route::apiResource('transaction-financieres', \App\Http\Controllers\TransactionFinanciereController::class);
+        Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
+        Route::apiResource('devis', \App\Http\Controllers\DevisController::class);
+        Route::apiResource('vente-lignes', \App\Http\Controllers\VenteLigneController::class);
+        Route::apiResource('employes', \App\Http\Controllers\EmployeController::class);
+        Route::apiResource('presences', \App\Http\Controllers\PresenceController::class);
+        Route::apiResource('compte-bancaires', \App\Http\Controllers\CompteBancaireController::class);
+        Route::apiResource('transaction-financieres', \App\Http\Controllers\TransactionFinanciereController::class);
+    });
 });

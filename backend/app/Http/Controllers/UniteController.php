@@ -14,6 +14,10 @@ class UniteController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'nom_court' => 'required|string|max:10',
+        ]);
         $item = Unite::create($request->all());
         return response()->json($item, 201);
     }
@@ -26,6 +30,10 @@ class UniteController extends Controller
     public function update(Request $request, $id)
     {
         $item = Unite::findOrFail($id);
+        $request->validate([
+            'nom' => 'sometimes|required|string|max:255',
+            'nom_court' => 'sometimes|required|string|max:10',
+        ]);
         $item->update($request->all());
         return response()->json($item);
     }

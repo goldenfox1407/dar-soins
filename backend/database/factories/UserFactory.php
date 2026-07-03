@@ -3,6 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\User;
+use App\Models\Client;
+use App\Models\Infirmier;
+use App\Models\Gestionnaire;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -42,5 +45,41 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
         ]);
+    }
+
+    /**
+     * State for client role with Client profile.
+     */
+    public function client(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'client',
+        ])->afterCreating(function (User $user) {
+            Client::factory()->create(['user_id' => $user->id]);
+        });
+    }
+
+    /**
+     * State for infirmier role with Infirmier profile.
+     */
+    public function infirmier(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'infirmier',
+        ])->afterCreating(function (User $user) {
+            Infirmier::factory()->create(['user_id' => $user->id]);
+        });
+    }
+
+    /**
+     * State for gestionnaire role with Gestionnaire profile.
+     */
+    public function gestionnaire(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'gestionnaire',
+        ])->afterCreating(function (User $user) {
+            Gestionnaire::factory()->create(['user_id' => $user->id]);
+        });
     }
 }

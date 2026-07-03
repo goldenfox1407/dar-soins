@@ -3,7 +3,7 @@ import { Plus, Package, Users, Receipt, Pencil, Trash2, ImagePlus, X, Check, Log
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
-const BACKEND_URL = 'http://localhost:8000/storage/';
+const BACKEND_URL = 'http://127.0.0.1:8000/storage/';
 
 const emptyForm = {
   nom: '', description: '', code_barres: '', type: 'soin',
@@ -529,7 +529,7 @@ export default function AdminDashboard() {
                     <td className="p-4 text-slate-400">{new Date(fac.date_emission).toLocaleDateString('fr-FR')}</td>
                     <td className="p-4 pr-6">
                       <a 
-                        href={`http://localhost:8000/api/factures/${fac.id}/pdf`} 
+                        href={`http://127.0.0.1:8000/api/factures/${fac.id}/pdf`} 
                         target="_blank" 
                         rel="noreferrer"
                         className="bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors inline-block no-underline"

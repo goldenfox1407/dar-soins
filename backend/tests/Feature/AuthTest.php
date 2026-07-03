@@ -3,7 +3,8 @@
 describe('Authentication', function () {
     it('allows a user to register', function () {
         $response = $this->postJson('/api/register', [
-            'nom' => 'Test User',
+            'nom' => 'Test',
+            'prenom' => 'User',
             'email' => 'test@example.com',
             'password' => 'password123',
             'role' => 'client',

@@ -9,7 +9,10 @@ class Localisation extends Model
 {
     use HasFactory;
 
-    protected $guarded = [];
+    protected $fillable = [
+        'latitude',
+        'longitude',
+    ];
 
     public function interventions() {}
 }

@@ -9,7 +9,11 @@ class Consommation extends Model
 {
     use HasFactory;
     
-    protected $guarded = [];
+    protected $fillable = [
+        'intervention_id',
+        'produit_id',
+        'quantite',
+    ];
 
     public function materiel() {
         return $this->belongsTo(Materiel::class);

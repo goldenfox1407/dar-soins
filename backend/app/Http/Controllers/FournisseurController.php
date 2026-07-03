@@ -14,6 +14,13 @@ class FournisseurController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'telephone' => 'nullable|string|max:20',
+            'adresse' => 'nullable|string',
+            'entreprise' => 'nullable|string|max:255',
+        ]);
         $item = Fournisseur::create($request->all());
         return response()->json($item, 201);
     }
@@ -26,6 +33,13 @@ class FournisseurController extends Controller
     public function update(Request $request, $id)
     {
         $item = Fournisseur::findOrFail($id);
+        $request->validate([
+            'nom' => 'sometimes|required|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'telephone' => 'nullable|string|max:20',
+            'adresse' => 'nullable|string',
+            'entreprise' => 'nullable|string|max:255',
+        ]);
         $item->update($request->all());
         return response()->json($item);
     }

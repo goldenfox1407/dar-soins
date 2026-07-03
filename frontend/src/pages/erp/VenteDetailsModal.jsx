@@ -149,7 +149,7 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
                 <div className="pt-2">
                   <strong>Ordonnance / Pièce jointe:</strong>
                   <a 
-                    href={`http://localhost:8000/storage/${intervention.fichier_joint}`} 
+                    href={`http://127.0.0.1:8000/storage/${intervention.fichier_joint}`} 
                     target="_blank" 
                     rel="noreferrer" 
                     className="block text-blue-400 hover:text-blue-300 transition-colors mt-1 font-semibold text-sm hover:underline"

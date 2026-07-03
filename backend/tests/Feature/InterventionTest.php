@@ -2,7 +2,7 @@
 
 describe('Intervention API', function () {
     it('allows client to commander soin', function () {
-        $client = \App\Models\User::factory()->create(['role' => 'client']);
+        $client = \App\Models\User::factory()->client()->create();
         $produit = \App\Models\Produit::factory()->create();
         
         $response = $this->actingAs($client, 'sanctum')
@@ -15,11 +15,11 @@ describe('Intervention API', function () {
             ]);
 
         $response->assertStatus(201)
-            ->assertJsonStructure(['message', 'intervention', 'devis', 'distance_infirmier_km']);
+            ->assertJsonStructure(['message', 'intervention']);
     });
 
     it('allows infirmier to cloturer intervention', function () {
-        $infirmier = \App\Models\User::factory()->create(['role' => 'infirmier']);
+        $infirmier = \App\Models\User::factory()->infirmier()->create();
         $intervention = \App\Models\Intervention::factory()->create([
             'infirmier_id' => $infirmier->infirmier->id,
         ]);

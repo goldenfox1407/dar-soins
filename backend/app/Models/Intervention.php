@@ -9,7 +9,24 @@ class Intervention extends Model
 {
     use HasFactory;
     
-    protected $guarded = [];
+    protected $fillable = [
+        'client_id',
+        'infirmier_id',
+        'produit_id',
+        'localisation_id',
+        'date_heure',
+        'type',
+        'duree_heures',
+        'statut',
+        'description_probleme',
+        'fichier_joint',
+        'notes_infirmier',
+        'methode_paiement',
+        'montant_recu',
+        'signature_patient',
+        'distance_manuelle',
+        'tarif_km_manuel',
+    ];
 
     public function client() {
         return $this->belongsTo(Client::class);

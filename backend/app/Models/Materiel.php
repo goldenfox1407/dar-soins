@@ -6,5 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Materiel extends Model
 {
-    //
+    protected $fillable = [
+        'nom',
+        'stock_actuel',
+        'prix_unitaire',
+    ];
 }

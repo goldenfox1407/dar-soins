@@ -14,6 +14,11 @@ class CategorieController extends Controller
 
     public function store(Request $request)
     {
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+        ]);
         $item = Categorie::create($request->all());
         return response()->json($item, 201);
     }
@@ -26,6 +31,11 @@ class CategorieController extends Controller
     public function update(Request $request, $id)
     {
         $item = Categorie::findOrFail($id);
+        $request->validate([
+            'nom' => 'sometimes|required|string|max:255',
+            'code' => 'nullable|string|max:50',
+            'description' => 'nullable|string',
+        ]);
         $item->update($request->all());
         return response()->json($item);
     }
