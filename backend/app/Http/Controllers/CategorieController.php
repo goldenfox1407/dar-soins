@@ -9,7 +9,7 @@ class CategorieController extends Controller
 {
     public function index()
     {
-        return response()->json(Categorie::all());
+        return response()->json(Categorie::paginate(15));
     }
 
     public function store(Request $request)

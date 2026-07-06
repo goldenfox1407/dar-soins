@@ -9,7 +9,7 @@ class UniteController extends Controller
 {
     public function index()
     {
-        return response()->json(Unite::all());
+        return response()->json(Unite::paginate(15));
     }
 
     public function store(Request $request)

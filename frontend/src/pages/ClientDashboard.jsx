@@ -344,7 +344,7 @@ export default function ClientDashboard() {
                 >
                   {isSubmitting ? 'Envoi en cours...' : 'Confirmer la demande et Trouver un infirmier'}
                 </button>
-                <p className="text-center text-xs text-slate-400 mt-3">Toute demande sera évaluée par notre gestionnaire médical.</p>
+                <p className="text-center text-xs text-slate-400 mt-3">Toute demande sera évaluée par notre admin médical.</p>
               </div>
 
             </form>

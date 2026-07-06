@@ -32,13 +32,13 @@ export default function AdminDashboard() {
   }, []);
 
   const fetchProduits = async () => {
-    try { const r = await api.get('/produits'); setProduits(r.data); } catch (e) { console.error(e); }
+    try { const r = await api.get('/produits'); setProduits(r.data.data ? r.data.data : r.data); } catch (e) { console.error(e); }
   };
   const fetchPersonnel = async () => {
-    try { const r = await api.get('/personnel'); setPersonnel(r.data); } catch (e) { console.error(e); }
+    try { const r = await api.get('/personnel'); setPersonnel(r.data.data ? r.data.data : r.data); } catch (e) { console.error(e); }
   };
   const fetchFactures = async () => {
-    try { const r = await api.get('/factures'); setFactures(r.data); } catch (e) { console.error(e); }
+    try { const r = await api.get('/factures'); setFactures(r.data.data ? r.data.data : r.data); } catch (e) { console.error(e); }
   };
 
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });

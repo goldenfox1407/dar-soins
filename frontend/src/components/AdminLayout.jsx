@@ -167,7 +167,7 @@ export default function AdminLayout() {
             <div className="erp-avatar">A</div>
             <div className="erp-user-info">
               <p className="erp-user-name">Admin User</p>
-              <p className="erp-user-role">Gestionnaire</p>
+              <p className="erp-user-role">Admin</p>
             </div>
           </div>
         </div>

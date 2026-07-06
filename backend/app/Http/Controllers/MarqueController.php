@@ -9,7 +9,7 @@ class MarqueController extends Controller
 {
     public function index()
     {
-        return response()->json(Marque::all());
+        return response()->json(Marque::paginate(15));
     }
 
     public function store(Request $request)

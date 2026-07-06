@@ -25,17 +25,12 @@ Route::get('/produits', [App\Http\Controllers\ProduitController::class, 'index']
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     
-    // Admin Routes
-    Route::post('/produits', [App\Http\Controllers\ProduitController::class, 'store']);
-    Route::put('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'update']);
-    Route::delete('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'destroy']);
-    
-    // Interventions
+    // Interventions (accessible par client et infirmier)
     Route::get('/interventions', [App\Http\Controllers\InterventionController::class, 'index']);
     Route::post('/interventions/commander', [App\Http\Controllers\InterventionController::class, 'commanderSoin']);
     Route::post('/interventions/{id}/cloturer', [App\Http\Controllers\InterventionController::class, 'cloturerIntervention']);
 
-    // Factures
+    // Factures (accessible par les utilisateurs authentifiés)
     Route::get('/factures', [App\Http\Controllers\FactureController::class, 'index']);
     Route::get('/factures/{id}/pdf', [App\Http\Controllers\FactureController::class, 'genererPdf']);
 
@@ -47,9 +42,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::apiResource('roles', App\Http\Controllers\RoleController::class);
     Route::apiResource('permissions', App\Http\Controllers\PermissionController::class)->only(['index']);
 
-    // Gestionnaire-only ERP Routes
+    // Gestionnaire-only Routes
     Route::middleware('role:gestionnaire')->group(function () {
+        // Admin Produit Routes (CRUD sauf index qui est public)
+        Route::post('/produits', [App\Http\Controllers\ProduitController::class, 'store']);
+        Route::put('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'update']);
+        Route::delete('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'destroy']);
+
         // ERP Routes Generated
+        Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);
         Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
         Route::apiResource('fournisseurs', \App\Http\Controllers\FournisseurController::class);
         Route::apiResource('categories', \App\Http\Controllers\CategorieController::class);
@@ -59,7 +60,15 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('variations', \App\Http\Controllers\VariationController::class);
         Route::apiResource('entrepots', \App\Http\Controllers\EntrepotController::class);
         Route::apiResource('achats', \App\Http\Controllers\AchatController::class);
+        Route::get('achats/{achat}/pdf', [\App\Http\Controllers\AchatController::class, 'generatePDF']);
+        Route::get('achats/{achat}/labels', [\App\Http\Controllers\AchatController::class, 'printLabels']);
+        Route::post('achats/{achat}/upload', [\App\Http\Controllers\AchatController::class, 'uploadDocument']);
+        Route::post('achats/{achat}/notify', [\App\Http\Controllers\AchatController::class, 'sendNotification']);
+        Route::get('achats/{achat}/paiements', [\App\Http\Controllers\AchatController::class, 'getPaiements']);
+        Route::post('achats/{achat}/paiements', [\App\Http\Controllers\AchatController::class, 'storePaiement']);
+        Route::post('achats/{achat}/retourner', [\App\Http\Controllers\AchatController::class, 'marquerRetourne']);
         Route::apiResource('achat-lignes', \App\Http\Controllers\AchatLigneController::class);
+        Route::apiResource('retour-achats', \App\Http\Controllers\RetourAchatController::class);
         Route::apiResource('ventes', \App\Http\Controllers\VenteController::class);
 
         // New Routes for Workflow V2
@@ -81,3 +90,4 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('transaction-financieres', \App\Http\Controllers\TransactionFinanciereController::class);
     });
 });
+

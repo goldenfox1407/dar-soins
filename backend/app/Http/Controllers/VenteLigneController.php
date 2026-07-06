@@ -9,7 +9,7 @@ class VenteLigneController extends Controller
 {
     public function index()
     {
-        return response()->json(VenteLigne::all());
+        return response()->json(VenteLigne::paginate(15));
     }
 
     public function store(Request $request)

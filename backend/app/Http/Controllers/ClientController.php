@@ -69,7 +69,13 @@ class ClientController extends Controller
 
     public function show($id)
     {
-        $client = Client::with('user')->findOrFail($id);
+        $client = Client::with([
+            'user', 
+            'interventions.produit', 
+            'interventions.infirmier.user', 
+            'interventions.constantes'
+        ])->findOrFail($id);
+        
         $data = $client->toArray();
         if ($client->user) {
             $data['nom'] = trim($client->user->nom . ' ' . $client->user->prenom);

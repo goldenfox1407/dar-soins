@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Produit;
 use App\Http\Resources\ProduitResource;
+use App\Http\Requests\StoreProduitRequest;
+use App\Http\Requests\UpdateProduitRequest;
 use App\Services\CacheService;
 use Illuminate\Http\Request;
 
@@ -24,18 +26,8 @@ class ProduitController extends Controller
     /**
      * Store a newly created product in storage.
      */
-    public function store(Request $request)
+    public function store(StoreProduitRequest $request)
     {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'type' => 'required|in:soin,garde,consommable',
-            'prix_client' => 'required|numeric|min:0',
-            'prix_achat' => 'nullable|numeric|min:0',
-            'stock_initial' => 'nullable|integer|min:0',
-            'remuneration_soignant' => 'nullable|numeric|min:0',
-            'type_remise' => 'in:none,percent,fixed',
-            'valeur_remise' => 'numeric|min:0'
-        ]);
 
         $data = $request->except(['materiels', 'image']);
 
@@ -65,21 +57,9 @@ class ProduitController extends Controller
     /**
      * Update the specified product in storage.
      */
-    public function update(Request $request, $id)
+    public function update(UpdateProduitRequest $request, $id)
     {
         $produit = Produit::findOrFail($id);
-
-        $request->validate([
-            'nom' => 'string|max:255',
-            'type' => 'in:soin,garde,consommable',
-            'prix_client' => 'numeric|min:0',
-            'prix_achat' => 'nullable|numeric|min:0',
-            'stock_initial' => 'nullable|integer|min:0',
-            'remuneration_soignant' => 'nullable|numeric|min:0',
-            'type_remise' => 'in:none,percent,fixed',
-            'valeur_remise' => 'numeric|min:0',
-            'image' => 'nullable|image|max:2048'
-        ]);
 
         $data = $request->except(['materiels', 'image']);
         

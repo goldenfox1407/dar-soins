@@ -43,9 +43,9 @@ export default function ProduitsCreate() {
         api.get('/marques'),
         api.get('/unites')
       ]);
-      setCategories(catRes.data || []);
-      setMarques(marqRes.data || []);
-      setUnites(unitRes.data || []);
+      setCategories(catRes.data?.data || catRes.data || []);
+      setMarques(marqRes.data?.data || marqRes.data || []);
+      setUnites(unitRes.data?.data || unitRes.data || []);
     } catch (error) {
       console.error('Erreur chargement paramètres:', error);
     }
@@ -72,8 +72,11 @@ export default function ProduitsCreate() {
     try {
       const data = new FormData();
       Object.keys(formData).forEach(key => {
-        if (formData[key] !== null && formData[key] !== '') {
-          data.append(key, formData[key]);
+        let value = formData[key];
+        if (typeof value === 'boolean') value = value ? 1 : 0;
+        
+        if (value !== null && value !== '') {
+          data.append(key, value);
         }
       });
 
@@ -84,7 +87,9 @@ export default function ProduitsCreate() {
       });
       navigate('/gestionnaire/produits');
     } catch (error) {
-      alert("Erreur lors de la création du produit.");
+      const msg = error.response?.data?.message || "Erreur inconnue";
+      const details = error.response?.data?.errors ? JSON.stringify(error.response.data.errors) : "";
+      alert(`Erreur lors de la création du produit: ${msg}\n${details}`);
       console.error(error);
     } finally {
       setLoading(false);

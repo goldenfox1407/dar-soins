@@ -16,7 +16,7 @@ export default function MarquesList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/marques');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

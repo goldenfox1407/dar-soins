@@ -77,7 +77,7 @@ export default function UtilisateursList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/users');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
     } finally {
@@ -88,7 +88,7 @@ export default function UtilisateursList() {
   const fetchRoles = async () => {
     try {
       const response = await api.get('/roles');
-      setRoles(response.data || []);
+      setRoles(response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching roles:', error);
     }
@@ -284,7 +284,7 @@ export default function UtilisateursList() {
                     <td style={{ padding: '1rem' }}>
                       {item.roles && item.roles.length > 0 ? (
                         <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600', textTransform: 'capitalize' }}>
-                          {item.roles.map(r => r.name).join(', ')}
+                          {item.roles.map(r => { const n = r.name || r; return n === 'gestionnaire' ? 'admin' : n; }).join(', ')}
                         </span>
                       ) : (
                         <span style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Aucun rôle</span>
@@ -349,7 +349,7 @@ export default function UtilisateursList() {
                   <select name="role" className="glass-input" required value={formData.role} onChange={handleInputChange} style={{ appearance: 'none', cursor: 'pointer', color: '#1e293b', fontWeight: 'bold' }}>
                     <option value="">-- Sélectionner un rôle --</option>
                     {roles.map(role => (
-                      <option key={role.id} value={role.name}>{role.name}</option>
+                      <option key={role.id || role} value={role.name || role}>{(role.name || role) === 'gestionnaire' ? 'admin' : (role.name || role)}</option>
                     ))}
                   </select>
                 </div>
@@ -470,7 +470,7 @@ export default function UtilisateursList() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', color: '#1e293b' }}>
               <p><strong>Nom Complet:</strong> {viewUser.prenom} {viewUser.nom}</p>
               <p><strong>Email:</strong> {viewUser.email}</p>
-              <p><strong>Rôle:</strong> {viewUser.role}</p>
+              <p><strong>Rôle:</strong> {viewUser.role === 'gestionnaire' ? 'admin' : viewUser.role}</p>
 
               {viewUser.role === 'infirmier' && viewUser.infirmier && (
                 <div style={{ borderTop: '1px solid #e2e8f0', marginTop: '1rem', paddingTop: '1rem' }}>

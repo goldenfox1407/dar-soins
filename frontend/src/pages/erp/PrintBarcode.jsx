@@ -14,7 +14,7 @@ export default function PrintBarcode() {
   const fetchProduits = async () => {
     try {
       const response = await api.get('/produits');
-      setProduits(response.data.data || response.data || []);
+      setProduits(response.data.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Erreur chargement produits:', error);
     }

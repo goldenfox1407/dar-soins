@@ -9,7 +9,7 @@ class FournisseurController extends Controller
 {
     public function index()
     {
-        return response()->json(Fournisseur::all());
+        return response()->json(Fournisseur::paginate(15));
     }
 
     public function store(Request $request)

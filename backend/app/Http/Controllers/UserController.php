@@ -15,7 +15,7 @@ class UserController extends Controller
 {
     public function index()
     {
-        return User::with(['roles', 'infirmier'])->get();
+        return User::with(['roles', 'infirmier'])->paginate(15);
     }
 
     public function store(Request $request)

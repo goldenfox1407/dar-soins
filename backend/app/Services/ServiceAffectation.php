@@ -16,11 +16,14 @@ class ServiceAffectation
 
     /**
      * Trouver l'infirmier disponible le plus proche
+     * Seuls les infirmiers avec des coordonnées GPS valides sont pris en compte.
      */
     public function trouverInfirmierProche(Localisation $clientLoc, array $ignoredInfirmierIds = [])
     {
         $infirmiers = Infirmier::where('est_disponible', true)
                                 ->whereNotIn('id', $ignoredInfirmierIds)
+                                ->whereNotNull('latitude')
+                                ->whereNotNull('longitude')
                                 ->with(['user'])
                                 ->get();
                                 
@@ -28,14 +31,9 @@ class ServiceAffectation
         $minDistance = PHP_FLOAT_MAX;
 
         foreach ($infirmiers as $inf) {
-            // Priority 1: $inf->latitude / longitude from their GPS
-            // For MVP, we default to Casablanca if still null
-            $infLat = $inf->latitude ?? 33.5731;
-            $infLon = $inf->longitude ?? -7.5898;
-            
             $distance = $this->geolocalisation->calculerDistance(
                 $clientLoc->latitude, $clientLoc->longitude,
-                $infLat, $infLon
+                $inf->latitude, $inf->longitude
             );
 
             if ($distance < $minDistance) {
@@ -46,7 +44,7 @@ class ServiceAffectation
 
         return [
             'infirmier' => $closest,
-            'distance_km' => $minDistance
+            'distance_km' => $closest ? round($minDistance, 2) : null
         ];
     }
 }

@@ -12,6 +12,6 @@ class PersonnelController extends Controller
      */
     public function index()
     {
-        return response()->json(Infirmier::with('user')->get());
+        return response()->json(Infirmier::with('user')->paginate(15));
     }
 }

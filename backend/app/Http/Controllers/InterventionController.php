@@ -10,6 +10,8 @@ use App\Models\ConstanteMedicale;
 use App\Http\Resources\InterventionResource;
 use App\Http\Resources\FactureResource;
 use App\Http\Resources\DevisResource;
+use App\Http\Requests\CommanderSoinRequest;
+use App\Http\Requests\CloturerInterventionRequest;
 use App\Services\ServiceAffectation;
 use App\Services\ServiceTarification;
 use Illuminate\Http\Request;
@@ -52,23 +54,9 @@ class InterventionController extends Controller
     /**
      * U.S1 & U.S7: Client commands care, gets assigned nearest nurse, and gets an estimate
      */
-    public function commanderSoin(Request $request)
+    public function commanderSoin(CommanderSoinRequest $request)
     {
-        $request->validate([
-            'produit_id' => 'required|exists:produits,id',
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
-            'type' => 'required|in:ponctuel,garde_malade',
-            'duree_heures' => 'nullable|numeric',
-            'date_heure' => 'required|date',
-            'description_probleme' => 'nullable|string',
-            'fichier_joint' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120'
-        ]);
-
         $user = Auth::user();
-        if ($user->role !== 'client') {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
 
         $localisation = Localisation::create([
             'latitude' => $request->latitude,
@@ -102,26 +90,14 @@ class InterventionController extends Controller
     /**
      * U.S2, U.S3, U.S5: Infirmier checks in, adds vitals, adds consumables
      */
-    public function cloturerIntervention(Request $request, $id)
+    public function cloturerIntervention(CloturerInterventionRequest $request, $id)
     {
         $intervention = Intervention::findOrFail($id);
         $user = Auth::user();
 
-        if ($user->role !== 'infirmier' || $intervention->infirmier_id !== $user->infirmier->id) {
+        if ($intervention->infirmier_id !== $user->infirmier->id) {
             return response()->json(['message' => 'Non autorisé'], 403);
         }
-
-        $request->validate([
-            'tension' => 'nullable|string',
-            'glycemie' => 'nullable|numeric',
-            'temperature' => 'nullable|numeric',
-            'poids' => 'nullable|numeric',
-            'notes_infirmier' => 'nullable|string',
-            'methode_paiement' => 'nullable|in:espece,carte,virement',
-            'montant_recu' => 'nullable|numeric',
-            'signature_patient' => 'nullable|string',
-            'consommations' => 'nullable|array',
-        ]);
 
         if ($request->has('tension') || $request->has('glycemie') || $request->has('temperature') || $request->has('poids')) {
             ConstanteMedicale::create([
@@ -210,20 +186,20 @@ class InterventionController extends Controller
         $ignoredIds = $intervention->infirmiers_refuses()->pluck('infirmiers.id')->toArray();
         $infirmiers = \App\Models\Infirmier::where('est_disponible', true)
                         ->whereNotIn('id', $ignoredIds)
+                        ->whereNotNull('latitude')
+                        ->whereNotNull('longitude')
                         ->with(['user'])
                         ->get();
 
         $infirmiersAvecDistance = [];
         foreach ($infirmiers as $inf) {
-            $infLat = $inf->latitude ?? 33.5731;
-            $infLon = $inf->longitude ?? -7.5898;
             $distance = app(\App\Services\ServiceGeolocalisation::class)->calculerDistance(
                 $intervention->localisation->latitude, $intervention->localisation->longitude,
-                $infLat, $infLon
+                $inf->latitude, $inf->longitude
             );
             $inf->distance_km = round($distance, 2);
-            $inf->lat = $infLat;
-            $inf->lng = $infLon;
+            $inf->lat = $inf->latitude;
+            $inf->lng = $inf->longitude;
             $infirmiersAvecDistance[] = $inf;
         }
 
@@ -313,13 +289,13 @@ class InterventionController extends Controller
         
         if ($intervention->distance_manuelle !== null) {
             $distance = $intervention->distance_manuelle;
-        } else {
-            $infLat = $intervention->infirmier->latitude ?? 33.5731;
-            $infLon = $intervention->infirmier->longitude ?? -7.5898;
+        } elseif ($intervention->infirmier && $intervention->infirmier->latitude && $intervention->infirmier->longitude) {
             $distance = app(\App\Services\ServiceGeolocalisation::class)->calculerDistance(
                 $intervention->localisation->latitude, $intervention->localisation->longitude,
-                $infLat, $infLon
+                $intervention->infirmier->latitude, $intervention->infirmier->longitude
             );
+        } else {
+            $distance = 0; // GPS infirmier non renseigné
         }
 
         $devis = $this->tarificationService->calculerDevis($intervention, $distance);

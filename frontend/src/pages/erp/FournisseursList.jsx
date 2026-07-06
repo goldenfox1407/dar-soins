@@ -24,7 +24,7 @@ export default function FournisseursList() {
     try {
       setLoading(true);
       const response = await api.get('/fournisseurs');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Erreur de chargement:', error);
     } finally {

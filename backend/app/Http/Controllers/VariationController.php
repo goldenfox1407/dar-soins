@@ -9,7 +9,7 @@ class VariationController extends Controller
 {
     public function index()
     {
-        return response()->json(Variation::all());
+        return response()->json(Variation::paginate(15));
     }
 
     public function store(Request $request)

@@ -23,7 +23,7 @@ export default function EntrepotsList() {
     try {
       setLoading(true);
       const response = await api.get('/entrepots');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Erreur de chargement des entrepôts:', error);
     } finally {

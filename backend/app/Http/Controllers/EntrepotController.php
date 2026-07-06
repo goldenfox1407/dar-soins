@@ -9,7 +9,7 @@ class EntrepotController extends Controller
 {
     public function index()
     {
-        return response()->json(Entrepot::all());
+        return response()->json(Entrepot::paginate(15));
     }
 
     public function store(Request $request)

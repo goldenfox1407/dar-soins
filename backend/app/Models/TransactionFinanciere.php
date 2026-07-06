@@ -9,5 +9,7 @@ class TransactionFinanciere extends Model
 {
     use HasFactory;
 
+    protected $table = 'transactions_financieres';
+
     protected $fillable = ['compte_id', 'type', 'montant', 'date_transaction', 'reference', 'description'];
 }

@@ -9,7 +9,7 @@ class EmployeController extends Controller
 {
     public function index()
     {
-        return response()->json(Employe::all());
+        return response()->json(Employe::paginate(15));
     }
 
     public function store(Request $request)

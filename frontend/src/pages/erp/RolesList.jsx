@@ -49,8 +49,8 @@ export default function RolesList() {
         api.get('/roles'),
         api.get('/permissions')
       ]);
-      setRoles(rolesRes.data || []);
-      setAllPermissions(permsRes.data || []);
+      setRoles(rolesRes.data?.data || rolesRes.data || []);
+      setAllPermissions(permsRes.data?.data || permsRes.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -148,7 +148,7 @@ export default function RolesList() {
               ) : (
                 roles.map((item) => (
                   <tr key={item.id} style={{ borderBottom: '1px solid #e2e8f0', transition: 'background 0.2s' }}>
-                    <td style={{ padding: '1rem', fontWeight: 'bold', textTransform: 'capitalize', color: '#1e293b' }}>{item.name}</td>
+                    <td style={{ padding: '1rem', fontWeight: 'bold', textTransform: 'capitalize', color: '#1e293b' }}>{(item.name === 'gestionnaire') ? 'admin' : item.name}</td>
                     <td style={{ padding: '1rem' }}>
                       <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                         {item.permissions && item.permissions.length > 0 ? (

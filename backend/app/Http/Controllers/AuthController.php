@@ -7,21 +7,16 @@ use App\Models\Client;
 use App\Models\Infirmier;
 use App\Models\Gestionnaire;
 use App\Http\Resources\UserResource;
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'nom' => 'required|string',
-            'prenom' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => 'required|in:client,infirmier,gestionnaire',
-        ]);
 
         $user = User::create([
             'nom' => $request->nom,
@@ -55,12 +50,8 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
 
         $user = User::where('email', $request->email)->first();
 

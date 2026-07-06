@@ -16,7 +16,7 @@ export default function UnitesBaseList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/unites-bases');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {

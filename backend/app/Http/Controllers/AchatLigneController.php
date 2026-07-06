@@ -9,7 +9,7 @@ class AchatLigneController extends Controller
 {
     public function index()
     {
-        return response()->json(AchatLigne::all());
+        return response()->json(AchatLigne::paginate(15));
     }
 
     public function store(Request $request)

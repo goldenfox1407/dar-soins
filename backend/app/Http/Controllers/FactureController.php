@@ -10,7 +10,7 @@ class FactureController extends Controller
 {
     public function index()
     {
-        return response()->json(Facture::with('intervention.client.user', 'intervention.infirmier.user', 'intervention.produit')->get());
+        return response()->json(Facture::with('intervention.client.user', 'intervention.infirmier.user', 'intervention.produit')->paginate(15));
     }
 
     /**

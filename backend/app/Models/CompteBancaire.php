@@ -9,5 +9,7 @@ class CompteBancaire extends Model
 {
     use HasFactory;
 
+    protected $table = 'comptes_bancaires';
+
     protected $fillable = ['nom_compte', 'numero_compte', 'solde_initial', 'details'];
 }

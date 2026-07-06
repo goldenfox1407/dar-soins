@@ -9,7 +9,7 @@ class TransactionFinanciereController extends Controller
 {
     public function index()
     {
-        return response()->json(TransactionFinanciere::all());
+        return response()->json(TransactionFinanciere::paginate(15));
     }
 
     public function store(Request $request)

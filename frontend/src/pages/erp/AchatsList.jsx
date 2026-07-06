@@ -1,8 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import { Search, Plus, Edit2, Trash2, X, Check, ShoppingCart, Calendar, User, Building2, Coins, FileText } from 'lucide-react';
+import { 
+  Search, Plus, Edit2, Trash2, X, Filter, 
+  FileText, FileSpreadsheet, MoreHorizontal, Eye, 
+  CornerUpLeft, List, PlusCircle, Download, Printer, 
+  MessageSquare, Paperclip, ChevronLeft, ChevronRight 
+} from 'lucide-react';
+import AchatDetailModal from './AchatDetailModal';
+import PaymentListModal from './PaymentListModal';
+import AddPaymentModal from './AddPaymentModal';
+import UploadDocumentModal from './UploadDocumentModal';
+import NotificationModal from './NotificationModal';
 
 export default function AchatsList() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -11,26 +23,37 @@ export default function AchatsList() {
   const [fournisseurs, setFournisseurs] = useState([]);
   const [entrepots, setEntrepots] = useState([]);
 
-  // Modal form states
-  const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    reference: '', fournisseur_id: '', entrepot_id: '',
-    statut: 'Commande', statut_paiement: 'Non paye',
-    montant_total: '', notes: ''
-  });
-  const [editId, setEditId] = useState(null);
-  const [isSaving, setIsSaving] = useState(false);
+  // UI states
+  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  
+  // Modals state
+  const [activeModal, setActiveModal] = useState({ type: null, item: null });
+
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const dropdownRef = useRef(null);
 
   useEffect(() => {
     fetchData();
     loadOptions();
+
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setActiveDropdown(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
       const response = await api.get('/achats');
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Erreur chargement achats:', error);
     } finally {
@@ -41,77 +64,16 @@ export default function AchatsList() {
   const loadOptions = async () => {
     try {
       const rF = await api.get('/fournisseurs');
-      setFournisseurs(rF.data || []);
+      setFournisseurs(rF.data?.data || rF.data || []);
       const rE = await api.get('/entrepots');
-      setEntrepots(rE.data || []);
+      setEntrepots(rE.data?.data || rE.data || []);
     } catch (error) {
       console.error('Erreur chargement options fournisseurs/entrepôts:', error);
     }
   };
 
-  const generateReference = () => {
-    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const randStr = Math.floor(1000 + Math.random() * 9000);
-    return `ACH-${dateStr}-${randStr}`;
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const openAddModal = () => {
-    setFormData({
-      reference: generateReference(),
-      fournisseur_id: fournisseurs[0]?.id || '',
-      entrepot_id: entrepots[0]?.id || '',
-      statut: 'Commande',
-      statut_paiement: 'Non paye',
-      montant_total: '',
-      notes: ''
-    });
-    setEditId(null);
-    setShowModal(true);
-  };
-
-  const openEditModal = (achat) => {
-    setFormData({
-      reference: achat.reference || '',
-      fournisseur_id: achat.fournisseur_id || '',
-      entrepot_id: achat.entrepot_id || '',
-      statut: achat.statut || 'Commande',
-      statut_paiement: achat.statut_paiement || 'Non paye',
-      montant_total: achat.montant_total || '',
-      notes: achat.notes || ''
-    });
-    setEditId(achat.id);
-    setShowModal(true);
-  };
-
-  const saveAchat = async (e) => {
-    e.preventDefault();
-    if (!formData.fournisseur_id || !formData.entrepot_id || !formData.montant_total) {
-      alert("Veuillez remplir tous les champs obligatoires (*).");
-      return;
-    }
-    setIsSaving(true);
-    try {
-      if (editId) {
-        await api.put(`/achats/${editId}`, formData);
-      } else {
-        await api.post('/achats', formData);
-      }
-      setShowModal(false);
-      fetchData();
-    } catch (error) {
-      console.error('Erreur sauvegarde achat:', error);
-      alert("Erreur lors de l'enregistrement de l'achat.");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   const deleteAchat = async (id, ref) => {
-    if (window.confirm(`Supprimer définitivement l'achat "${ref}" ?`)) {
+    if (window.confirm(`Voulez-vous supprimer l'achat "${ref}" ?`)) {
       try {
         await api.delete(`/achats/${id}`);
         fetchData();
@@ -128,290 +90,395 @@ export default function AchatsList() {
     (item.entrepot?.nom?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
+  const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+  const currentData = filteredData.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
   const getStatusBadge = (statut) => {
-    const normal = String(statut).toLowerCase();
-    if (normal.includes('recu') || normal.includes('reçu')) {
-      return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Reçu</span>;
+    const normal = String(statut).toLowerCase().trim();
+    if (normal === 'recu' || normal === 'reçu' || normal === 'received') {
+      return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#28a745] border border-[#28a745] bg-transparent">Reçu</span>;
     }
-    if (normal.includes('attente')) {
-      return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">En attente</span>;
+    if (normal === 'attente' || normal === 'en attente' || normal === 'pending') {
+      return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#007bff] border border-[#007bff] bg-transparent">En attente</span>;
     }
-    return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">Commandé</span>;
+    return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#fd7e14] border border-[#fd7e14] bg-transparent">Commandé</span>;
   };
 
   const getPaymentBadge = (payStatus) => {
-    const normal = String(payStatus).toLowerCase();
-    if (normal.includes('paye') || normal.includes('payé')) {
-      return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Payé</span>;
+    const normal = String(payStatus).toLowerCase().trim();
+    if (normal === 'paye' || normal === 'payé' || normal === 'paid') {
+      return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#28a745] border border-[#28a745] bg-transparent">Payé</span>;
     }
-    if (normal.includes('partiel')) {
-      return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-500/10 text-orange-400 border border-orange-500/20">Partiel</span>;
+    if (normal === 'partiel' || normal === 'partial') {
+      return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#6f42c1] border border-[#6f42c1] bg-transparent">Partiel</span>;
     }
-    return <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-500/10 text-red-400 border border-red-500/20">Non payé</span>;
+    return <span className="px-2 py-1 rounded text-[11px] font-semibold text-[#fd7e14] border border-[#fd7e14] bg-transparent">Non payé</span>;
   };
 
+  const calculateAmounts = (item) => {
+    const total = parseFloat(item.montant_total) || 0;
+    const normalPay = String(item.statut_paiement).toLowerCase();
+    let paid = 0;
+    
+    if (normalPay.includes('paye') && !normalPay.includes('non')) {
+      paid = total;
+    } else if (normalPay.includes('partiel')) {
+      paid = total / 2; // Simulation
+    }
+    
+    const due = total - paid;
+    return { total, paid, due };
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toISOString().replace('T', ' ').slice(0, 16);
+  };
+
+  const handleAction = async (actionName, item) => {
+    setActiveDropdown(null);
+    switch(actionName) {
+      case 'detail':
+        setActiveModal({ type: 'detail', item });
+        break;
+      case 'edit':
+        navigate(`/gestionnaire/achats/modifier/${item.id}`);
+        break;
+      case 'return':
+        navigate(`/gestionnaire/achats/retour/${item.id}`);
+        break;
+      case 'show_payments':
+        setActiveModal({ type: 'show_payments', item });
+        break;
+      case 'create_payment':
+        setActiveModal({ type: 'create_payment', item });
+        break;
+      case 'download_pdf':
+        window.open(`http://localhost:8000/api/achats/${item.id}/pdf`, '_blank');
+        break;
+      case 'print_labels':
+        window.open(`http://localhost:8000/api/achats/${item.id}/labels`, '_blank');
+        break;
+      case 'whatsapp':
+      case 'email':
+      case 'sms':
+        setActiveModal({ type: actionName, item });
+        break;
+      case 'attach':
+        setActiveModal({ type: 'attach', item });
+        break;
+      case 'delete':
+        deleteAchat(item.id, item.reference);
+        break;
+    }
+  };
+
+  const closeModal = () => setActiveModal({ type: null, item: null });
+
   return (
-    <div className="animate-fade-in text-slate-200">
+    <div className="bg-[#f8f9fa] min-h-[calc(100vh-64px)] text-[#495057] font-sans pb-10 relative overflow-y-auto">
       
       {/* Header section */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-end mb-6 px-6 pt-6">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
-            <ShoppingCart className="text-blue-500" size={24} />
-            <span>Gestion des Achats</span>
-          </h1>
-          <p className="text-slate-400 text-sm mt-1">Créez et suivez les bons d'achats passés auprès de vos fournisseurs de matériel médical.</p>
-        </div>
-        <button 
-          onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5"
-        >
-          <Plus size={18} />
-          <span>Ajouter un achat</span>
-        </button>
-      </div>
-
-      {/* Search Input bar */}
-      <div className="mb-6 flex max-w-md items-center bg-slate-900/50 border border-slate-700/80 rounded-xl px-4 py-2.5 shadow-inner">
-        <Search size={18} className="text-slate-500 mr-2.5" />
-        <input 
-          type="text" 
-          placeholder="Rechercher par référence, fournisseur, entrepôt..." 
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="bg-transparent border-none text-white w-full outline-none text-sm placeholder-slate-500"
-        />
-      </div>
-
-      {/* Main List Table card */}
-      <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr className="border-b border-slate-700/60 bg-slate-900/30">
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pl-6">Référence</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Fournisseur</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Entrepôt</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Paiement</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Total TTC</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Date</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pr-6">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/50">
-              {loading ? (
-                <tr>
-                  <td colSpan="8" className="p-8 text-center text-slate-500">
-                    Chargement des bons d'achat...
-                  </td>
-                </tr>
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="p-16 text-center text-slate-500">
-                    <ShoppingCart size={48} className="mx-auto mb-4 text-slate-600" />
-                    <p>Aucun bon d'achat disponible.</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-750/30 transition-colors">
-                    <td className="p-4 pl-6 font-bold text-white">{item.reference}</td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <User size={14} className="text-slate-500" />
-                        <span>{item.fournisseur?.nom || `ID: ${item.fournisseur_id}`}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <Building2 size={14} className="text-slate-500" />
-                        <span>{item.entrepot?.nom || `ID: ${item.entrepot_id}`}</span>
-                      </div>
-                    </td>
-                    <td className="p-4">{getStatusBadge(item.statut)}</td>
-                    <td className="p-4">{getPaymentBadge(item.statut_paiement)}</td>
-                    <td className="p-4 font-bold text-emerald-400">
-                      {Number(item.montant_total).toFixed(2)} MAD
-                    </td>
-                    <td className="p-4 text-slate-400 text-xs">
-                      {new Date(item.created_at).toLocaleDateString('fr-FR')}
-                    </td>
-                    <td className="p-4 pr-6">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => openEditModal(item)} 
-                          className="bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 text-blue-400 p-2 rounded-lg cursor-pointer transition-colors"
-                          title="Modifier"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button 
-                          onClick={() => deleteAchat(item.id, item.reference)} 
-                          className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 p-2 rounded-lg cursor-pointer transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          <h1 className="text-[22px] font-medium text-[#343a40]">Tous les Achats</h1>
+          <div className="text-[13px] text-[#6c757d] mt-1 flex gap-2">
+            <span>Achats</span>
+            <span className="mx-1">|</span>
+            <span className="text-[#adb5bd]">Tous les Achats</span>
+          </div>
         </div>
       </div>
 
-      {/* Modal Popup Form container */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700/60 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl animate-scale-in">
-            
-            {/* Modal Header */}
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <ShoppingCart size={20} className="text-blue-500" />
-                <span>{editId ? 'Modifier le Bon d\'Achat' : 'Ajouter un Bon d\'Achat'}</span>
-              </h2>
-              <button 
-                onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
+      {/* Main Container */}
+      <div className="px-6">
+        <div className="bg-white rounded-lg shadow-sm border border-[#dee2e6] overflow-hidden">
+          
+          {/* Toolbar */}
+          <div className="p-4 border-b border-[#dee2e6] flex justify-between items-center bg-white">
+            <div className="w-[250px] relative">
+              <input 
+                type="text" 
+                placeholder="Rechercher dans la table" 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full border border-[#ced4da] rounded-md pl-3 pr-8 py-1.5 text-[13px] focus:outline-none focus:border-[#80bdff] focus:ring-1 focus:ring-[#80bdff] text-[#495057]"
+              />
+              <Search size={14} className="absolute right-3 top-2.5 text-[#adb5bd]" />
             </div>
 
-            {/* Modal Form body */}
-            <form onSubmit={saveAchat} className="p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Référence Achat *</label>
-                  <input 
-                    name="reference" 
-                    value={formData.reference} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm font-semibold" 
-                    placeholder="Reference..." 
-                    required
-                  />
-                </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowFilterSidebar(true)}
+                className="flex items-center gap-1.5 border border-[#ced4da] bg-white text-[#495057] hover:bg-[#f8f9fa] px-3 py-1.5 rounded-md text-[13px] transition-colors cursor-pointer"
+              >
+                <Filter size={14} /> <span>Filtre</span>
+              </button>
+              <button className="flex items-center gap-1.5 border border-[#ced4da] bg-white text-[#495057] hover:bg-[#f8f9fa] px-3 py-1.5 rounded-md text-[13px] transition-colors cursor-pointer">
+                <FileText size={14} /> <span>PDF</span>
+              </button>
+              <button className="flex items-center gap-1.5 border border-[#ced4da] bg-white text-[#495057] hover:bg-[#f8f9fa] px-3 py-1.5 rounded-md text-[13px] transition-colors cursor-pointer">
+                <FileSpreadsheet size={14} /> <span>EXCEL</span>
+              </button>
+              <button 
+                onClick={() => navigate('/gestionnaire/achats/ajouter')}
+                className="flex items-center gap-1.5 bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-4 py-1.5 rounded-md text-[13px] transition-colors shadow-sm ml-2 cursor-pointer"
+              >
+                <Plus size={14} /> <span>Créer</span>
+              </button>
+            </div>
+          </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Montant Total (MAD) *</label>
-                  <input 
-                    type="number"
-                    name="montant_total" 
-                    value={formData.montant_total} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm font-semibold text-emerald-400" 
-                    placeholder="0.00" 
-                    required
-                  />
-                </div>
-              </div>
+          {/* Table */}
+          <div className="overflow-x-auto min-h-[400px]">
+            <table className="w-full text-left text-[13px]">
+              <thead>
+                <tr className="border-b border-[#dee2e6] bg-[#f8f9fa] text-[#495057]">
+                  <th className="p-3 w-10 text-center font-semibold">
+                    <input type="checkbox" className="rounded border-[#ced4da]" />
+                  </th>
+                  <th className="p-3 font-semibold w-16">Action</th>
+                  <th className="p-3 font-semibold">Date</th>
+                  <th className="p-3 font-semibold">Référence</th>
+                  <th className="p-3 font-semibold">Fournisseur</th>
+                  <th className="p-3 font-semibold">Entrepôt</th>
+                  <th className="p-3 font-semibold">Statut</th>
+                  <th className="p-3 font-semibold">Total</th>
+                  <th className="p-3 font-semibold">Payé</th>
+                  <th className="p-3 font-semibold">Dû</th>
+                  <th className="p-3 font-semibold">Statut Paiement</th>
+                  <th className="p-3 font-semibold">Documents</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="12" className="p-8 text-center text-[#6c757d]">Chargement...</td>
+                  </tr>
+                ) : currentData.length === 0 ? (
+                  <tr>
+                    <td colSpan="12" className="p-8 text-center text-[#6c757d]">Aucun enregistrement trouvé</td>
+                  </tr>
+                ) : (
+                  currentData.map((item) => {
+                    const { total, paid, due } = calculateAmounts(item);
+                    return (
+                      <tr key={item.id} className="border-b border-[#dee2e6] hover:bg-[#f8f9fa] transition-colors text-[#495057]">
+                        <td className="p-3 text-center">
+                          <input type="checkbox" className="rounded border-[#ced4da]" />
+                        </td>
+                        <td className="p-3 relative">
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveDropdown(activeDropdown === item.id ? null : item.id);
+                            }}
+                            className="p-1 rounded hover:bg-[#e9ecef] transition-colors text-[#adb5bd] cursor-pointer"
+                          >
+                            <MoreHorizontal size={18} />
+                          </button>
+                          
+                          {/* Dropdown Menu */}
+                          {activeDropdown === item.id && (
+                            <div 
+                              ref={dropdownRef}
+                              className="absolute z-10 top-full left-3 mt-1 w-56 bg-white border border-[#dee2e6] rounded-md shadow-lg py-1 text-[13px]"
+                            >
+                              <button onClick={() => handleAction('detail', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <Eye size={14} className="text-[#6c757d]" /> Détail d'Achat
+                              </button>
+                              <button onClick={() => handleAction('edit', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <Edit2 size={14} className="text-[#6c757d]" /> Modifier Achat
+                              </button>
+                              <button onClick={() => handleAction('return', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <CornerUpLeft size={14} className="text-[#6c757d]" /> Retour d'Achat
+                              </button>
+                              <button onClick={() => handleAction('show_payments', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <List size={14} className="text-[#6c757d]" /> Afficher Paiements
+                              </button>
+                              <button onClick={() => handleAction('create_payment', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <PlusCircle size={14} className="text-[#6c757d]" /> Créer Paiement
+                              </button>
+                              <button onClick={() => handleAction('download_pdf', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <Download size={14} className="text-[#6c757d]" /> Télécharger PDF
+                              </button>
+                              <button onClick={() => handleAction('print_labels', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <Printer size={14} className="text-[#6c757d]" /> Imprimer Étiquettes
+                              </button>
+                              <button onClick={() => handleAction('whatsapp', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <MessageSquare size={14} className="text-[#6c757d]" /> Notification WhatsApp
+                              </button>
+                              <button onClick={() => handleAction('email', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <MessageSquare size={14} className="text-[#6c757d]" /> Notification Email
+                              </button>
+                              <button onClick={() => handleAction('sms', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <MessageSquare size={14} className="text-[#6c757d]" /> Notification SMS
+                              </button>
+                              <button onClick={() => handleAction('attach', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#495057]">
+                                <Paperclip size={14} className="text-[#6c757d]" /> Joindre Documents
+                              </button>
+                              <button onClick={() => handleAction('delete', item)} className="w-full text-left px-4 py-2 hover:bg-[#f8f9fa] flex items-center gap-3 text-[#dc3545]">
+                                <X size={14} className="text-[#dc3545]" /> Supprimer Achat
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3 whitespace-nowrap">{formatDate(item.created_at)}</td>
+                        <td className="p-3 text-[#2563eb] hover:underline cursor-pointer font-medium">{item.reference}</td>
+                        <td className="p-3">{item.fournisseur?.nom || 'N/A'}</td>
+                        <td className="p-3 text-[#6c757d]">{item.entrepot?.nom || 'N/A'}</td>
+                        <td className="p-3">{getStatusBadge(item.statut)}</td>
+                        <td className="p-3">MAD {total.toFixed(2)}</td>
+                        <td className="p-3">MAD {paid.toFixed(2)}</td>
+                        <td className="p-3">MAD {due.toFixed(2)}</td>
+                        <td className="p-3">{getPaymentBadge(item.statut_paiement)}</td>
+                        <td className="p-3 text-[#adb5bd]">-</td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Fournisseur *</label>
-                  <select 
-                    name="fournisseur_id" 
-                    value={formData.fournisseur_id} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm"
-                    required
-                  >
-                    <option value="" disabled>Sélectionner un fournisseur</option>
-                    {fournisseurs.map(f => (
-                      <option key={f.id} value={f.id} style={{ color: 'black' }}>
-                        {f.nom} ({f.entreprise || 'Privé'})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Entrepôt Cible *</label>
-                  <select 
-                    name="entrepot_id" 
-                    value={formData.entrepot_id} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm"
-                    required
-                  >
-                    <option value="" disabled>Sélectionner un entrepôt</option>
-                    {entrepots.map(e => (
-                      <option key={e.id} value={e.id} style={{ color: 'black' }}>
-                        {e.nom}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Statut de Livraison</label>
-                  <select 
-                    name="statut" 
-                    value={formData.statut} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm"
-                  >
-                    <option value="Commande" style={{ color: 'black' }}>Commandé</option>
-                    <option value="Attente" style={{ color: 'black' }}>En attente</option>
-                    <option value="Recu" style={{ color: 'black' }}>Reçu</option>
-                  </select>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-slate-400">Statut de Paiement</label>
-                  <select 
-                    name="statut_paiement" 
-                    value={formData.statut_paiement} 
-                    onChange={handleInputChange} 
-                    className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm"
-                  >
-                    <option value="Non paye" style={{ color: 'black' }}>Non payé</option>
-                    <option value="Partiel" style={{ color: 'black' }}>Partiel</option>
-                    <option value="Paye" style={{ color: 'black' }}>Payé</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400">Notes / Remarques</label>
-                <textarea 
-                  name="notes" 
-                  value={formData.notes} 
-                  onChange={handleInputChange} 
-                  rows="3" 
-                  className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm resize-none" 
-                  placeholder="Notes de commande..." 
-                />
-              </div>
-
-              {/* Modal Actions Footer */}
-              <div className="pt-6 border-t border-slate-800 flex justify-end gap-3">
+          {/* Footer Pagination */}
+          <div className="p-4 border-t border-[#dee2e6] flex justify-between items-center text-[13px] text-[#6c757d] bg-white">
+            <div className="flex items-center gap-2">
+              <span>Lignes par page:</span>
+              <select 
+                value={rowsPerPage} 
+                onChange={(e) => { setRowsPerPage(Number(e.target.value)); setPage(1); }}
+                className="border border-[#ced4da] rounded p-1 outline-none focus:border-[#80bdff]"
+              >
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-4">
+              <span>{Math.min((page - 1) * rowsPerPage + 1, filteredData.length)} - {Math.min(page * rowsPerPage, filteredData.length)} sur {filteredData.length}</span>
+              <div className="flex gap-1">
                 <button 
-                  type="button"
-                  onClick={() => setShowModal(false)} 
-                  className="flex items-center gap-1.5 bg-slate-950 hover:bg-slate-850 text-slate-400 hover:text-white border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                  disabled={page === 1} 
+                  onClick={() => setPage(p => p - 1)}
+                  className="p-1 disabled:opacity-50 hover:bg-[#f8f9fa] rounded flex items-center cursor-pointer"
                 >
-                  <X size={15} /> <span>Annuler</span>
+                  <ChevronLeft size={16} /> <span className="mr-1">préc</span>
                 </button>
                 <button 
-                  type="submit" 
-                  disabled={isSaving}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+                  disabled={page === totalPages || totalPages === 0} 
+                  onClick={() => setPage(p => p + 1)}
+                  className="p-1 disabled:opacity-50 hover:bg-[#f8f9fa] rounded flex items-center cursor-pointer"
                 >
-                  <Check size={15} /> <span>{isSaving ? 'Enregistrement...' : editId ? 'Modifier' : 'Ajouter'}</span>
+                  <span className="ml-1">suiv</span> <ChevronRight size={16} />
                 </button>
               </div>
-            </form>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter Sidebar overlay */}
+      {showFilterSidebar && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-black/20" onClick={() => setShowFilterSidebar(false)}></div>
+          <div className="relative w-[350px] bg-[#f8f9fa] h-full shadow-2xl animate-fade-in-right flex flex-col border-l border-[#dee2e6]">
+            <div className="flex justify-between items-center p-4 border-b border-[#dee2e6] bg-white">
+              <h2 className="text-[16px] font-semibold text-[#343a40]">Filtre</h2>
+              <button onClick={() => setShowFilterSidebar(false)} className="text-[#adb5bd] hover:text-[#495057] cursor-pointer">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-5 overflow-y-auto flex-1 space-y-4 text-[13px] text-[#495057]">
+              <div>
+                <label className="block mb-1 font-medium">Date</label>
+                <input type="date" className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff]" />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Référence</label>
+                <input type="text" placeholder="Référence" className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff]" />
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Fournisseur</label>
+                <select className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff] bg-white">
+                  <option>Choisir Fournisseur</option>
+                  {fournisseurs.map(f => <option key={f.id} value={f.id}>{f.nom}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Entrepôt</label>
+                <select className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff] bg-white">
+                  <option>Choisir Entrepôt</option>
+                  {entrepots.map(e => <option key={e.id} value={e.id}>{e.nom}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Statut</label>
+                <select className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff] bg-white">
+                  <option>Choisir Statut</option>
+                  <option>Reçu</option>
+                  <option>En attente</option>
+                  <option>Commandé</option>
+                </select>
+              </div>
+              <div>
+                <label className="block mb-1 font-medium">Statut Paiement</label>
+                <select className="w-full border border-[#ced4da] rounded-md px-3 py-2 outline-none focus:border-[#80bdff] bg-white">
+                  <option>Choisir statut</option>
+                  <option>Payé</option>
+                  <option>Partiel</option>
+                  <option>Non payé</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-[#dee2e6] bg-white flex gap-3">
+              <button className="flex-1 bg-[#2563eb] hover:bg-[#1d4ed8] text-white py-2 rounded-md font-semibold flex justify-center items-center gap-2 transition-colors cursor-pointer">
+                <Filter size={14} /> Filtrer
+              </button>
+              <button className="flex-1 bg-[#dc3545] hover:bg-[#c82333] text-white py-2 rounded-md font-semibold flex justify-center items-center gap-2 transition-colors cursor-pointer">
+                <X size={14} /> Réinitialiser
+              </button>
+            </div>
           </div>
         </div>
       )}
+
+      {/* Modals */}
+      {activeModal.type === 'detail' && (
+        <AchatDetailModal achatId={activeModal.item.id} onClose={closeModal} />
+      )}
+      {activeModal.type === 'show_payments' && (
+        <PaymentListModal achatId={activeModal.item.id} reference={activeModal.item.reference} onClose={closeModal} />
+      )}
+      {activeModal.type === 'create_payment' && (
+        <AddPaymentModal 
+          achatId={activeModal.item.id} 
+          reference={activeModal.item.reference} 
+          dueAmount={calculateAmounts(activeModal.item).due} 
+          onClose={closeModal} 
+          onPaymentAdded={fetchData} 
+        />
+      )}
+      {activeModal.type === 'attach' && (
+        <UploadDocumentModal achatId={activeModal.item.id} reference={activeModal.item.reference} onClose={closeModal} onUploadSuccess={fetchData} />
+      )}
+      {(activeModal.type === 'email' || activeModal.type === 'sms' || activeModal.type === 'whatsapp') && (
+        <NotificationModal achatId={activeModal.item.id} reference={activeModal.item.reference} type={activeModal.type} onClose={closeModal} />
+      )}
+
+      {/* Basic styles for animation */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes fade-in-right {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in-right {
+          animation: fade-in-right 0.3s ease-out;
+        }
+      `}} />
     </div>
   );
 }

@@ -9,7 +9,7 @@ class CompteBancaireController extends Controller
 {
     public function index()
     {
-        return response()->json(CompteBancaire::all());
+        return response()->json(CompteBancaire::paginate(15));
     }
 
     public function store(Request $request)

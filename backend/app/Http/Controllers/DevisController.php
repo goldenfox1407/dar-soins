@@ -14,7 +14,7 @@ class DevisController extends Controller
     {
         $devis = Devis::with(['intervention.client.user', 'intervention.produit'])
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
             
         return response()->json($devis);
     }

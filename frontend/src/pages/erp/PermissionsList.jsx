@@ -13,7 +13,7 @@ export default function PermissionsList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/permissions');
-      setPermissions(response.data || []);
+      setPermissions(response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching permissions:', error);
     } finally {

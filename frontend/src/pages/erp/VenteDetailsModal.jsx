@@ -86,13 +86,14 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
     }
   };
 
-  const consulterPdf = async (devisId) => {
+  const consulterDocument = async (type, id) => {
     try {
-      const response = await api.get(`/devis/${devisId}/pdf`, { responseType: 'blob' });
+      const endpoint = type === 'facture' ? `/factures/${id}/pdf` : `/devis/${id}/pdf`;
+      const response = await api.get(endpoint, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
       window.open(url, '_blank');
     } catch (err) {
-      alert("Erreur lors de la récupération du PDF.");
+      alert(`Erreur lors de la récupération du ${type} (PDF).`);
     }
   };
 
@@ -188,13 +189,42 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
                   </button>
                 )}
 
-                {intervention.devis && (
+                {intervention.devis && intervention.statut !== 'terminee' && (
                   <button 
-                    onClick={() => consulterPdf(intervention.devis.id)} 
+                    onClick={() => consulterDocument('devis', intervention.devis.id)} 
                     className="w-full bg-slate-950 hover:bg-slate-850 text-blue-400 hover:text-blue-300 border border-blue-500/20 py-3 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
                   >
                     <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
                   </button>
+                )}
+
+                {intervention.statut === 'terminee' && (
+                  <div className="mt-4 pt-4 border-t border-slate-800">
+                    <h4 className="font-bold text-slate-300 mb-3 uppercase tracking-wider text-xs">Documents Générés</h4>
+                    <div className="space-y-2">
+                      {intervention.devis && (
+                        <button 
+                          onClick={() => consulterDocument('devis', intervention.devis.id)} 
+                          className="w-full bg-slate-950 hover:bg-slate-850 text-blue-400 hover:text-blue-300 border border-blue-500/20 py-2.5 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
+                        >
+                          <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
+                        </button>
+                      )}
+                      
+                      {intervention.facture && (
+                        <button 
+                          onClick={() => consulterDocument('facture', intervention.facture.id)} 
+                          className="w-full bg-slate-950 hover:bg-slate-850 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 py-2.5 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
+                        >
+                          <FileText size={18} /> <span>Consulter la Facture (PDF)</span>
+                        </button>
+                      )}
+
+                      {!intervention.devis && !intervention.facture && (
+                        <p className="text-sm text-slate-500 italic text-center">Aucun document disponible.</p>
+                      )}
+                    </div>
+                  </div>
                 )}
 
                 {['en_attente_reponse_infirmier', 'en_attente_reponse_client', 'acceptee', 'terminee'].includes(intervention.statut) && (

@@ -9,7 +9,7 @@ class PresenceController extends Controller
 {
     public function index()
     {
-        return response()->json(Presence::all());
+        return response()->json(Presence::paginate(15));
     }
 
     public function store(Request $request)

@@ -12,7 +12,7 @@ export default function DepotsList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/depots').catch(() => ({ data: [] }));
-      setData(response.data || []);
+      setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
