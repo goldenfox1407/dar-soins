@@ -6,6 +6,7 @@ import {
   FileSignature, CheckSquare, Calendar, Percent, Settings, Brain, 
   BarChart, Menu, X, ChevronDown, ChevronRight, LogOut, Bell, Search
 } from 'lucide-react';
+import Logo from './Logo';
 
 const MENU_ITEMS = [
   { id: 'gens', title: 'Contacts & Gens', icon: Users, submenus: [
@@ -17,8 +18,8 @@ const MENU_ITEMS = [
     { title: 'Rôles', path: '/gestionnaire/roles' }
   ]},
   { id: 'produits', title: 'Produits', icon: Package, submenus: [
-    { title: 'Ajouter Produit', path: '/gestionnaire/produits/create' },
     { title: 'Liste des produits', path: '/gestionnaire/produits' },
+    { title: 'Ajouter Produit', path: '/gestionnaire/produits/create' },
     { title: 'Imprimer Code-barres', path: '/gestionnaire/produits/code-barres' },
     { title: 'Catégories', path: '/gestionnaire/produits/categories' },
     { title: 'Marques', path: '/gestionnaire/produits/marques' },
@@ -32,6 +33,7 @@ const MENU_ITEMS = [
   ]},
   { id: 'achats', title: 'Achats', icon: ShoppingCart, submenus: [
     { title: 'Liste des achats', path: '/gestionnaire/achats' },
+    { title: 'Ajouter Achat', path: '/gestionnaire/achats/ajouter' },
     { title: 'Retours achats', path: '/gestionnaire/retours/achats' }
   ]},
   { id: 'ventes', title: 'Ventes', icon: TrendingUp, submenus: [
@@ -58,7 +60,7 @@ const MENU_ITEMS = [
   ]},
   { id: 'taches', title: 'Organisation', icon: CheckSquare, submenus: [
     { title: 'Tâches', path: '/gestionnaire/taches' },
-    { title: 'Réservations', path: '/gestionnaire/reservations' }
+    { title: 'Calendrier', path: '/gestionnaire/calendrier' }
   ]},
   { id: 'rapp', title: 'Rapports & IA', icon: Brain, submenus: [
     { title: 'AI Reports', path: '/gestionnaire/ai-reports' },
@@ -71,30 +73,34 @@ const MENU_ITEMS = [
     { title: 'Système', path: '/gestionnaire/parametres/systeme' },
     { title: 'Taxes', path: '/gestionnaire/parametres/taxes' },
     { title: 'Devises', path: '/gestionnaire/parametres/devises' },
-    { title: 'Entrepôts', path: '/gestionnaire/parametres/entrepots' }
+    { title: 'Entrepôts', path: '/gestionnaire/parametres/entrepots' },
+    { title: 'Numérotation', path: '/gestionnaire/parametres/numerotation' },
+    { title: 'Notifications', path: '/gestionnaire/parametres/notifications' }
   ]},
 ];
 
 const SidebarItem = ({ item, isOpen, toggleOpen, currentPath }) => {
   const Icon = item.icon;
-  // Auto-expand if a child route is active
-  const isChildActive = item.submenus?.some(sub => currentPath.startsWith(sub.path));
-  const isExpanded = isOpen === item.id || (isOpen === null && isChildActive);
-
+  const isExpanded = isOpen === item.id;
+  
+  const hasActiveSub = item.submenus && item.submenus.some(sub => currentPath.startsWith(sub.path));
+  
   if (item.submenus) {
     return (
       <div className="erp-sidebar-item">
         <button 
-          onClick={() => toggleOpen(isExpanded ? '' : item.id)}
-          className={`erp-sidebar-btn ${isExpanded ? 'expanded' : ''} ${isChildActive ? 'child-active' : ''}`}
+          onClick={() => toggleOpen(isExpanded ? null : item.id)} 
+          className={`erp-sidebar-btn ${isExpanded ? 'expanded' : ''} ${hasActiveSub ? 'child-active' : ''}`}
         >
           <div className="erp-sidebar-btn-content">
             <Icon size={18} className="erp-sidebar-icon" />
             <span className="erp-sidebar-label">{item.title}</span>
           </div>
-          <ChevronRight size={16} className={`erp-sidebar-chevron ${isExpanded ? 'rotate-90' : ''}`} />
+          <ChevronRight 
+            size={16} 
+            className={`erp-sidebar-chevron ${isExpanded ? 'rotate-90' : ''}`} 
+          />
         </button>
-        
         <div className={`erp-sidebar-submenus ${isExpanded ? 'open' : ''}`}>
           {item.submenus.map((sub, idx) => (
             <NavLink 
@@ -140,9 +146,9 @@ export default function AdminLayout() {
       {/* SIDEBAR */}
       <aside className={`erp-sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
         <div className="erp-sidebar-header">
-          <div className="erp-brand">
-            <div className="erp-brand-logo">D</div>
-            <span className="erp-brand-text">DarSoins ERP</span>
+          <div className="erp-brand" onClick={() => navigate('/gestionnaire')} style={{ cursor: 'pointer' }}>
+            <Logo size={36} light={false} />
+            <span className="erp-brand-text-badge" style={{ fontSize: '0.65rem', background: 'rgba(37, 99, 235, 0.15)', color: '#2563EB', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold', marginLeft: '-4px' }}>ERP</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="erp-sidebar-close lg:hidden">
             <X size={20} />
@@ -218,13 +224,22 @@ export default function AdminLayout() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+        :root {
+          --bg-app: #F8FAFC;
+          --text-main: #1E293B;
+          --primary-color: #2563EB;
+          --primary-light: rgba(37, 99, 235, 0.1);
+          --primary-glow: rgba(37, 99, 235, 0.2);
+          --card-border: #E2E8F0;
+        }
+
         .erp-layout {
           display: flex;
           height: 100vh;
           width: 100vw;
           overflow: hidden;
-          background: #0f172a; /* Slate 900 */
-          color: #f8fafc; /* Slate 50 */
+          background: var(--bg-app);
+          color: var(--text-main);
           font-family: 'Inter', sans-serif;
         }
 
@@ -233,8 +248,8 @@ export default function AdminLayout() {
           width: 280px;
           min-width: 280px;
           flex-shrink: 0;
-          background: #0b1120; /* Slate 950 */
-          border-right: 1px solid rgba(255, 255, 255, 0.05);
+          background: #FFFFFF;
+          border-right: 1px solid var(--card-border);
           display: flex;
           flex-direction: column;
           transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -255,34 +270,13 @@ export default function AdminLayout() {
           align-items: center;
           justify-content: space-between;
           padding: 0 24px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid var(--card-border);
         }
 
         .erp-brand {
           display: flex;
           align-items: center;
           gap: 12px;
-        }
-
-        .erp-brand-logo {
-          width: 32px;
-          height: 32px;
-          background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
-          color: white;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: 700;
-          font-size: 16px;
-          box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);
-        }
-
-        .erp-brand-text {
-          font-weight: 700;
-          font-size: 1.1rem;
-          letter-spacing: -0.01em;
-          color: #f1f5f9;
         }
 
         .erp-sidebar-close {
@@ -305,7 +299,7 @@ export default function AdminLayout() {
           font-size: 0.75rem;
           text-transform: uppercase;
           letter-spacing: 0.05em;
-          color: #475569;
+          color: #94a3b8;
           font-weight: 600;
           margin: 10px 0 8px 12px;
         }
@@ -325,23 +319,23 @@ export default function AdminLayout() {
           border-radius: 8px;
           background: transparent;
           border: 1px solid transparent;
-          color: #94a3b8;
+          color: #475569;
           cursor: pointer;
           transition: all 0.2s ease;
           text-decoration: none;
         }
 
         .erp-sidebar-btn:hover {
-          background: rgba(255, 255, 255, 0.03);
-          color: #e2e8f0;
+          background: #F1F5F9;
+          color: var(--primary-color);
         }
 
         .erp-sidebar-btn.expanded {
-          color: #f8fafc;
+          color: var(--text-main);
         }
 
         .erp-sidebar-btn.child-active {
-          color: #38bdf8;
+          color: var(--primary-color);
         }
 
         .erp-sidebar-btn-content {
@@ -355,7 +349,7 @@ export default function AdminLayout() {
         }
         
         .erp-sidebar-btn.child-active .erp-sidebar-icon {
-          color: #38bdf8;
+          color: var(--primary-color);
         }
 
         .erp-sidebar-label {
@@ -365,7 +359,7 @@ export default function AdminLayout() {
 
         .erp-sidebar-chevron {
           transition: transform 0.3s ease;
-          color: #475569;
+          color: #94a3b8;
         }
         .erp-sidebar-chevron.rotate-90 {
           transform: rotate(90deg);
@@ -384,7 +378,6 @@ export default function AdminLayout() {
           position: relative;
         }
         
-        /* The connecting line for submenus */
         .erp-sidebar-submenus::before {
           content: '';
           position: absolute;
@@ -392,7 +385,7 @@ export default function AdminLayout() {
           top: 0;
           bottom: 12px;
           width: 1px;
-          background: #334155;
+          background: var(--card-border);
         }
 
         .erp-sidebar-submenus.open {
@@ -413,20 +406,20 @@ export default function AdminLayout() {
         }
 
         .erp-sidebar-sub-link:hover {
-          color: #cbd5e1;
-          background: rgba(255, 255, 255, 0.03);
+          color: var(--primary-color);
+          background: #F1F5F9;
         }
 
         .erp-sidebar-sub-link.active-sub {
-          color: #38bdf8;
+          color: var(--primary-color);
           font-weight: 500;
-          background: rgba(56, 189, 248, 0.08);
+          background: var(--primary-light);
         }
 
         /* SIDEBAR FOOTER */
         .erp-sidebar-footer {
           padding: 16px;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
+          border-top: 1px solid var(--card-border);
         }
 
         .erp-user-profile {
@@ -435,25 +428,25 @@ export default function AdminLayout() {
           gap: 12px;
           padding: 8px;
           border-radius: 10px;
-          background: rgba(255,255,255,0.02);
-          border: 1px solid rgba(255,255,255,0.05);
+          background: #F8FAFC;
+          border: 1px solid var(--card-border);
           cursor: pointer;
           transition: background 0.2s;
         }
         .erp-user-profile:hover {
-          background: rgba(255,255,255,0.05);
+          background: #F1F5F9;
         }
 
         .erp-avatar {
           width: 36px;
           height: 36px;
           border-radius: 50%;
-          background: #334155;
+          background: var(--primary-light);
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 600;
-          color: #e2e8f0;
+          color: var(--primary-color);
         }
 
         .erp-user-info {
@@ -464,7 +457,7 @@ export default function AdminLayout() {
         .erp-user-name {
           font-size: 0.85rem;
           font-weight: 600;
-          color: #f1f5f9;
+          color: var(--text-main);
           margin: 0;
         }
         .erp-user-role {
@@ -479,7 +472,7 @@ export default function AdminLayout() {
           display: flex;
           flex-direction: column;
           position: relative;
-          background: #0f172a;
+          background: var(--bg-app);
         }
 
         /* TOPBAR */
@@ -490,9 +483,9 @@ export default function AdminLayout() {
           align-items: center;
           justify-content: space-between;
           padding: 0 24px;
-          background: rgba(15, 23, 42, 0.8);
+          background: rgba(255, 255, 255, 0.95);
           backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid var(--card-border);
           z-index: 40;
         }
 
@@ -505,22 +498,22 @@ export default function AdminLayout() {
         .erp-menu-trigger {
           background: none;
           border: none;
-          color: #94a3b8;
+          color: #64748b;
           cursor: pointer;
           padding: 6px;
           border-radius: 6px;
           transition: all 0.2s;
         }
         .erp-menu-trigger:hover {
-          background: rgba(255,255,255,0.05);
-          color: #f8fafc;
+          background: #F1F5F9;
+          color: var(--text-main);
         }
 
         .erp-searchbar {
           display: flex;
           align-items: center;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: #F8FAFC;
+          border: 1px solid var(--card-border);
           border-radius: 8px;
           padding: 0 12px;
           height: 38px;
@@ -528,8 +521,8 @@ export default function AdminLayout() {
           transition: border-color 0.2s;
         }
         .erp-searchbar:focus-within {
-          border-color: #38bdf8;
-          box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 2px var(--primary-glow);
         }
         .erp-search-icon {
           color: #64748b;
@@ -537,20 +530,20 @@ export default function AdminLayout() {
         .erp-search-input {
           background: transparent;
           border: none;
-          color: #e2e8f0;
+          color: var(--text-main);
           font-size: 0.85rem;
           padding: 0 10px;
           width: 100%;
           outline: none;
         }
         .erp-search-input::placeholder {
-          color: #475569;
+          color: #94a3b8;
         }
 
         .erp-icon-btn {
           background: transparent;
-          border: 1px solid rgba(255,255,255,0.08);
-          color: #cbd5e1;
+          border: 1px solid var(--card-border);
+          color: #64748b;
           width: 38px;
           height: 38px;
           border-radius: 8px;
@@ -562,8 +555,8 @@ export default function AdminLayout() {
           transition: all 0.2s;
         }
         .erp-icon-btn:hover {
-          background: rgba(255,255,255,0.05);
-          color: #f8fafc;
+          background: #F1F5F9;
+          color: var(--text-main);
         }
         .erp-badge {
           position: absolute;
@@ -579,16 +572,16 @@ export default function AdminLayout() {
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 2px solid #0f172a;
+          border: 2px solid #FFFFFF;
         }
 
         .erp-logout-btn {
           display: flex;
           align-items: center;
           gap: 8px;
-          background: rgba(239, 68, 68, 0.1);
-          color: #f87171;
-          border: 1px solid rgba(239, 68, 68, 0.2);
+          background: rgba(239, 68, 68, 0.08);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.15);
           padding: 8px 16px;
           border-radius: 8px;
           font-size: 0.85rem;
@@ -597,8 +590,8 @@ export default function AdminLayout() {
           transition: all 0.2s;
         }
         .erp-logout-btn:hover {
-          background: rgba(239, 68, 68, 0.15);
-          border-color: rgba(239, 68, 68, 0.3);
+          background: rgba(239, 68, 68, 0.12);
+          border-color: rgba(239, 68, 68, 0.25);
         }
 
         /* CONTENT AREA */
@@ -606,20 +599,20 @@ export default function AdminLayout() {
           flex: 1;
           padding: 24px;
           overflow-y: auto;
-          background: radial-gradient(circle at 50% 0%, rgba(30, 41, 59, 0.4) 0%, transparent 80%);
+          background: #F8FAFC;
         }
 
         .erp-content-container {
           max-width: 1400px;
           margin: 0 auto;
-          color: #e2e8f0;
+          color: var(--text-main);
         }
 
         /* SCROLLBAR */
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.2); }
       `}</style>
     </div>
   );

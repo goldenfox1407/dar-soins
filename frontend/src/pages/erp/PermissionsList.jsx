@@ -52,7 +52,7 @@ export default function PermissionsList() {
                   <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                     <td style={{ padding: '1rem' }}>{item.id}</td>
                     <td style={{ padding: '1rem', fontWeight: 'bold', color: '#e2e8f0' }}>
-                      <Key size={14} style={{ display: 'inline', marginRight: '8px', color: '#38bdf8' }} />
+                      <Key size={14} style={{ display: 'inline', marginRight: '8px', color: 'var(--primary-color)' }} />
                       {item.name}
                     </td>
                     <td style={{ padding: '1rem', color: 'var(--text-muted)' }}>{item.guard_name}</td>

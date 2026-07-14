@@ -25,4 +25,9 @@ class Achat extends Model
     {
         return $this->belongsTo(Entrepot::class);
     }
+
+    public function paiements()
+    {
+        return $this->hasMany(TransactionFinanciere::class);
+    }
 }

@@ -4,6 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ParametreController;
+use App\Http\Controllers\TaxeController;
+use App\Http\Controllers\DeviseController;
+use App\Http\Controllers\NotifConfigController;
 use Illuminate\Http\Response;
 
 // Rate Limiting Configuration
@@ -29,6 +33,9 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/interventions', [App\Http\Controllers\InterventionController::class, 'index']);
     Route::post('/interventions/commander', [App\Http\Controllers\InterventionController::class, 'commanderSoin']);
     Route::post('/interventions/{id}/cloturer', [App\Http\Controllers\InterventionController::class, 'cloturerIntervention']);
+    Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
+    Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
+    Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
 
     // Factures (accessible par les utilisateurs authentifiés)
     Route::get('/factures', [App\Http\Controllers\FactureController::class, 'index']);
@@ -76,10 +83,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/interventions/{id}/affecter-manuellement', [\App\Http\Controllers\InterventionController::class, 'affecterManuellement']);
         Route::post('/interventions/{id}/generer-devis', [\App\Http\Controllers\InterventionController::class, 'genererDevis']);
         Route::post('/interventions/{id}/envoyer-devis', [\App\Http\Controllers\InterventionController::class, 'envoyerDevis']);
-        Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
-
-        Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
-        Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
 
         Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
         Route::apiResource('devis', \App\Http\Controllers\DevisController::class);
@@ -88,6 +91,22 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('presences', \App\Http\Controllers\PresenceController::class);
         Route::apiResource('compte-bancaires', \App\Http\Controllers\CompteBancaireController::class);
         Route::apiResource('transaction-financieres', \App\Http\Controllers\TransactionFinanciereController::class);
+
+        // Parametres
+        Route::get('parametres', [ParametreController::class, 'show']);
+        Route::put('parametres', [ParametreController::class, 'update']);
+        Route::post('parametres/logo', [ParametreController::class, 'uploadLogo']);
+
+        // Taxes
+        Route::apiResource('taxes', TaxeController::class);
+
+        // Devises
+        Route::apiResource('devises', DeviseController::class);
+
+        // Notifications config
+        Route::get('notif-configs', [NotifConfigController::class, 'index']);
+        Route::put('notif-configs/{notifConfig}', [NotifConfigController::class, 'update']);
+        Route::patch('notif-configs/{notifConfig}/toggle', [NotifConfigController::class, 'toggle']);
     });
 });
 

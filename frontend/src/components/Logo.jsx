@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Logo({ className = '', size = 32 }) {
+export default function Logo({ className = '', size = 32, light = false }) {
   // SVG of a house with a medical cross inside
   // House lines in Royal Blue (#2563EB)
   // Cross in Emerald Green (#10B981)
@@ -21,7 +21,7 @@ export default function Logo({ className = '', size = 32 }) {
           strokeWidth="8" 
           strokeLinecap="round" 
           strokeLinejoin="round"
-          fill="white"
+          fill="none"
         />
         
         {/* Medical Cross (Emerald Green) */}
@@ -37,7 +37,7 @@ export default function Logo({ className = '', size = 32 }) {
           strokeLinejoin="round"
         />
       </svg>
-      <span className="text-xl font-extrabold text-[#1E293B] tracking-tight">Dar-Soins</span>
+      <span className={`text-xl font-extrabold tracking-tight ${light ? 'text-white' : 'text-[#1E293B]'}`}>Dar-Soins</span>
     </div>
   );
 }

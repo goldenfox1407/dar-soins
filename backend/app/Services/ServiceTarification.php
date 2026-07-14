@@ -6,6 +6,7 @@ use App\Models\Intervention;
 use App\Models\Config;
 use App\Models\Devis;
 use App\Models\Facture;
+use App\Services\ServiceNumerotation;
 
 class ServiceTarification
 {
@@ -16,7 +17,7 @@ class ServiceTarification
      */
     private function calculerBaseSoin(Intervention $intervention, float $distanceKm = 0): array
     {
-        $config = Config::first() ?? Config::create(['tkmf_sm' => 2.5, 'tva' => 20]);
+        $config = Config::firstOrFail();
         
         $produit = $intervention->produit;
         $prixSoin = $produit->prix_client;
@@ -84,7 +85,8 @@ class ServiceTarification
         $montantHT = $calcul['prix_soin'] + $calcul['frais_deplacement'] + $coutMateriels;
         $montantTTC = $montantHT * (1 + ($calcul['config']->tva / 100));
 
-        $reference = 'FAC-' . date('Ymd') . '-' . sprintf('%04d', $intervention->id);
+        $numerotation = new ServiceNumerotation();
+        $reference = $numerotation->generer('facture');
 
         $facture = Facture::updateOrCreate(
             ['intervention_id' => $intervention->id],

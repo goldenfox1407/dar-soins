@@ -11,5 +11,10 @@ class TransactionFinanciere extends Model
 
     protected $table = 'transactions_financieres';
 
-    protected $fillable = ['compte_id', 'type', 'montant', 'date_transaction', 'reference', 'description'];
+    protected $fillable = ['compte_id', 'achat_id', 'type', 'montant', 'date_transaction', 'reference', 'description'];
+
+    public function achat()
+    {
+        return $this->belongsTo(Achat::class);
+    }
 }

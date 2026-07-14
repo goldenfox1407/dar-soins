@@ -39,3 +39,7 @@ monitoring/
 
 # Misc
 *.ps1
+
+# Custom Ignore
+plan_et_execution/
+

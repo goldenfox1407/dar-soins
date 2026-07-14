@@ -13,9 +13,11 @@ use App\Http\Resources\DevisResource;
 use App\Http\Requests\CommanderSoinRequest;
 use App\Http\Requests\CloturerInterventionRequest;
 use App\Services\ServiceAffectation;
+use App\Services\ServiceGeolocalisation;
 use App\Services\ServiceTarification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class InterventionController extends Controller
 {
@@ -34,20 +36,20 @@ class InterventionController extends Controller
     public function index()
     {
         $user = Auth::user();
-        if ($user->role === 'client') {
+        if ($user->hasRole('client')) {
             $interventions = Intervention::with(['infirmier.user', 'produit', 'constantes', 'devis', 'facture'])
                 ->where('client_id', $user->client->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
             return response()->json($interventions);
-        } elseif ($user->role === 'infirmier') {
+        } elseif ($user->hasRole('infirmier')) {
             $interventions = Intervention::with(['client.user', 'produit', 'devis', 'localisation', 'facture'])
                 ->where('infirmier_id', $user->infirmier->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
             return response()->json($interventions);
         }
-        
+
         return response()->json(['message' => 'Non autorisé'], 403);
     }
 
@@ -58,32 +60,34 @@ class InterventionController extends Controller
     {
         $user = Auth::user();
 
-        $localisation = Localisation::create([
-            'latitude' => $request->latitude,
-            'longitude' => $request->longitude
-        ]);
-
         $path = null;
         if ($request->hasFile('fichier_joint')) {
             $path = $request->file('fichier_joint')->store('interventions', 'public');
         }
 
-        $intervention = Intervention::create([
-            'client_id' => $user->client->id,
-            'infirmier_id' => null,
-            'produit_id' => $request->produit_id,
-            'localisation_id' => $localisation->id,
-            'date_heure' => $request->date_heure,
-            'type' => $request->type,
-            'duree_heures' => $request->duree_heures,
-            'statut' => 'en_attente_affectation',
-            'description_probleme' => $request->description_probleme,
-            'fichier_joint' => $path
-        ]);
+        $intervention = DB::transaction(function () use ($user, $request, $path) {
+            $localisation = Localisation::create([
+                'latitude'  => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
+
+            return Intervention::create([
+                'client_id'           => $user->client->id,
+                'infirmier_id'        => null,
+                'produit_id'          => $request->produit_id,
+                'localisation_id'     => $localisation->id,
+                'date_heure'          => $request->date_heure,
+                'type'                => $request->type,
+                'duree_heures'        => $request->duree_heures,
+                'statut'              => 'en_attente_affectation',
+                'description_probleme'=> $request->description_probleme,
+                'fichier_joint'       => $path,
+            ]);
+        });
 
         return response()->json([
-            'message' => 'Commande enregistrée, en attente de validation',
-            'intervention' => new InterventionResource($intervention->load(['produit']))
+            'message'      => 'Commande enregistrée, en attente de validation',
+            'intervention' => new InterventionResource($intervention->load(['produit'])),
         ], 201);
     }
 
@@ -93,58 +97,75 @@ class InterventionController extends Controller
     public function cloturerIntervention(CloturerInterventionRequest $request, $id)
     {
         $intervention = Intervention::findOrFail($id);
-        $user = Auth::user();
+        $user         = Auth::user();
 
-        if ($intervention->infirmier_id !== $user->infirmier->id) {
+        if ($user->hasRole('infirmier') && $intervention->infirmier_id !== $user->infirmier->id) {
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
-        if ($request->has('tension') || $request->has('glycemie') || $request->has('temperature') || $request->has('poids')) {
-            ConstanteMedicale::create([
-                'intervention_id' => $intervention->id,
-                'tension' => $request->tension,
-                'glycemie' => $request->glycemie,
-                'temperature' => $request->temperature,
-                'poids' => $request->poids,
-                'date' => now()
-            ]);
+        $intervention->load(['infirmier', 'localisation']);
+
+        if ($intervention->distance_manuelle !== null) {
+            $distance = $intervention->distance_manuelle;
+        } elseif (
+            $intervention->infirmier &&
+            $intervention->infirmier->latitude &&
+            $intervention->infirmier->longitude &&
+            $intervention->localisation
+        ) {
+            $distance = app(ServiceGeolocalisation::class)->calculerDistance(
+                $intervention->localisation->latitude,
+                $intervention->localisation->longitude,
+                $intervention->infirmier->latitude,
+                $intervention->infirmier->longitude
+            );
+        } else {
+            return response()->json([
+                'message' => 'Distance non disponible. Veuillez saisir la distance manuellement avant de clôturer.',
+            ], 422);
         }
 
-        if ($request->has('notes_infirmier')) {
-            $intervention->notes_infirmier = $request->notes_infirmier;
-        }
-        if ($request->has('methode_paiement')) {
-            $intervention->methode_paiement = $request->methode_paiement;
-        }
-        if ($request->has('montant_recu')) {
-            $intervention->montant_recu = $request->montant_recu;
-        }
-        if ($request->has('signature_patient')) {
-            $intervention->signature_patient = $request->signature_patient;
-        }
-
-        if ($request->has('consommations')) {
-            foreach ($request->consommations as $conso) {
-                Consommation::create([
+        [$intervention, $facture] = DB::transaction(function () use ($intervention, $request, $distance) {
+            if ($request->has('tension') || $request->has('glycemie') || $request->has('temperature') || $request->has('poids')) {
+                ConstanteMedicale::create([
                     'intervention_id' => $intervention->id,
-                    'produit_id' => $conso['produit_id'],
-                    'quantite' => $conso['quantite']
+                    'tension'         => $request->tension,
+                    'glycemie'        => $request->glycemie,
+                    'temperature'     => $request->temperature,
+                    'poids'           => $request->poids,
+                    'date'            => now(),
                 ]);
             }
-        }
 
-        $intervention->statut = 'terminee';
-        $intervention->save();
+            $intervention->fill(array_filter([
+                'notes_infirmier'   => $request->notes_infirmier,
+                'methode_paiement'  => $request->methode_paiement,
+                'montant_recu'      => $request->montant_recu,
+                'signature_patient' => $request->signature_patient,
+            ], fn($v) => $v !== null));
 
-        // Calculate final distance if needed or use the one saved
-        $distance = $intervention->distance_manuelle ?? 5.0; // Fallback
-        
-        $facture = $this->tarificationService->calculerFacture($intervention, $distance);
+            if ($request->has('consommations')) {
+                foreach ($request->consommations as $conso) {
+                    Consommation::create([
+                        'intervention_id' => $intervention->id,
+                        'produit_id'      => $conso['produit_id'],
+                        'quantite'        => $conso['quantite'],
+                    ]);
+                }
+            }
+
+            $intervention->statut = 'terminee';
+            $intervention->save();
+
+            $facture = $this->tarificationService->calculerFacture($intervention, $distance);
+
+            return [$intervention, $facture];
+        });
 
         return response()->json([
-            'message' => 'Intervention clôturée avec succès',
+            'message'      => 'Intervention clôturée avec succès',
             'intervention' => new InterventionResource($intervention->load(['constantes', 'consommations'])),
-            'facture' => new FactureResource($facture)
+            'facture'      => new FactureResource($facture),
         ]);
     }
 
@@ -156,7 +177,7 @@ class InterventionController extends Controller
         $intervention = Intervention::findOrFail($id);
         $user = Auth::user();
 
-        if ($user->role !== 'infirmier' || $intervention->infirmier_id !== $user->infirmier->id) {
+        if (!$user->hasRole('infirmier') || $intervention->infirmier_id !== $user->infirmier->id) {
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
@@ -255,7 +276,7 @@ class InterventionController extends Controller
         $intervention = Intervention::findOrFail($id);
         $user = Auth::user();
 
-        if ($user->role !== 'infirmier') {
+        if (!$user->hasRole('infirmier')) {
             return response()->json(['message' => 'Non autorisé. Rôle incorrect.'], 403);
         }
 
@@ -341,8 +362,12 @@ class InterventionController extends Controller
     public function repondreDevisClient(Request $request, $id)
     {
         $request->validate(['accepte' => 'required|boolean']);
-        $intervention = Intervention::with('devis')->findOrFail($id);
-        
+        $intervention = Intervention::with(['devis', 'client'])->findOrFail($id);
+
+        if ($intervention->client->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Non autorisé'], 403);
+        }
+
         if ($request->accepte) {
             $intervention->statut = 'acceptee';
             if ($intervention->devis) {

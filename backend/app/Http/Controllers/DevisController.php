@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Config;
 use App\Models\Devis;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,12 @@ class DevisController extends Controller
     public function telechargerPdf($id)
     {
         $devis = Devis::with(['intervention.client.user', 'intervention.produit', 'intervention.localisation'])->findOrFail($id);
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.devis', ['intervention' => $devis->intervention, 'devis' => $devis]);
+        $config = Config::firstOrFail();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.devis', [
+            'intervention' => $devis->intervention,
+            'devis'        => $devis,
+            'config'       => $config,
+        ]);
         return $pdf->download('devis_'.$devis->id.'.pdf');
     }
 

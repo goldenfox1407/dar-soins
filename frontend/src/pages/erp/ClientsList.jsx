@@ -192,7 +192,7 @@ export default function ClientsList() {
       {/* MODAL AJOUT/MODIFICATION */}
       {showModal && (
         <div className="erp-modal-overlay" style={{ zIndex: 9999, padding: '2rem' }}>
-          <div className="erp-modal custom-scrollbar" style={{ width: '900px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto' }}>
+          <div className="erp-modal" style={{ width: '900px', maxWidth: '95vw' }}>
             <div className="erp-modal-header" style={{ paddingBottom: '0' }}>
               <div className="flex justify-between items-center w-full mb-4">
                 <h2 className="text-xl font-bold">{editId ? `Dossier Client : ${formData.nom}` : 'Nouveau Client'}</h2>

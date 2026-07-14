@@ -4,6 +4,7 @@ import { Activity, Mail, Lock, LogIn, UserPlus, ArrowRight } from 'lucide-react'
 import api from '../services/api';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e?.preventDefault();
@@ -20,8 +22,7 @@ export default function Login() {
     setError('');
     try {
       const response = await api.post('/login', { email, password });
-      sessionStorage.setItem('auth_token', response.data.token);
-      sessionStorage.setItem('user', JSON.stringify(response.data.user));
+      login(response.data.user, response.data.token);
       navigate(`/${response.data.user.role}`);
     } catch (error) {
       setError("Identifiants incorrects. Veuillez réessayer.");

@@ -195,48 +195,45 @@ export default function AchatsCreate() {
   ).slice(0, 8);
 
   return (
-    <div className="animate-fade-in text-slate-200 min-h-screen pb-12">
-      <div className="flex justify-between items-center mb-6">
+    <div className="erp-page animate-fade-in">
+      <header className="erp-page-header">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
-            <button onClick={() => navigate(-1)} className="text-slate-400 hover:text-white transition-colors mr-2">
+          <h1 className="erp-page-title flex items-center gap-2">
+            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
               <ChevronLeft size={24} />
             </button>
-            <span className="text-[22px] font-medium text-slate-800">
-              {isEdit ? "Modifier l'Achat" : "Ajouter un Achat"}
-            </span>
+            <span>{isEdit ? "Modifier l'Achat" : "Ajouter un Achat"}</span>
           </h1>
-          <div className="text-[13px] text-slate-500 mt-1 ml-10 flex gap-2 items-center">
-            <span className="hover:text-blue-600 cursor-pointer" onClick={() => navigate('/gestionnaire/achats')}>Achats</span>
+          <div className="erp-page-subtitle" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '32px' }}>
+            <span className="hover:underline cursor-pointer" onClick={() => navigate('/gestionnaire/achats')}>Achats</span>
             <ChevronRight size={14} />
-            <span className="text-slate-400">{isEdit ? "Modifier" : "Ajouter"}</span>
+            <span>{isEdit ? "Modifier" : "Ajouter"}</span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden text-slate-800 p-6 border border-slate-200">
+      <div className="erp-card p-6">
         <form onSubmit={handleSubmit}>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Date *</label>
+          <div className="erp-form-grid mb-6">
+            <div className="erp-form-group">
+              <label>Date *</label>
               <input 
                 type="date" 
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fournisseur *</label>
-              <div className="flex">
+            <div className="erp-form-group">
+              <label>Fournisseur *</label>
+              <div style={{ display: 'flex' }}>
                 <select 
                   name="fournisseur_id"
                   value={formData.fournisseur_id}
                   onChange={handleInputChange}
-                  className="flex-1 border border-slate-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                  style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0, flex: 1 }}
                   required
                 >
                   <option value="" disabled>Choisir un Fournisseur</option>
@@ -244,18 +241,22 @@ export default function AchatsCreate() {
                     <option key={f.id} value={f.id}>{f.nom}</option>
                   ))}
                 </select>
-                <button type="button" onClick={() => navigate('/gestionnaire/gens/fournisseurs')} className="bg-purple-700 hover:bg-purple-800 text-white px-3 rounded-r-md flex items-center justify-center transition-colors">
+                <button 
+                  type="button" 
+                  onClick={() => navigate('/gestionnaire/gens/fournisseurs')} 
+                  className="erp-btn-primary"
+                  style={{ borderTopLeftRadius: 0, borderBottomLeftRadius: 0, padding: '0 12px' }}
+                >
                   <Plus size={16} />
                 </button>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Entrepôt *</label>
+            <div className="erp-form-group">
+              <label>Entrepôt *</label>
               <select 
                 name="entrepot_id"
                 value={formData.entrepot_id}
                 onChange={handleInputChange}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
                 required
               >
                 <option value="" disabled>Choisir un Entrepôt</option>
@@ -266,16 +267,16 @@ export default function AchatsCreate() {
             </div>
           </div>
 
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nom du Produit</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Barcode className="h-5 w-5 text-slate-400" />
+          <div className="erp-form-group mb-6">
+            <label>Nom du Produit</label>
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, bottom: 0, left: 0, paddingLeft: '12px', display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+                <Barcode size={20} style={{ color: 'var(--text-muted)' }} />
               </div>
               <input
                 type="text"
                 placeholder="Scanner/Rechercher un produit par code ou nom"
-                className="w-full pl-10 pr-3 py-3 border border-slate-300 rounded-md text-sm bg-slate-50 focus:outline-none focus:bg-white focus:ring-1 focus:ring-purple-500"
+                style={{ paddingLeft: '40px', background: '#F8FAFC' }}
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
@@ -285,102 +286,104 @@ export default function AchatsCreate() {
               />
               
               {showDropdown && searchQuery && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-slate-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                <div style={{ position: 'absolute', zIndex: 10, width: '100%', marginTop: '4px', background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: '8px', boxShadow: 'var(--card-shadow-hover)', maxHeight: '240px', overflowY: 'auto' }}>
                   {filteredProducts.length > 0 ? (
                     filteredProducts.map(p => (
                       <div 
                         key={p.id} 
-                        className="px-4 py-2 hover:bg-slate-50 cursor-pointer flex justify-between items-center border-b border-slate-100 last:border-0"
+                        style={{ padding: '10px 16px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--card-border)' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F8FAFC'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
                         onClick={() => addProductToOrder(p)}
                       >
-                        <div className="font-medium">{p.nom}</div>
-                        <div className="text-xs text-slate-500">{p.code_barre || 'Sans code'} • Stock: {p.quantite_stock || 0}</div>
+                        <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>{p.nom}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.code_barre || 'Sans code'} • Stock: {p.quantite_stock || 0}</div>
                       </div>
                     ))
                   ) : (
-                    <div className="px-4 py-3 text-sm text-slate-500 text-center">Aucun produit trouvé</div>
+                    <div style={{ padding: '12px', fontSize: '0.85rem', color: 'var(--text-muted)', textAlign: 'center' }}>Aucun produit trouvé</div>
                   )}
                 </div>
               )}
             </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-slate-800 mb-2">Produits de la commande *</h3>
-            <div className="border border-slate-200 rounded-md overflow-hidden">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-200 text-slate-700 font-semibold text-xs uppercase">
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-muted mb-2">Produits de la commande *</h3>
+            <div className="erp-table-container" style={{ border: '1px solid var(--card-border)', borderRadius: '8px' }}>
+              <table className="erp-table">
+                <thead>
                   <tr>
-                    <th className="px-4 py-3 w-12">#</th>
-                    <th className="px-4 py-3">Produit</th>
-                    <th className="px-4 py-3 w-32">Coût Unitaire Net</th>
-                    <th className="px-4 py-3 w-28">Stock Actuel</th>
-                    <th className="px-4 py-3 w-36">Qté</th>
-                    <th className="px-4 py-3 w-28">Remise</th>
-                    <th className="px-4 py-3 w-28">Taxe %</th>
-                    <th className="px-4 py-3 w-32">Sous-total</th>
-                    <th className="px-4 py-3 w-12 text-center"></th>
+                    <th style={{ width: '50px' }}>#</th>
+                    <th>Produit</th>
+                    <th style={{ width: '150px' }}>Coût Unitaire Net</th>
+                    <th style={{ width: '120px' }}>Stock Actuel</th>
+                    <th style={{ width: '150px' }}>Qté</th>
+                    <th style={{ width: '120px' }}>Remise</th>
+                    <th style={{ width: '120px' }}>Taxe %</th>
+                    <th style={{ width: '150px' }}>Sous-total</th>
+                    <th style={{ width: '50px' }}></th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody>
                   {lignes.length === 0 ? (
                     <tr>
-                      <td colSpan="9" className="px-4 py-8 text-center text-slate-500">
+                      <td colSpan="9" className="text-center py-8 text-muted">
                         Aucune donnée disponible
                       </td>
                     </tr>
                   ) : (
                     lignes.map((ligne, idx) => (
-                      <tr key={ligne.produit_id} className="hover:bg-slate-50">
-                        <td className="px-4 py-3 text-slate-500">{idx + 1}</td>
-                        <td className="px-4 py-3 font-medium text-purple-700">{ligne.nom}</td>
-                        <td className="px-4 py-3">
+                      <tr key={ligne.produit_id}>
+                        <td className="text-muted">{idx + 1}</td>
+                        <td className="font-semibold" style={{ color: 'var(--primary-color)' }}>{ligne.nom}</td>
+                        <td>
                           <input 
                             type="number" 
                             min="0" step="0.01"
                             value={ligne.cout_unitaire} 
                             onChange={(e) => updateLigne(ligne.produit_id, 'cout_unitaire', e.target.value)}
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                            style={{ padding: '6px 10px', height: 'auto', border: '1px solid var(--card-border)', borderRadius: '6px' }}
                           />
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="border border-amber-300 text-amber-600 bg-amber-50 px-2 py-0.5 rounded text-xs">
+                        <td>
+                          <span className="status-badge warning" style={{ padding: '4px 8px' }}>
                             {ligne.stock_actuel}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center border border-slate-300 rounded overflow-hidden">
-                            <button type="button" onClick={() => updateLigne(ligne.produit_id, 'quantite', Math.max(1, ligne.quantite - 1))} className="bg-purple-700 text-white px-2 py-1 hover:bg-purple-800">-</button>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--card-border)', borderRadius: '6px', overflow: 'hidden', width: 'fit-content', background: '#FFFFFF' }}>
+                            <button type="button" onClick={() => updateLigne(ligne.produit_id, 'quantite', Math.max(1, ligne.quantite - 1))} style={{ background: 'var(--primary-color)', color: '#FFFFFF', border: 'none', width: '28px', height: '28px', cursor: 'pointer' }}>-</button>
                             <input 
                               type="number" min="1" 
                               value={ligne.quantite} 
                               onChange={(e) => updateLigne(ligne.produit_id, 'quantite', e.target.value)}
-                              className="w-12 text-center text-sm py-1 focus:outline-none"
+                              style={{ width: '40px', textAlignment: 'center', border: 'none', padding: '0', textAlign: 'center', height: 'auto' }}
                             />
-                            <button type="button" onClick={() => updateLigne(ligne.produit_id, 'quantite', ligne.quantite + 1)} className="bg-purple-700 text-white px-2 py-1 hover:bg-purple-800">+</button>
+                            <button type="button" onClick={() => updateLigne(ligne.produit_id, 'quantite', ligne.quantite + 1)} style={{ background: 'var(--primary-color)', color: '#FFFFFF', border: 'none', width: '28px', height: '28px', cursor: 'pointer' }}>+</button>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <input 
                             type="number" min="0" step="0.01"
                             value={ligne.discount} 
                             onChange={(e) => updateLigne(ligne.produit_id, 'discount', e.target.value)}
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                            style={{ padding: '6px 10px', height: 'auto', border: '1px solid var(--card-border)', borderRadius: '6px' }}
                           />
                         </td>
-                        <td className="px-4 py-3">
+                        <td>
                           <input 
                             type="number" min="0" step="0.01"
                             value={ligne.tax_percent} 
                             onChange={(e) => updateLigne(ligne.produit_id, 'tax_percent', e.target.value)}
-                            className="w-full border border-slate-300 rounded px-2 py-1 text-sm focus:outline-none focus:border-purple-500"
+                            style={{ padding: '6px 10px', height: 'auto', border: '1px solid var(--card-border)', borderRadius: '6px' }}
                           />
                         </td>
-                        <td className="px-4 py-3 font-semibold text-slate-700">
+                        <td className="font-semibold">
                           MAD {calculateSubtotal(ligne).toFixed(2)}
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <button type="button" onClick={() => removeLigne(ligne.produit_id)} className="text-red-400 hover:text-red-600">
+                        <td className="text-center">
+                          <button type="button" onClick={() => removeLigne(ligne.produit_id)} style={{ background: 'none', border: 'none', color: 'var(--danger-color)', cursor: 'pointer' }}>
                             <X size={16} />
                           </button>
                         </td>
@@ -393,25 +396,25 @@ export default function AchatsCreate() {
           </div>
 
           {lignes.length > 0 && (
-            <div className="flex justify-end mb-8">
-              <div className="w-full max-w-md">
-                <table className="w-full text-sm text-slate-700">
-                  <tbody className="divide-y divide-slate-100">
-                    <tr>
-                      <td className="py-2 font-medium">Taxe de commande</td>
-                      <td className="py-2 text-right">MAD {Number(formData.order_tax || 0).toFixed(2)}</td>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+              <div style={{ width: '100%', maxWidth: '350px' }}>
+                <table style={{ width: '100%', fontSize: '0.875rem' }}>
+                  <tbody>
+                    <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
+                      <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Taxe de commande</td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 500 }}>MAD {Number(formData.order_tax || 0).toFixed(2)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
+                      <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Remise</td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 500 }}>MAD {Number(formData.discount || 0).toFixed(2)}</td>
+                    </tr>
+                    <tr style={{ borderBottom: '1px solid var(--card-border)' }}>
+                      <td style={{ padding: '8px 0', color: 'var(--text-muted)' }}>Frais de livraison</td>
+                      <td style={{ padding: '8px 0', textAlign: 'right', fontWeight: 500 }}>MAD {Number(formData.shipping || 0).toFixed(2)}</td>
                     </tr>
                     <tr>
-                      <td className="py-2 font-medium">Remise</td>
-                      <td className="py-2 text-right">MAD {Number(formData.discount || 0).toFixed(2)}</td>
-                    </tr>
-                    <tr>
-                      <td className="py-2 font-medium">Frais de livraison</td>
-                      <td className="py-2 text-right">MAD {Number(formData.shipping || 0).toFixed(2)}</td>
-                    </tr>
-                    <tr className="text-base">
-                      <td className="py-3 font-bold text-slate-900">Total</td>
-                      <td className="py-3 text-right font-bold text-slate-900">MAD {grandTotal.toFixed(2)}</td>
+                      <td style={{ padding: '12px 0', fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>Total</td>
+                      <td style={{ padding: '12px 0', textAlign: 'right', fontWeight: 'bold', fontSize: '1rem', color: 'var(--text-main)' }}>MAD {grandTotal.toFixed(2)}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -419,58 +422,54 @@ export default function AchatsCreate() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Taxe de commande</label>
-              <div className="flex">
+          <div className="erp-form-grid mb-6" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+            <div className="erp-form-group">
+              <label>Taxe de commande</label>
+              <div style={{ display: 'flex' }}>
                 <input 
                   type="number" min="0" step="0.01" name="order_tax" value={formData.order_tax} onChange={handleInputChange}
-                  className="flex-1 border border-slate-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                  style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                 />
-                <span className="bg-slate-100 border border-l-0 border-slate-300 px-3 py-2 rounded-r-md text-slate-500 text-sm flex items-center">MAD</span>
+                <span style={{ background: '#F8FAFC', border: '1px solid var(--card-border)', borderLeft: 'none', padding: '10px 14px', borderTopRightRadius: '8px', borderBottomRightRadius: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>MAD</span>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Remise</label>
-              <div className="flex">
+            <div className="erp-form-group">
+              <label>Remise</label>
+              <div style={{ display: 'flex' }}>
                 <input 
                   type="number" min="0" step="0.01" name="discount" value={formData.discount} onChange={handleInputChange}
-                  className="flex-1 border border-slate-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                  style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                 />
-                <span className="bg-slate-100 border border-l-0 border-slate-300 px-3 py-2 rounded-r-md text-slate-500 text-sm flex items-center">MAD</span>
+                <span style={{ background: '#F8FAFC', border: '1px solid var(--card-border)', borderLeft: 'none', padding: '10px 14px', borderTopRightRadius: '8px', borderBottomRightRadius: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>MAD</span>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Frais de livraison</label>
-              <div className="flex">
+            <div className="erp-form-group">
+              <label>Frais de livraison</label>
+              <div style={{ display: 'flex' }}>
                 <input 
                   type="number" min="0" step="0.01" name="shipping" value={formData.shipping} onChange={handleInputChange}
-                  className="flex-1 border border-slate-300 rounded-l-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
+                  style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                 />
-                <span className="bg-slate-100 border border-l-0 border-slate-300 px-3 py-2 rounded-r-md text-slate-500 text-sm flex items-center">MAD</span>
+                <span style={{ background: '#F8FAFC', border: '1px solid var(--card-border)', borderLeft: 'none', padding: '10px 14px', borderTopRightRadius: '8px', borderBottomRightRadius: '8px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>MAD</span>
               </div>
             </div>
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
-            <select 
-              name="statut" value={formData.statut} onChange={handleInputChange}
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-            >
+          <div className="erp-form-group mb-6">
+            <label>Statut *</label>
+            <select name="statut" value={formData.statut} onChange={handleInputChange}>
               <option value="Recu">Reçu</option>
               <option value="En attente">En attente</option>
               <option value="Commande">Commandé</option>
             </select>
           </div>
 
-          <div className="mb-8">
-            <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+          <div className="erp-form-group mb-6">
+            <label>Notes</label>
             <textarea 
               name="notes" value={formData.notes} onChange={handleInputChange}
               rows="4"
-              className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500"
-              placeholder="Quelques mots..."
+              placeholder="Notes complémentaires..."
             ></textarea>
           </div>
 
@@ -478,7 +477,7 @@ export default function AchatsCreate() {
             <button 
               type="submit" 
               disabled={loading}
-              className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-2.5 rounded-md text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-70"
+              className="erp-btn-primary"
             >
               <Check size={16} /> <span>{loading ? 'Enregistrement...' : 'Enregistrer'}</span>
             </button>

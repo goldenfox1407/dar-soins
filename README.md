@@ -123,19 +123,37 @@ cp .env.example .env
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Sans Docker (Développement local)
+### Démarrage Automatique (Windows & macOS/Linux)
 
-**Backend:**
+Pour lancer le projet instantanément sans installer PostgreSQL, sans exécuter manuellement de migrations ni de seeds (base de données SQLite pré-configurée et pré-remplie incluse d'office) :
+
+* **Sous Windows** : Double-cliquez sur le fichier `start.bat` à la racine ou lancez-le dans votre invite de commande :
+  ```cmd
+  start.bat
+  ```
+* **Sous macOS/Linux** : Lancez le script `start.sh` à la racine :
+  ```bash
+  chmod +x start.sh
+  ./start.sh
+  ```
+
+Ces scripts s'occupent automatiquement de cloner le fichier de configuration `.env` s'il est absent, d'initialiser les clés de sécurité et de démarrer simultanément les serveurs backend (Laravel API) et frontend (React + Vite).
+
+---
+
+### Sans Docker (Développement local manuel)
+
+**Backend (Laravel API) :**
 ```bash
 cd backend
 composer install
-cp .env.example .env  # Configurer DB, Redis, etc.
+cp .env.example .env
+# Par défaut, SQLite est configuré avec la base pré-remplie incluse 'database/database.sqlite'
 php artisan key:generate
-php artisan migrate --seed
 php artisan serve
 ```
 
-**Frontend:**
+**Frontend (React SPA) :**
 ```bash
 cd frontend
 npm install

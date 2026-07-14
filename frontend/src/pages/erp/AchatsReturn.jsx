@@ -126,107 +126,106 @@ export default function AchatsReturn() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px] text-slate-800">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', color: 'var(--text-muted)' }}>
         Chargement des détails de l'achat...
       </div>
     );
   }
 
   return (
-    <div className="animate-fade-in text-slate-800 min-h-screen pb-12">
-      <div className="flex justify-between items-center mb-6">
+    <div className="erp-page animate-fade-in">
+      <header className="erp-page-header">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-800">
-            <button onClick={() => navigate(-1)} className="text-slate-400 hover:text-slate-800 transition-colors mr-2">
+          <h1 className="erp-page-title flex items-center gap-2">
+            <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
               <ChevronLeft size={24} />
             </button>
-            <span className="text-[22px] font-medium">Créer un Retour d'Achat</span>
+            <span>Créer un Retour d'Achat</span>
           </h1>
-          <div className="text-[13px] text-slate-500 mt-1 ml-10 flex gap-2 items-center">
-            <span className="hover:text-blue-600 cursor-pointer" onClick={() => navigate('/gestionnaire/achats')}>Achats</span>
+          <div className="erp-page-subtitle" style={{ display: 'flex', gap: '8px', alignItems: 'center', marginLeft: '32px' }}>
+            <span className="hover:underline cursor-pointer" onClick={() => navigate('/gestionnaire/achats')}>Achats</span>
             <ChevronRight size={14} />
-            <span className="text-slate-400">Retour d'Achat</span>
+            <span>Retour d'Achat</span>
           </div>
         </div>
-      </div>
+      </header>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden p-6 border border-slate-200">
+      <div className="erp-card p-6">
         <form onSubmit={handleSubmit}>
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Date *</label>
+          <div className="erp-form-grid mb-6" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr' }}>
+            <div className="erp-form-group">
+              <label>Date *</label>
               <input 
                 type="date" 
                 name="date"
                 value={formData.date}
                 onChange={handleInputChange}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Référence Retour *</label>
+            <div className="erp-form-group">
+              <label>Référence Retour *</label>
               <input 
                 type="text" 
                 name="reference"
                 value={formData.reference}
                 onChange={handleInputChange}
-                className="w-full border border-slate-300 bg-slate-50 rounded-md px-3 py-2 text-sm focus:outline-none"
+                style={{ background: '#F8FAFC' }}
                 required
                 readOnly
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Fournisseur</label>
+            <div className="erp-form-group">
+              <label>Fournisseur</label>
               <input 
                 type="text" 
                 value={formData.fournisseur_nom}
-                className="w-full border border-slate-300 bg-slate-50 rounded-md px-3 py-2 text-sm focus:outline-none"
+                style={{ background: '#F8FAFC' }}
                 readOnly
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Entrepôt</label>
+            <div className="erp-form-group">
+              <label>Entrepôt</label>
               <input 
                 type="text" 
                 value={formData.entrepot_nom}
-                className="w-full border border-slate-300 bg-slate-50 rounded-md px-3 py-2 text-sm focus:outline-none"
+                style={{ background: '#F8FAFC' }}
                 readOnly
               />
             </div>
           </div>
 
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-slate-800 mb-2">Produits de la commande d'origine ({purchase?.reference})</h3>
-            <div className="border border-slate-200 rounded-md overflow-hidden shadow-sm">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-slate-50 border-b border-slate-200">
+          <div className="mb-6">
+            <h3 className="text-sm font-bold text-muted mb-2">Produits de la commande d'origine ({purchase?.reference})</h3>
+            <div className="erp-table-container" style={{ border: '1px solid var(--card-border)', borderRadius: '8px' }}>
+              <table className="erp-table">
+                <thead>
                   <tr>
-                    <th className="p-3 font-semibold">Produit</th>
-                    <th className="p-3 font-semibold text-right">Coût Unitaire</th>
-                    <th className="p-3 font-semibold text-center">Quantité Achetée</th>
-                    <th className="p-3 font-semibold text-center w-36">Quantité à Retourner</th>
-                    <th className="p-3 font-semibold text-right">Sous-total Retour</th>
+                    <th>Produit</th>
+                    <th style={{ textAlign: 'right' }}>Coût Unitaire</th>
+                    <th style={{ textAlign: 'center' }}>Quantité Achetée</th>
+                    <th style={{ textAlign: 'center', width: '150px' }}>Quantité à Retourner</th>
+                    <th style={{ textAlign: 'right' }}>Sous-total Retour</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lignes.map((ligne) => (
-                    <tr key={ligne.produit_id} className="border-b border-slate-200 last:border-0 hover:bg-slate-50">
-                      <td className="p-3">{ligne.nom}</td>
-                      <td className="p-3 text-right">{ligne.cout_unitaire.toFixed(2)} MAD</td>
-                      <td className="p-3 text-center text-slate-500 font-medium">{ligne.quantite_achetee}</td>
-                      <td className="p-3 text-center">
+                    <tr key={ligne.produit_id}>
+                      <td>{ligne.nom}</td>
+                      <td style={{ textAlign: 'right' }}>{ligne.cout_unitaire.toFixed(2)} MAD</td>
+                      <td style={{ textAlign: 'center' }} className="text-muted font-medium">{ligne.quantite_achetee}</td>
+                      <td style={{ textAlign: 'center' }}>
                         <input 
                           type="number" 
                           min="0"
                           max={ligne.quantite_achetee}
                           value={ligne.quantite_retournee} 
                           onChange={(e) => handleQtyChange(ligne.produit_id, e.target.value)}
-                          className="w-20 text-center border border-slate-300 rounded-md py-1 text-sm focus:outline-none focus:border-blue-500"
+                          style={{ width: '80px', padding: '6px', textAlign: 'center', border: '1px solid var(--card-border)', borderRadius: '6px' }}
                         />
                       </td>
-                      <td className="p-3 text-right font-semibold text-blue-600">
+                      <td style={{ textAlign: 'right', fontWeight: 600, color: 'var(--primary-color)' }}>
                         {calculateSubtotal(ligne).toFixed(2)} MAD
                       </td>
                     </tr>
@@ -236,53 +235,52 @@ export default function AchatsReturn() {
             </div>
           </div>
 
-          <div className="flex justify-end mb-8">
-            <div className="w-full max-w-xs bg-slate-50 p-4 border border-slate-200 rounded-md">
-              <div className="flex justify-between font-bold text-base text-blue-600">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '24px' }}>
+            <div className="glass-panel" style={{ width: '100%', maxWidth: '280px', padding: '16px', background: '#F8FAFC' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '1rem', color: 'var(--primary-color)' }}>
                 <span>Total Retour :</span>
                 <span>{grandTotal.toFixed(2)} MAD</span>
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Statut *</label>
+          <div className="erp-form-grid mb-6" style={{ gridTemplateColumns: '1fr 1fr' }}>
+            <div className="erp-form-group">
+              <label>Statut *</label>
               <select 
                 name="statut" 
                 value={formData.statut}
                 onChange={handleInputChange}
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white"
                 required
               >
                 <option value="Termine">Terminé</option>
                 <option value="En attente">En attente</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Notes</label>
+            <div className="erp-form-group">
+              <label>Notes</label>
               <textarea 
                 name="notes"
                 value={formData.notes}
                 onChange={handleInputChange}
                 rows="2"
-                className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                placeholder="Quelques mots..."
               ></textarea>
             </div>
           </div>
 
-          <div className="flex gap-3 justify-end pt-4 border-t border-slate-200">
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', paddingTop: '16px', borderTop: '1px solid var(--card-border)' }}>
             <button 
               type="button" 
               onClick={() => navigate(-1)}
-              className="px-6 py-2 bg-white border border-slate-300 rounded-md text-sm font-semibold hover:bg-slate-50 transition-colors"
+              className="erp-btn-secondary"
             >
               Annuler
             </button>
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-6 py-2 rounded-md font-semibold flex items-center gap-2 transition-colors disabled:opacity-50"
+              className="erp-btn-primary"
             >
               <Check size={16} /> {isSubmitting ? 'Enregistrement...' : 'Enregistrer le Retour'}
             </button>

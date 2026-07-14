@@ -11,7 +11,7 @@ describe('Produits API', function () {
     });
 
     it('allows admin to create a produit', function () {
-        $admin = \App\Models\User::factory()->create(['role' => 'gestionnaire']);
+        $admin = \App\Models\User::factory()->gestionnaire()->create();
         
         $response = $this->actingAs($admin, 'sanctum')
             ->postJson('/api/produits', [
@@ -25,7 +25,7 @@ describe('Produits API', function () {
     });
 
     it('allows admin to update a produit', function () {
-        $admin = \App\Models\User::factory()->create(['role' => 'gestionnaire']);
+        $admin = \App\Models\User::factory()->gestionnaire()->create();
         $produit = \App\Models\Produit::factory()->create();
         
         $response = $this->actingAs($admin, 'sanctum')
@@ -38,7 +38,7 @@ describe('Produits API', function () {
     });
 
     it('allows admin to delete a produit', function () {
-        $admin = \App\Models\User::factory()->create(['role' => 'gestionnaire']);
+        $admin = \App\Models\User::factory()->gestionnaire()->create();
         $produit = \App\Models\Produit::factory()->create();
         
         $response = $this->actingAs($admin, 'sanctum')

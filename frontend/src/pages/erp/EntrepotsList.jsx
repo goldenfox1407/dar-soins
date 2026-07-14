@@ -1,19 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
-import { Search, Plus, Edit2, Trash2, X, Check, Building2, Phone, MapPin } from 'lucide-react';
+import { 
+  Search, Plus, Edit2, Trash2, X, Check, Building2, MapPin, Phone
+} from 'lucide-react';
 
 export default function EntrepotsList() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  
-  // Modal state
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({
-    nom: '', localisation: '', telephone: '', est_principal: false
-  });
   const [editId, setEditId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    nom: '',
+    localisation: '',
+    telephone: '',
+    est_principal: false
+  });
 
   useEffect(() => {
     fetchData();
@@ -23,44 +27,47 @@ export default function EntrepotsList() {
     try {
       setLoading(true);
       const response = await api.get('/entrepots');
-      setData(response.data?.data || response.data?.data || response.data || []);
+      setData(response.data?.data || response.data || []);
     } catch (error) {
-      console.error('Erreur de chargement des entrepôts:', error);
+      console.error('Erreur chargement entrepôts:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleInputChange = (e) => {
-    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    setFormData({ ...formData, [e.target.name]: value });
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
   };
 
   const openAddModal = () => {
-    setFormData({
-      nom: '', localisation: '', telephone: '', est_principal: false
-    });
     setEditId(null);
+    setFormData({
+      nom: '',
+      localisation: '',
+      telephone: '',
+      est_principal: false
+    });
     setShowModal(true);
   };
 
-  const openEditModal = (entrepot) => {
+  const openEditModal = (item) => {
+    setEditId(item.id);
     setFormData({
-      nom: entrepot.nom || '',
-      localisation: entrepot.localisation || '',
-      telephone: entrepot.telephone || '',
-      est_principal: Boolean(entrepot.est_principal)
+      nom: item.nom || '',
+      localisation: item.localisation || '',
+      telephone: item.telephone || '',
+      est_principal: !!item.est_principal
     });
-    setEditId(entrepot.id);
     setShowModal(true);
   };
 
   const saveEntrepot = async (e) => {
     e.preventDefault();
-    if (!formData.nom) {
-      alert("Le nom de l'entrepôt est obligatoire.");
-      return;
-    }
+    if (!formData.nom) return;
     setIsSaving(true);
     try {
       if (editId) {
@@ -68,11 +75,11 @@ export default function EntrepotsList() {
       } else {
         await api.post('/entrepots', formData);
       }
-      setShowModal(false);
       fetchData();
+      setShowModal(false);
     } catch (error) {
-      console.error('Erreur sauvegarde:', error);
-      alert("Erreur lors de l'enregistrement de l'entrepôt");
+      console.error('Erreur sauvegarde entrepôt:', error);
+      alert('Une erreur est survenue.');
     } finally {
       setIsSaving(false);
     }
@@ -84,127 +91,124 @@ export default function EntrepotsList() {
         await api.delete(`/entrepots/${id}`);
         fetchData();
       } catch (error) {
-        console.error('Erreur suppression:', error);
-        alert("Erreur lors de la suppression.");
+        console.error('Erreur suppression entrepôt:', error);
+        alert('Erreur lors de la suppression.');
       }
     }
   };
 
   const filteredData = data.filter(item => 
-    (item.nom?.toLowerCase() || '').includes(search.toLowerCase()) || 
+    (item.nom?.toLowerCase() || '').includes(search.toLowerCase()) ||
     (item.localisation?.toLowerCase() || '').includes(search.toLowerCase()) ||
-    (item.telephone || '').includes(search)
+    (item.telephone?.toLowerCase() || '').includes(search.toLowerCase())
   );
 
   return (
-    <div className="animate-fade-in text-slate-200">
+    <div className="erp-page animate-fade-in">
       
       {/* Header section */}
-      <div className="flex justify-between items-center mb-6">
+      <header className="erp-page-header">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2 text-white">
+          <h1 className="erp-page-title flex items-center gap-2">
             <Building2 className="text-blue-500" size={24} />
             <span>Entrepôts & Dépôts</span>
           </h1>
-          <p className="text-slate-400 text-sm mt-1">Gérez les localisations physiques de stockage et de distribution des matériels.</p>
+          <p className="erp-page-subtitle">Gérez les localisations physiques de stockage et de distribution des matériels.</p>
         </div>
         <button 
           onClick={openAddModal}
-          className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-md shadow-blue-500/20 hover:-translate-y-0.5"
+          className="erp-btn-primary"
         >
           <Plus size={18} />
           <span>Ajouter un entrepôt</span>
         </button>
-      </div>
+      </header>
 
-      {/* Search Input bar */}
-      <div className="mb-6 flex max-w-md items-center bg-slate-900/50 border border-slate-700/80 rounded-xl px-4 py-2.5 shadow-inner">
-        <Search size={18} className="text-slate-500 mr-2.5" />
-        <input 
-          type="text" 
-          placeholder="Rechercher par nom, ville, téléphone..." 
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="bg-transparent border-none text-white w-full outline-none text-sm placeholder-slate-500"
-        />
-      </div>
+      {/* Main Container Card */}
+      <div className="erp-card">
+        
+        {/* Search bar */}
+        <div className="erp-toolbar">
+          <div className="erp-search-box">
+            <Search size={16} />
+            <input 
+              type="text" 
+              placeholder="Rechercher par nom, ville, téléphone..." 
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
 
-      {/* Main List Table card */}
-      <div className="bg-slate-800/30 border border-slate-700/50 rounded-2xl overflow-hidden shadow-lg backdrop-blur-md">
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse text-left">
+        {/* Table */}
+        <div className="erp-table-container">
+          <table className="erp-table">
             <thead>
-              <tr className="border-b border-slate-700/60 bg-slate-900/30">
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pl-6">Nom</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Localisation</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Téléphone</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Statut</th>
-                <th className="p-4 text-xs font-semibold text-slate-400 uppercase tracking-wider pr-6">Actions</th>
+              <tr>
+                <th>Nom</th>
+                <th>Localisation</th>
+                <th>Téléphone</th>
+                <th>Statut</th>
+                <th className="text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/50">
+            <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-slate-500">
+                  <td colSpan="5" className="text-center py-8 text-muted">
                     Chargement des entrepôts...
                   </td>
                 </tr>
               ) : filteredData.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-16 text-center text-slate-500">
-                    <Building2 size={48} className="mx-auto mb-4 text-slate-600" />
+                  <td colSpan="5" className="text-center py-16 text-muted">
+                    <Building2 size={48} style={{ color: 'var(--text-muted)' }} className="mx-auto mb-4" />
                     <p>Aucun entrepôt disponible pour le moment.</p>
                   </td>
                 </tr>
               ) : (
                 filteredData.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-750/30 transition-colors">
-                    <td className="p-4 pl-6">
-                      <div className="font-bold text-white flex items-center gap-2">
-                        <Building2 size={16} className="text-slate-400" />
+                  <tr key={item.id}>
+                    <td className="font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Building2 size={16} className="text-blue-500" />
                         <span>{item.nom}</span>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <MapPin size={14} className="text-slate-500" />
+                    <td>
+                      <div className="flex items-center gap-1.5 text-muted">
+                        <MapPin size={14} />
                         <span>{item.localisation || '—'}</span>
                       </div>
                     </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5 text-slate-300">
-                        <Phone size={14} className="text-slate-500" />
+                    <td>
+                      <div className="flex items-center gap-1.5 text-muted">
+                        <Phone size={14} />
                         <span>{item.telephone || '—'}</span>
                       </div>
                     </td>
-                    <td className="p-4">
+                    <td>
                       {item.est_principal ? (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          Principal
-                        </span>
+                        <span className="status-badge success">Principal</span>
                       ) : (
-                        <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-500/15 text-slate-400 border border-slate-700">
-                          Secondaire
-                        </span>
+                        <span className="status-badge neutral">Secondaire</span>
                       )}
                     </td>
-                    <td className="p-4 pr-6">
-                      <div className="flex gap-2">
-                        <button 
-                          onClick={() => openEditModal(item)} 
-                          className="bg-blue-500/10 border border-blue-500/20 hover:bg-blue-500/20 text-blue-400 p-2 rounded-lg cursor-pointer transition-colors"
-                          title="Modifier"
-                        >
-                          <Edit2 size={14} />
-                        </button>
-                        <button 
-                          onClick={() => deleteEntrepot(item.id, item.nom)} 
-                          className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 p-2 rounded-lg cursor-pointer transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
+                    <td className="erp-table-actions" style={{ justifyContent: 'flex-end' }}>
+                      <button 
+                        onClick={() => openEditModal(item)} 
+                        className="erp-action-btn edit"
+                        title="Modifier"
+                      >
+                        <Edit2 size={14} />
+                      </button>
+                      <button 
+                        onClick={() => deleteEntrepot(item.id, item.nom)} 
+                        className="erp-action-btn delete"
+                        title="Supprimer"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -214,90 +218,81 @@ export default function EntrepotsList() {
         </div>
       </div>
 
-      {/* Modal Popup Form container */}
+      {/* Modal Popup Form */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-700/60 rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-scale-in">
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
+          <div className="glass-panel" style={{ width: '420px', padding: '2rem', position: 'relative', margin: 'auto', background: '#FFFFFF', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={18} /></button>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--primary-color)', margin: 0, fontWeight: 'bold' }}>{editId ? 'Modifier l\'Entrepôt' : 'Ajouter un Entrepôt'}</h2>
             
-            {/* Modal Header */}
-            <div className="flex justify-between items-center px-6 py-4 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Building2 size={20} className="text-blue-500" />
-                <span>{editId ? 'Modifier l\'Entrepôt' : 'Ajouter un Entrepôt'}</span>
-              </h2>
-              <button 
-                onClick={() => setShowModal(false)}
-                className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Form body */}
-            <form onSubmit={saveEntrepot} className="p-6 space-y-4">
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400">Nom de l'entrepôt *</label>
+            <form onSubmit={saveEntrepot} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div className="erp-form-group">
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Nom de l'entrepôt *</label>
                 <input 
+                  type="text"
                   name="nom" 
                   value={formData.nom} 
                   onChange={handleInputChange} 
-                  className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm" 
                   placeholder="Ex: Dépôt Central..." 
                   required
+                  style={{ padding: '8px 12px' }}
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400">Adresse / Localisation</label>
+              <div className="erp-form-group">
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Adresse / Localisation</label>
                 <input 
+                  type="text"
                   name="localisation" 
                   value={formData.localisation} 
                   onChange={handleInputChange} 
-                  className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm" 
                   placeholder="Ex: Quartier Agdal, Rabat..." 
+                  style={{ padding: '8px 12px' }}
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-400">Téléphone</label>
+              <div className="erp-form-group">
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Téléphone</label>
                 <input 
+                  type="text"
                   name="telephone" 
                   value={formData.telephone} 
                   onChange={handleInputChange} 
-                  className="bg-slate-950/50 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:border-blue-500 outline-none transition-all text-sm" 
                   placeholder="Ex: +212 522 XXXXXX..." 
+                  style={{ padding: '8px 12px' }}
                 />
               </div>
 
-              <div className="flex items-center gap-3 pt-2">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <input 
                   type="checkbox"
                   id="est_principal"
                   name="est_principal" 
                   checked={formData.est_principal} 
                   onChange={handleInputChange} 
-                  className="w-4 h-4 rounded border-slate-750 bg-slate-950 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900 cursor-pointer"
+                  style={{ cursor: 'pointer' }}
                 />
-                <label htmlFor="est_principal" className="text-sm text-slate-300 font-medium cursor-pointer">
+                <label htmlFor="est_principal" style={{ fontSize: '0.85rem', fontWeight: 500, cursor: 'pointer' }}>
                   Définir comme entrepôt principal
                 </label>
               </div>
 
-              {/* Modal Actions Footer */}
-              <div className="pt-6 border-t border-slate-800 flex justify-end gap-3">
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                 <button 
                   type="button"
                   onClick={() => setShowModal(false)} 
-                  className="flex items-center gap-1.5 bg-slate-950 hover:bg-slate-850 text-slate-400 hover:text-white border border-slate-700 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer"
+                  className="erp-btn-secondary"
+                  style={{ padding: '8px 16px' }}
                 >
-                  <X size={15} /> <span>Annuler</span>
+                  Annuler
                 </button>
                 <button 
                   type="submit" 
                   disabled={isSaving}
-                  className="flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md shadow-blue-500/20 cursor-pointer"
+                  className="erp-btn-primary"
+                  style={{ padding: '8px 20px' }}
                 >
-                  <Check size={15} /> <span>{isSaving ? 'Enregistrement...' : editId ? 'Modifier' : 'Ajouter'}</span>
+                  {isSaving ? 'Enregistrement...' : editId ? 'Modifier' : 'Ajouter'}
                 </button>
               </div>
             </form>

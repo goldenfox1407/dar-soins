@@ -34,6 +34,11 @@ import AchatsReturn from './pages/erp/AchatsReturn';
 import VentesList from './pages/erp/VentesList';
 import DevisList from './pages/erp/DevisList';
 import EntrepotsList from './pages/erp/EntrepotsList';
+import ParametresSysteme from './pages/erp/ParametresSysteme';
+import TaxesList from './pages/erp/TaxesList';
+import DevisesList from './pages/erp/DevisesList';
+import NumerotationSettings from './pages/erp/NumerotationSettings';
+import NotificationsSettings from './pages/erp/NotificationsSettings';
 
 import APropos from './pages/APropos';
 import Faq from './pages/Faq';
@@ -130,11 +135,13 @@ function App() {
           <Route path="reservations" element={<ErpComingSoon title="Réservations" />} />
           <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />
           
-          {/* Paramètres — En développement */}
-          <Route path="parametres/systeme" element={<ErpComingSoon title="Paramètres Système" />} />
-          <Route path="parametres/taxes" element={<ErpComingSoon title="Taxes" />} />
-          <Route path="parametres/devises" element={<ErpComingSoon title="Devises" />} />
+          {/* Paramètres — Actifs */}
+          <Route path="parametres/systeme" element={<ParametresSysteme />} />
+          <Route path="parametres/taxes" element={<TaxesList />} />
+          <Route path="parametres/devises" element={<DevisesList />} />
           <Route path="parametres/entrepots" element={<EntrepotsList />} />
+          <Route path="parametres/numerotation" element={<NumerotationSettings />} />
+          <Route path="parametres/notifications" element={<NotificationsSettings />} />
           
           {/* Rapports — En développement */}
           <Route path="ai-reports" element={<ErpComingSoon title="Rapports IA" description="Les rapports générés par intelligence artificielle seront bientôt disponibles." />} />

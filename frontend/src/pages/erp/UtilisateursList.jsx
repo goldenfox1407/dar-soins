@@ -283,7 +283,7 @@ export default function UtilisateursList() {
                     <td style={{ padding: '1rem', color: '#64748b' }}>{item.email}</td>
                     <td style={{ padding: '1rem' }}>
                       {item.roles && item.roles.length > 0 ? (
-                        <span style={{ background: '#e0f2fe', color: '#0284c7', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600', textTransform: 'capitalize' }}>
+                        <span style={{ background: 'var(--primary-light)', color: 'var(--primary-color)', padding: '4px 10px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: '600', textTransform: 'capitalize' }}>
                           {item.roles.map(r => { const n = r.name || r; return n === 'gestionnaire' ? 'admin' : n; }).join(', ')}
                         </span>
                       ) : (

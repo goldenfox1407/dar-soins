@@ -17,7 +17,6 @@ class AuthController extends Controller
 {
     public function register(RegisterRequest $request)
     {
-
         $user = User::create([
             'nom' => $request->nom,
             'prenom' => $request->prenom,
@@ -41,6 +40,12 @@ class AuthController extends Controller
         } elseif ($user->role === 'gestionnaire') {
             Gestionnaire::create(['user_id' => $user->id]);
         }
+
+        // Assign Spatie role (creates it if missing)
+        \Spatie\Permission\Models\Role::firstOrCreate(
+            ['name' => $user->role, 'guard_name' => 'web']
+        );
+        $user->assignRole($user->role);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -70,10 +75,10 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = clone $request->user();
-        if ($user->role === 'client') $user->load('client');
-        if ($user->role === 'infirmier') $user->load('infirmier');
-        if ($user->role === 'gestionnaire') $user->load('gestionnaire');
-        
+        if ($user->hasRole('client')) $user->load('client');
+        if ($user->hasRole('infirmier')) $user->load('infirmier');
+        if ($user->hasRole('gestionnaire')) $user->load('gestionnaire');
+
         return response()->json(new UserResource($user));
     }
 }

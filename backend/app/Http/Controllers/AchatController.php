@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Achat;
+use App\Models\Config;
 use App\Models\TransactionFinanciere;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -77,8 +78,8 @@ class AchatController extends Controller
     public function generatePDF($id)
     {
         $achat = Achat::with(['fournisseur', 'entrepot', 'lignes.produit'])->findOrFail($id);
-        // We will create a simple view 'achats.pdf' later
-        $pdf = Pdf::loadView('achats.pdf', compact('achat'));
+        $config = Config::first();
+        $pdf = Pdf::loadView('achats.pdf', compact('achat', 'config'));
         return $pdf->download('achat_' . $achat->reference . '.pdf');
     }
 
@@ -130,36 +131,34 @@ class AchatController extends Controller
     public function getPaiements($id)
     {
         $achat = Achat::findOrFail($id);
-        // Fetch paiements from transactions_financieres with reference LIKE ACHAT_REF%
-        $paiements = TransactionFinanciere::where('reference', 'LIKE', 'PAY_ACHAT_' . $achat->id . '%')->orderBy('created_at', 'desc')->get();
-        return response()->json($paiements);
+        return response()->json($achat->paiements()->orderBy('created_at', 'desc')->get());
     }
 
     public function storePaiement(Request $request, $id)
     {
         $request->validate([
-            'montant' => 'required|numeric|min:0.1',
+            'montant'          => 'required|numeric|min:0.1',
             'date_transaction' => 'required|date',
-            'type_paiement' => 'required|string',
-            'compte_id' => 'required|exists:comptes_bancaires,id'
+            'type_paiement'    => 'required|string',
+            'compte_id'        => 'required|exists:comptes_bancaires,id',
         ]);
 
         $achat = Achat::findOrFail($id);
-        
-        $paiement = TransactionFinanciere::create([
-            'compte_id' => $request->compte_id,
-            'type' => 'depense',
-            'montant' => $request->montant,
+
+        $paiement = $achat->paiements()->create([
+            'compte_id'        => $request->compte_id,
+            'achat_id'         => $achat->id,
+            'type'             => 'depense',
+            'montant'          => $request->montant,
             'date_transaction' => $request->date_transaction,
-            'reference' => 'PAY_ACHAT_' . $achat->id . '_' . time(),
-            'description' => 'Paiement pour l\'achat ' . $achat->reference . ' par ' . $request->type_paiement,
+            'reference'        => 'PAY_ACHAT_' . $achat->id . '_' . time(),
+            'description'      => 'Paiement pour l\'achat ' . $achat->reference . ' par ' . $request->type_paiement,
         ]);
-        
-        // Update statut paiement
-        $totalPaiements = TransactionFinanciere::where('reference', 'LIKE', 'PAY_ACHAT_' . $achat->id . '%')->sum('montant');
+
+        $totalPaiements = $achat->paiements()->sum('montant');
         if ($totalPaiements >= $achat->montant_total) {
             $achat->statut_paiement = 'Paye';
-        } else if ($totalPaiements > 0) {
+        } elseif ($totalPaiements > 0) {
             $achat->statut_paiement = 'Partiel';
         }
         $achat->save();

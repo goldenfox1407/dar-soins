@@ -98,271 +98,292 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700/60 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto text-slate-200 shadow-2xl animate-scale-in">
+    <div className="erp-modal-overlay" style={{ zIndex: 9999, padding: '2rem' }}>
+      <div className="erp-modal" style={{ width: '900px', maxWidth: '95vw' }}>
         
         {/* Modal Header */}
-        <div className="flex justify-between items-center p-6 border-b border-slate-800">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <FileText size={22} className="text-blue-500" />
-            <span>Détails de la demande #{intervention.id}</span>
-          </h2>
-          <button 
-            onClick={onClose} 
-            className="text-slate-400 hover:text-white transition-colors cursor-pointer"
-          >
-            <X size={24} />
-          </button>
+        <div className="erp-modal-header">
+          <div className="flex justify-between items-center w-full">
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <FileText size={22} className="text-blue-500" />
+              <span>Détails de la demande #{intervention.id}</span>
+            </h2>
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-200" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Modal Content */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          {/* Infos Client */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider">Informations Patient & Demande</h3>
-            <div className="bg-slate-950/40 text-slate-300 p-5 rounded-xl border border-slate-800 space-y-3 shadow-inner">
-              <p className="flex items-center gap-2">
-                <User size={14} className="text-slate-500" />
-                <span><strong>Nom:</strong> {intervention.client?.user ? `${intervention.client.user.nom} ${intervention.client.user.prenom || ''}` : 'Inconnu'}</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <FileText size={14} className="text-slate-500" />
-                <span><strong>Email:</strong> {intervention.client?.user?.email || 'Non spécifié'}</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <Calendar size={14} className="text-slate-500" />
-                <span><strong>Date demandée:</strong> {new Date(intervention.date_heure).toLocaleString('fr-FR')}</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <Package size={14} className="text-slate-500" />
-                <span><strong>Soin demandé:</strong> {intervention.produit?.nom}</span>
-              </p>
-              <p className="flex items-center gap-2">
-                <Coins size={14} className="text-slate-500" />
-                <span><strong>Prix unitaire (Soin):</strong> {intervention.produit?.prix_client} MAD</span>
-              </p>
-              <div className="border-t border-slate-800/80 pt-3">
-                <p><strong>Description du problème:</strong></p>
-                <p className="text-slate-400 text-sm mt-1 bg-slate-950/50 p-3 rounded-lg border border-slate-850">{intervention.description_probleme || 'Aucune description fournie'}</p>
-              </div>
-              {intervention.fichier_joint && (
-                <div className="pt-2">
-                  <strong>Ordonnance / Pièce jointe:</strong>
-                  <a 
-                    href={`http://127.0.0.1:8000/storage/${intervention.fichier_joint}`} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="block text-blue-400 hover:text-blue-300 transition-colors mt-1 font-semibold text-sm hover:underline"
-                  >
-                    Voir la pièce jointe
-                  </a>
+        <div className="erp-modal-body p-6">
+          <div className="erp-form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            
+            {/* Infos Client */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-semibold text-xs uppercase tracking-wider text-muted">Informations Patient & Demande</h3>
+              <div className="glass-panel" style={{ padding: '20px', background: '#F8FAFC', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <p className="flex items-center gap-2 text-sm">
+                  <User size={14} className="text-muted" />
+                  <span><strong>Nom :</strong> {intervention.client?.user ? `${intervention.client.user.nom} ${intervention.client.user.prenom || ''}` : 'Inconnu'}</span>
+                </p>
+                <p className="flex items-center gap-2 text-sm">
+                  <FileText size={14} className="text-muted" />
+                  <span><strong>Email :</strong> {intervention.client?.user?.email || 'Non spécifié'}</span>
+                </p>
+                <p className="flex items-center gap-2 text-sm">
+                  <Calendar size={14} className="text-muted" />
+                  <span><strong>Date demandée :</strong> {new Date(intervention.date_heure).toLocaleString('fr-FR')}</span>
+                </p>
+                <p className="flex items-center gap-2 text-sm">
+                  <Package size={14} className="text-muted" />
+                  <span><strong>Soin demandé :</strong> {intervention.produit?.nom}</span>
+                </p>
+                <p className="flex items-center gap-2 text-sm">
+                  <Coins size={14} className="text-muted" />
+                  <span><strong>Prix unitaire (Soin) :</strong> {intervention.produit?.prix_client} MAD</span>
+                </p>
+                <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '10px', marginTop: '10px' }}>
+                  <p className="font-semibold text-sm">Description du problème :</p>
+                  <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', background: '#FFFFFF', padding: '10px', borderRadius: '6px', border: '1px solid var(--card-border)', marginTop: '4px' }}>
+                    {intervention.description_probleme || 'Aucune description fournie'}
+                  </p>
                 </div>
-              )}
-            </div>
-          </div>
-
-          {/* Actions & Status */}
-          <div className="space-y-4">
-            <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider">Statut & Actions</h3>
-            <div className="bg-slate-950/40 p-5 rounded-xl border border-slate-800 space-y-4 shadow-inner">
-              <p><strong>Statut actuel:</strong> <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">{intervention.statut}</span></p>
-              
-              <div className="space-y-2 pt-2">
-                {intervention.statut === 'infirmier_accepte' && (
-                  <button 
-                    disabled={actionLoading} 
-                    onClick={genererDevis} 
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-md shadow-blue-500/20 transition-all cursor-pointer"
-                  >
-                    <FileText size={18} /> <span>{actionLoading ? 'Génération...' : 'Générer Devis (PDF)'}</span>
-                  </button>
-                )}
-
-                {intervention.statut === 'devis_genere' && (
-                  <button 
-                    disabled={actionLoading} 
-                    onClick={envoyerDevis} 
-                    className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white py-3 rounded-xl flex items-center justify-center gap-2 font-semibold shadow-md shadow-emerald-500/20 transition-all cursor-pointer"
-                  >
-                    <Send size={18} /> <span>{actionLoading ? 'Envoi...' : 'Envoyer Devis au Client'}</span>
-                  </button>
-                )}
-
-                {intervention.devis && intervention.statut !== 'terminee' && (
-                  <button 
-                    onClick={() => consulterDocument('devis', intervention.devis.id)} 
-                    className="w-full bg-slate-950 hover:bg-slate-850 text-blue-400 hover:text-blue-300 border border-blue-500/20 py-3 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
-                  >
-                    <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
-                  </button>
-                )}
-
-                {intervention.statut === 'terminee' && (
-                  <div className="mt-4 pt-4 border-t border-slate-800">
-                    <h4 className="font-bold text-slate-300 mb-3 uppercase tracking-wider text-xs">Documents Générés</h4>
-                    <div className="space-y-2">
-                      {intervention.devis && (
-                        <button 
-                          onClick={() => consulterDocument('devis', intervention.devis.id)} 
-                          className="w-full bg-slate-950 hover:bg-slate-850 text-blue-400 hover:text-blue-300 border border-blue-500/20 py-2.5 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
-                        >
-                          <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
-                        </button>
-                      )}
-                      
-                      {intervention.facture && (
-                        <button 
-                          onClick={() => consulterDocument('facture', intervention.facture.id)} 
-                          className="w-full bg-slate-950 hover:bg-slate-850 text-emerald-400 hover:text-emerald-300 border border-emerald-500/20 py-2.5 rounded-xl flex items-center justify-center gap-2 font-semibold transition-all cursor-pointer"
-                        >
-                          <FileText size={18} /> <span>Consulter la Facture (PDF)</span>
-                        </button>
-                      )}
-
-                      {!intervention.devis && !intervention.facture && (
-                        <p className="text-sm text-slate-500 italic text-center">Aucun document disponible.</p>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {['en_attente_reponse_infirmier', 'en_attente_reponse_client', 'acceptee', 'terminee'].includes(intervention.statut) && (
-                  <div className="text-sm text-slate-500 flex items-center gap-2 p-3 bg-slate-900/40 rounded-lg border border-slate-850 mt-2">
-                    <AlertCircle size={16} className="text-slate-400" /> 
-                    <span>Aucune action requise pour le moment.</span>
+                {intervention.fichier_joint && (
+                  <div style={{ paddingTop: '8px' }}>
+                    <strong className="text-sm">Ordonnance / Pièce jointe :</strong>
+                    <a 
+                      href={`http://127.0.0.1:8000/storage/${intervention.fichier_joint}`} 
+                      target="_blank" 
+                      rel="noreferrer" 
+                      className="text-blue-500 hover:text-blue-700 block text-sm mt-1 font-semibold hover:underline"
+                    >
+                      Voir la pièce jointe
+                    </a>
                   </div>
                 )}
               </div>
             </div>
-          </div>
 
-          {/* Carte d'affectation (Uniquement si en attente d'affectation) */}
-          {intervention.statut === 'en_attente_affectation' && (
-            <div className="md:col-span-2 mt-4 space-y-4">
-              <h3 className="font-semibold text-slate-400 uppercase text-xs tracking-wider flex items-center gap-2">
-                <Map size={16} /> <span>Affectation Géolocalisée</span>
-              </h3>
-              
-              {loading ? (
-                <p className="text-center py-6 text-slate-500">Chargement de la carte et des infirmiers...</p>
-              ) : mapData ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Map container */}
-                  <div className="lg:col-span-2 h-96 bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
-                    <MapContainer center={[mapData.client_localisation.latitude, mapData.client_localisation.longitude]} zoom={13} style={{ height: '100%', width: '100%' }}>
-                      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                      
-                      {/* Marqueur Client (Rouge) */}
-                      <Marker position={[mapData.client_localisation.latitude, mapData.client_localisation.longitude]}>
-                        <Popup><strong>Patient</strong></Popup>
-                      </Marker>
+            {/* Actions & Status */}
+            <div className="flex flex-col gap-3">
+              <h3 className="font-semibold text-xs uppercase tracking-wider text-muted">Statut & Actions</h3>
+              <div className="glass-panel" style={{ padding: '20px', background: '#F8FAFC', border: '1px solid var(--card-border)', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <p className="text-sm">
+                  <strong>Statut actuel :</strong> <span className="status-badge info">{intervention.statut}</span>
+                </p>
+                
+                <div className="flex flex-col gap-2 pt-2">
+                  {intervention.statut === 'infirmier_accepte' && (
+                    <button 
+                      disabled={actionLoading} 
+                      onClick={genererDevis} 
+                      className="erp-btn-primary"
+                      style={{ width: '100%', justifyContent: 'center' }}
+                    >
+                      <FileText size={18} /> <span>{actionLoading ? 'Génération...' : 'Générer Devis (PDF)'}</span>
+                    </button>
+                  )}
 
-                      {/* Marqueurs Infirmiers (Bleu) */}
-                      {mapData.infirmiers.map(inf => (
-                        <Marker key={inf.id} position={[inf.lat, inf.lng]}>
-                          <Popup>
-                            <strong>{inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}</strong><br/>
-                            Distance: {inf.distance_km} km
-                          </Popup>
-                        </Marker>
-                      ))}
-                    </MapContainer>
-                  </div>
-                  
-                  {/* Nurse selection panel */}
-                  <div className="space-y-4 flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <h4 className="font-bold text-sm text-white">Infirmiers disponibles</h4>
-                      {mapData.infirmiers.length === 0 ? (
-                        <p className="text-sm text-red-400 bg-red-500/10 p-3 rounded-lg border border-red-500/20">Aucun infirmier disponible dans le secteur.</p>
-                      ) : (
-                        <div className="space-y-2 max-h-56 overflow-y-auto pr-2 custom-scrollbar">
-                          {mapData.infirmiers.map(inf => (
-                            <label 
-                              key={inf.id} 
-                              className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
-                                selectedInfirmier === inf.id 
-                                  ? 'border-blue-500 bg-blue-500/10' 
-                                  : 'border-slate-800 bg-slate-950/20 hover:bg-slate-800/40 text-slate-300'
-                              }`}
-                            >
-                              <input 
-                                type="radio" 
-                                name="infirmier" 
-                                className="mt-1"
-                                checked={selectedInfirmier === inf.id}
-                                onChange={() => setSelectedInfirmier(inf.id)}
-                              />
-                              <div>
-                                <p className="font-semibold text-sm text-white">{inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}</p>
-                                <p className="text-xs text-slate-500">{inf.distance_km} km de distance</p>
-                              </div>
-                            </label>
-                          ))}
-                        </div>
-                      )}
+                  {intervention.statut === 'devis_genere' && (
+                    <button 
+                      disabled={actionLoading} 
+                      onClick={envoyerDevis} 
+                      className="erp-btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', background: 'var(--gradient-success)', boxShadow: 'none' }}
+                    >
+                      <Send size={18} /> <span>{actionLoading ? 'Envoi...' : 'Envoyer Devis au Client'}</span>
+                    </button>
+                  )}
+
+                  {intervention.devis && intervention.statut !== 'terminee' && (
+                    <button 
+                      onClick={() => consulterDocument('devis', intervention.devis.id)} 
+                      className="erp-btn-secondary"
+                      style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
+                    >
+                      <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
+                    </button>
+                  )}
+
+                  {intervention.statut === 'terminee' && (
+                    <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '10px', marginTop: '10px' }}>
+                      <h4 className="font-bold text-xs uppercase tracking-wider text-muted mb-2">Documents Générés</h4>
+                      <div className="flex flex-col gap-2">
+                        {intervention.devis && (
+                          <button 
+                            onClick={() => consulterDocument('devis', intervention.devis.id)} 
+                            className="erp-btn-secondary"
+                            style={{ width: '100%', justifyContent: 'center', borderColor: 'var(--primary-color)', color: 'var(--primary-color)' }}
+                          >
+                            <FileText size={18} /> <span>Consulter le Devis (PDF)</span>
+                          </button>
+                        )}
+                        
+                        {intervention.facture && (
+                          <button 
+                            onClick={() => consulterDocument('facture', intervention.facture.id)} 
+                            className="erp-btn-secondary"
+                            style={{ width: '100%', justifyContent: 'center', borderColor: '#10B981', color: '#10B981' }}
+                          >
+                            <FileText size={18} /> <span>Consulter la Facture (PDF)</span>
+                          </button>
+                        )}
+
+                        {!intervention.devis && !intervention.facture && (
+                          <p className="text-sm text-muted italic text-center">Aucun document disponible.</p>
+                        )}
+                      </div>
                     </div>
+                  )}
 
-                    {/* TABLEAU SIMULATION DEVIS */}
-                    {selectedInfirmier && (
-                      <div className="bg-slate-950/40 border border-slate-800 rounded-xl p-4 shadow-sm text-sm">
-                        <h4 className="font-bold text-slate-400 mb-3 uppercase tracking-wider text-xs">Simulation du Devis</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500">Prix du Soin</span>
-                            <span className="font-medium text-white">{intervention.produit?.prix_client || 0} MAD</span>
-                          </div>
-                          
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500">Distance (km)</span>
-                            <input 
-                              type="number" 
-                              value={distanceManuelle} 
-                              onChange={(e) => setDistanceManuelle(e.target.value)} 
-                              className="w-20 px-2 py-1 border border-slate-700 rounded bg-slate-900 text-white text-right outline-none focus:border-blue-500 text-xs"
-                            />
-                          </div>
+                  {['en_attente_reponse_infirmier', 'en_attente_reponse_client', 'acceptee', 'terminee'].includes(intervention.statut) && (
+                    <div className="flex items-center gap-2 p-3 bg-blue-50/50 rounded-lg border border-blue-100 text-sm text-muted">
+                      <AlertCircle size={16} className="text-blue-500" /> 
+                      <span>Aucune action requise pour le moment.</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-                          <div className="flex justify-between items-center">
-                            <span className="text-slate-500">Tarif par km</span>
-                            <div className="flex items-center gap-1">
+            {/* Carte d'affectation (Uniquement si en attente d'affectation) */}
+            {intervention.statut === 'en_attente_affectation' && (
+              <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
+                <h3 className="font-semibold text-xs uppercase tracking-wider text-muted flex items-center gap-2">
+                  <Map size={16} /> <span>Affectation Géolocalisée</span>
+                </h3>
+                
+                {loading ? (
+                  <p className="text-center py-6 text-muted">Chargement de la carte et des infirmiers...</p>
+                ) : mapData ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+                    {/* Map container */}
+                    <div style={{ height: '380px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--card-border)' }}>
+                      <MapContainer center={[mapData.client_localisation.latitude, mapData.client_localisation.longitude]} zoom={13} style={{ height: '100%', width: '100%' }}>
+                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                        
+                        {/* Marqueur Client */}
+                        <Marker position={[mapData.client_localisation.latitude, mapData.client_localisation.longitude]}>
+                          <Popup><strong>Patient</strong></Popup>
+                        </Marker>
+
+                        {/* Marqueurs Infirmiers */}
+                        {mapData.infirmiers.map(inf => (
+                          <Marker key={inf.id} position={[inf.lat, inf.lng]}>
+                            <Popup>
+                              <strong>{inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}</strong><br/>
+                              Distance: {inf.distance_km} km
+                            </Popup>
+                          </Marker>
+                        ))}
+                      </MapContainer>
+                    </div>
+                    
+                    {/* Nurse selection panel */}
+                    <div className="flex flex-col justify-between gap-3">
+                      <div className="flex flex-col gap-2">
+                        <h4 className="font-bold text-sm">Infirmiers disponibles</h4>
+                        {mapData.infirmiers.length === 0 ? (
+                          <p className="text-sm text-red-500 bg-red-50 rounded-lg p-3 border border-red-100">Aucun infirmier disponible dans le secteur.</p>
+                        ) : (
+                          <div className="custom-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '180px', overflowY: 'auto', paddingRight: '4px' }}>
+                            {mapData.infirmiers.map(inf => (
+                              <label 
+                                key={inf.id} 
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'flex-start',
+                                  gap: '12px',
+                                  padding: '10px',
+                                  borderRadius: '10px',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s',
+                                  background: selectedInfirmier === inf.id ? 'rgba(37,99,235,0.04)' : '#FFFFFF',
+                                  border: selectedInfirmier === inf.id ? '1px solid var(--primary-color)' : '1px solid var(--card-border)'
+                                }}
+                              >
+                                <input 
+                                  type="radio" 
+                                  name="infirmier" 
+                                  style={{ marginTop: '3px' }}
+                                  checked={selectedInfirmier === inf.id}
+                                  onChange={() => setSelectedInfirmier(inf.id)}
+                                />
+                                <div>
+                                  <p className="font-semibold text-sm margin-0">
+                                    {inf.user ? `${inf.user.nom} ${inf.user.prenom || ''}` : 'Infirmier'}
+                                  </p>
+                                  <p className="text-xs text-muted margin-0">
+                                    {inf.distance_km} km de distance
+                                  </p>
+                                </div>
+                              </label>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* TABLEAU SIMULATION DEVIS */}
+                      {selectedInfirmier && (
+                        <div className="glass-panel" style={{ background: '#FFFFFF', border: '1px solid var(--card-border)', borderRadius: '12px', padding: '16px', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <h4 style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Simulation du Devis</h4>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted">Prix du Soin</span>
+                              <span className="font-medium">{intervention.produit?.prix_client || 0} MAD</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted">Distance (km)</span>
                               <input 
                                 type="number" 
-                                value={tarifKmManuel} 
-                                onChange={(e) => setTarifKmManuel(e.target.value)} 
-                                className="w-20 px-2 py-1 border border-slate-700 rounded bg-slate-900 text-white text-right outline-none focus:border-blue-500 text-xs"
-                              /> <span className="text-xs text-slate-400">MAD</span>
+                                value={distanceManuelle} 
+                                onChange={(e) => setDistanceManuelle(e.target.value)} 
+                                style={{ width: '80px', padding: '4px 8px', border: '1px solid var(--card-border)', borderRadius: '4px', background: '#FFFFFF', color: 'var(--text-main)', textAlign: 'right', outline: 'none' }}
+                              />
+                            </div>
+
+                            <div className="flex justify-between items-center">
+                              <span className="text-muted">Tarif par km</span>
+                              <div className="flex items-center gap-1">
+                                <input 
+                                  type="number" 
+                                  value={tarifKmManuel} 
+                                  onChange={(e) => setTarifKmManuel(e.target.value)} 
+                                  style={{ width: '80px', padding: '4px 8px', border: '1px solid var(--card-border)', borderRadius: '4px', background: '#FFFFFF', color: 'var(--text-main)', textAlign: 'right', outline: 'none' }}
+                                /> <span className="text-xs text-muted">MAD</span>
+                              </div>
+                            </div>
+
+                            <div className="flex justify-between items-center text-xs text-muted">
+                              <span>Frais de déplacement</span>
+                              <span>{((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0)).toFixed(2)} MAD</span>
+                            </div>
+
+                            <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '0.9rem', color: '#10B981' }}>
+                              <span>Total Estimé (TTC)</span>
+                              <span>{(((parseFloat(intervention.produit?.prix_client) || 0) + ((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0))) * 1.20).toFixed(2)} MAD</span>
                             </div>
                           </div>
-
-                          <div className="flex justify-between items-center text-slate-500 pt-1 text-xs">
-                            <span>Frais de déplacement</span>
-                            <span>{((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0)).toFixed(2)} MAD</span>
-                          </div>
-
-                          <div className="border-t border-slate-800 pt-2 mt-2 flex justify-between items-center font-bold text-sm text-emerald-400">
-                            <span>Total Estimé (TTC)</span>
-                            <span>{(((parseFloat(intervention.produit?.prix_client) || 0) + ((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0))) * 1.20).toFixed(2)} MAD</span>
-                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    <button 
-                      onClick={affecterManuellement}
-                      disabled={!selectedInfirmier || actionLoading}
-                      className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 mt-4 disabled:opacity-50 transition-all cursor-pointer shadow-md shadow-blue-500/20"
-                    >
-                      <UserCheck size={18} /> <span>{actionLoading ? 'Affectation...' : 'Confirmer l\'affectation'}</span>
-                    </button>
+                      <button 
+                        onClick={affecterManuellement}
+                        disabled={!selectedInfirmier || actionLoading}
+                        className="erp-btn-primary"
+                        style={{ width: '100%', justifyContent: 'center' }}
+                      >
+                        <UserCheck size={18} /> <span>{actionLoading ? 'Affectation...' : 'Confirmer l\'affectation'}</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <p className="text-slate-500 text-center">Erreur lors du chargement des données de la carte.</p>
-              )}
-            </div>
-          )}
+                ) : (
+                  <p className="text-center text-muted">Erreur lors du chargement des données de la carte.</p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -16,7 +16,7 @@ export default function CategoriesList() {
   const fetchData = async () => {
     try {
       const response = await api.get('/categories');
-      setData(response.data?.data || response.data?.data || response.data || []);
+      setData(response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
@@ -59,77 +59,85 @@ export default function CategoriesList() {
   ) : [];
 
   return (
-    <div className="glass-panel p-6 animate-fade-in" style={{ padding: '2rem' }}>
-      <header className="flex justify-between items-center mb-6" style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="erp-page animate-fade-in">
+      <header className="erp-page-header">
         <div>
-          <h1 className="text-2xl font-bold" style={{ fontSize: '1.8rem', color: 'var(--primary-color)' }}>Catégories</h1>
-          <p className="text-muted text-sm mt-1">Gérez les catégories de vos produits.</p>
+          <h1 className="erp-page-title">Catégories</h1>
+          <p className="erp-page-subtitle">Gérez les catégories de vos produits.</p>
         </div>
-        <button onClick={() => handleOpenModal()} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button onClick={() => handleOpenModal()} className="erp-btn-primary">
           <Plus size={18} /> Ajouter
         </button>
       </header>
 
-      <div style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--glass-border)', borderRadius: '8px', padding: '0.5rem 1rem', width: '300px' }}>
-        <Search size={18} color="var(--text-muted)" style={{ marginRight: '10px' }} />
-        <input 
-          type="text" 
-          placeholder="Rechercher..." 
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-          style={{ background: 'transparent', border: 'none', color: 'white', width: '100%', outline: 'none' }}
-        />
-      </div>
-
-      {loading ? (
-        <div className="text-center p-8 text-muted">Chargement...</div>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse" style={{ width: '100%' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.03)' }}>
-                <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>ID</th>
-                <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase' }}>Nom</th>
-                <th style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.85rem', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan="3" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>Aucune donnée.</td>
-                </tr>
-              ) : (
-                filteredData.map((item) => (
-                  <tr key={item.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
-                    <td style={{ padding: '1rem' }}>{item.id}</td>
-                    <td style={{ padding: '1rem', fontWeight: '500' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Tag size={16} color="var(--primary-color)" /> {item.nom}
-                      </div>
-                    </td>
-                    <td style={{ padding: '1rem', textAlign: 'right' }}>
-                      <button onClick={() => handleOpenModal(item)} style={{ color: 'var(--primary-color)', marginRight: '1rem', background: 'none', border: 'none', cursor: 'pointer' }}><Edit size={18} /></button>
-                      <button onClick={() => handleDelete(item.id)} style={{ color: '#f87171', background: 'none', border: 'none', cursor: 'pointer' }}><Trash2 size={18} /></button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+      <div className="erp-card">
+        <div className="erp-toolbar">
+          <div className="erp-search-box">
+            <Search size={16} />
+            <input 
+              type="text" 
+              placeholder="Rechercher..." 
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className="text-center py-8 text-muted">Chargement...</div>
+        ) : (
+          <div className="erp-table-container">
+            <table className="erp-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '80px' }}>ID</th>
+                  <th>Nom</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="text-center py-8 text-muted">Aucune donnée.</td>
+                  </tr>
+                ) : (
+                  filteredData.map((item) => (
+                    <tr key={item.id}>
+                      <td className="text-muted">#{item.id}</td>
+                      <td className="font-semibold">
+                        <div className="flex items-center gap-2">
+                          <Tag size={16} className="text-blue-500" /> {item.nom}
+                        </div>
+                      </td>
+                      <td className="erp-table-actions" style={{ justifyContent: 'flex-end' }}>
+                        <button onClick={() => handleOpenModal(item)} className="erp-action-btn edit" title="Modifier"><Edit size={16} /></button>
+                        <button onClick={() => handleDelete(item.id)} className="erp-action-btn delete" title="Supprimer"><Trash2 size={16} /></button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
 
       {isModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-panel" style={{ width: '400px', padding: '2rem', position: 'relative', margin: 'auto', marginTop: '10vh' }}>
+          <div className="glass-panel" style={{ width: '400px', padding: '2rem', position: 'relative', margin: 'auto', background: '#FFFFFF', color: 'var(--text-main)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <button onClick={() => setIsModalOpen(false)} style={{ position: 'absolute', top: '15px', right: '15px', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}><X size={20} /></button>
-            <h2 style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: 'white' }}>{currentItem ? 'Modifier' : 'Nouveau'}</h2>
+            <h2 style={{ fontSize: '1.4rem', color: 'var(--primary-color)', margin: 0, fontWeight: 'bold' }}>{currentItem ? 'Modifier la catégorie' : 'Nouvelle catégorie'}</h2>
+            
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>Nom de la catégorie</label>
-                <input type="text" className="glass-input" required value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} />
+              <div className="erp-form-group">
+                <label style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Nom de la catégorie *</label>
+                <input type="text" required value={formData.nom} onChange={e => setFormData({...formData, nom: e.target.value})} style={{ padding: '8px 12px' }} />
               </div>
-              <button type="submit" className="btn-primary" style={{ marginTop: '1rem' }}>Enregistrer</button>
+              
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setIsModalOpen(false)} className="erp-btn-secondary" style={{ padding: '8px 16px' }}>Annuler</button>
+                <button type="submit" className="erp-btn-primary" style={{ padding: '8px 20px' }}>Enregistrer</button>
+              </div>
             </form>
           </div>
         </div>

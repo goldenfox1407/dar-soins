@@ -48,6 +48,17 @@ class UserFactory extends Factory
     }
 
     /**
+     * Ensures a Spatie role exists and assigns it to the user.
+     */
+    private function ensureRole(User $user, string $roleName): void
+    {
+        \Spatie\Permission\Models\Role::firstOrCreate(
+            ['name' => $roleName, 'guard_name' => 'web']
+        );
+        $user->assignRole($roleName);
+    }
+
+    /**
      * State for client role with Client profile.
      */
     public function client(): static
@@ -56,6 +67,7 @@ class UserFactory extends Factory
             'role' => 'client',
         ])->afterCreating(function (User $user) {
             Client::factory()->create(['user_id' => $user->id]);
+            $this->ensureRole($user, 'client');
         });
     }
 
@@ -68,6 +80,7 @@ class UserFactory extends Factory
             'role' => 'infirmier',
         ])->afterCreating(function (User $user) {
             Infirmier::factory()->create(['user_id' => $user->id]);
+            $this->ensureRole($user, 'infirmier');
         });
     }
 
@@ -80,6 +93,7 @@ class UserFactory extends Factory
             'role' => 'gestionnaire',
         ])->afterCreating(function (User $user) {
             Gestionnaire::factory()->create(['user_id' => $user->id]);
+            $this->ensureRole($user, 'gestionnaire');
         });
     }
 }
