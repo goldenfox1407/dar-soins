@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  Users, UserCog, Package, ArrowRightLeft, ShoppingCart, TrendingUp, 
-  RotateCcw, FileText, Briefcase, Calculator, Repeat, Wrench, 
-  FileSignature, CheckSquare, Calendar, Percent, Settings, Brain, 
+import {
+  Users, UserCog, Package, ArrowRightLeft, ShoppingCart, TrendingUp,
+  RotateCcw, FileText, Briefcase, Calculator, Repeat, Wrench,
+  FileSignature, CheckSquare, Calendar, Percent, Settings, Brain,
   BarChart, Menu, X, ChevronDown, ChevronRight, LogOut, Bell, Search
 } from 'lucide-react';
 import Logo from './Logo';
+import NotificationBell from './notifications/NotificationBell';
+import NotificationToasts from './notifications/NotificationToasts';
 
 const MENU_ITEMS = [
   { id: 'gens', title: 'Contacts & Gens', icon: Users, submenus: [
@@ -197,12 +199,8 @@ export default function AdminLayout() {
           </div>
 
           <div className="erp-topbar-right">
-            <button className="erp-icon-btn">
-              <Bell size={18} />
-              <span className="erp-badge">3</span>
-            </button>
-            
-            <button 
+            <NotificationBell />
+            <button
               onClick={handleLogout}
               className="erp-logout-btn"
             >
@@ -211,6 +209,9 @@ export default function AdminLayout() {
             </button>
           </div>
         </header>
+
+        {/* TOASTS temps réel (fixe en haut à droite) */}
+        <NotificationToasts />
 
         {/* PAGE CONTENT (Outlet) */}
         <div className="erp-content-area custom-scrollbar">

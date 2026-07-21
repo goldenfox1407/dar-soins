@@ -163,6 +163,21 @@ class AchatController extends Controller
         }
         $achat->save();
 
+        // Notification : Paiement reçu → gestionnaire
+        try {
+            \App\Services\ServiceNotification::dispatcher('paiement_recu', [
+                'reference' => $achat->reference,
+                'montant'   => $request->montant,
+                'methode'   => $request->type_paiement,
+                'type'      => 'achat',
+                'id'        => $achat->id,
+            ], [
+                'url_cible' => "/gestionnaire/achats/{$achat->id}",
+            ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur notification paiement_recu (achat): '.$e->getMessage());
+        }
+
         return response()->json(['message' => 'Paiement ajouté', 'paiement' => $paiement, 'achat' => $achat]);
     }
 

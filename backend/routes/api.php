@@ -4,7 +4,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ParametreController;
+use App\Http\Controllers\RapportController;
+use App\Http\Controllers\TacheController;
 use App\Http\Controllers\TaxeController;
 use App\Http\Controllers\DeviseController;
 use App\Http\Controllers\NotifConfigController;
@@ -43,7 +46,25 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
 
     // Personnel
     Route::get('/personnel', [App\Http\Controllers\PersonnelController::class, 'index']);
-    
+
+    // =====================================================================
+    // NOTIFICATIONS (accessible par tous les utilisateurs authentifiés)
+    // =====================================================================
+    Route::prefix('notifications')->group(function () {
+        Route::get('/', [NotificationController::class, 'index']);
+        Route::get('/unread', [NotificationController::class, 'unread']);
+        Route::get('/unread-count', [NotificationController::class, 'unreadCount']);
+        Route::post('/{id}/mark-read', [NotificationController::class, 'markAsRead']);
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead']);
+        Route::delete('/{id}', [NotificationController::class, 'destroy']);
+        Route::delete('/clear-read', [NotificationController::class, 'clearRead']);
+    });
+
+    // Tâches d'organisation (accessible par tous, mais filtrage par rôle côté contrôleur)
+    Route::apiResource('taches', TacheController::class);
+    Route::get('/planning', [TacheController::class, 'planning']);
+    Route::get('/organisation/stats', [TacheController::class, 'stats']);
+
     // User Management (Stocky Clone)
     Route::apiResource('users', App\Http\Controllers\UserController::class);
     Route::apiResource('roles', App\Http\Controllers\RoleController::class);
@@ -107,6 +128,23 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('notif-configs', [NotifConfigController::class, 'index']);
         Route::put('notif-configs/{notifConfig}', [NotifConfigController::class, 'update']);
         Route::patch('notif-configs/{notifConfig}/toggle', [NotifConfigController::class, 'toggle']);
+
+        // =====================================================================
+        // RAPPORTS & IA (gestionnaire only)
+        // =====================================================================
+        Route::prefix('rapports')->group(function () {
+            Route::get('/synthese', [RapportController::class, 'synthese']);
+            Route::get('/stock', [RapportController::class, 'stock']);
+            Route::get('/ventes', [RapportController::class, 'ventes']);
+            Route::get('/achats', [RapportController::class, 'achats']);
+            Route::get('/interventions', [RapportController::class, 'interventions']);
+            Route::get('/finances', [RapportController::class, 'finances']);
+            Route::get('/ia/synthese', [RapportController::class, 'iaSynthese']);
+            Route::get('/ia/anomalies', [RapportController::class, 'iaAnomalies']);
+            Route::get('/ia/previsions', [RapportController::class, 'iaPrevisions']);
+            Route::get('/ia/recommandations', [RapportController::class, 'iaRecommandations']);
+            Route::get('/export/{type}', [RapportController::class, 'export']);
+        });
     });
 });
 

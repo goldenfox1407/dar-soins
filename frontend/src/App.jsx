@@ -39,6 +39,15 @@ import TaxesList from './pages/erp/TaxesList';
 import DevisesList from './pages/erp/DevisesList';
 import NumerotationSettings from './pages/erp/NumerotationSettings';
 import NotificationsSettings from './pages/erp/NotificationsSettings';
+import NotificationsCentre from './pages/erp/NotificationsCentre';
+
+// Nouveaux modules v2 (Organisation + Rapports & IA)
+import TachesList from './pages/erp/TachesList';
+import Calendrier from './pages/erp/Calendrier';
+import AiReports from './pages/erp/AiReports';
+import RapportStock from './pages/erp/RapportStock';
+import RapportVentes from './pages/erp/RapportVentes';
+import RapportAchats from './pages/erp/RapportAchats';
 
 import APropos from './pages/APropos';
 import Faq from './pages/Faq';
@@ -65,7 +74,14 @@ function App() {
             <InfirmierDashboard />
           </ProtectedRoute>
         } />
-        
+
+        {/* Centre de notifications (tous rôles connectés) */}
+        <Route path="/notifications" element={
+          <ProtectedRoute allowedRoles={['client', 'infirmier', 'gestionnaire']}>
+            <NotificationsCentre />
+          </ProtectedRoute>
+        } />
+
         {/* ERP Layout pour Gestionnaire */}
         <Route path="/gestionnaire" element={
           <ProtectedRoute allowedRoles={['gestionnaire']}>
@@ -131,9 +147,11 @@ function App() {
           <Route path="abonnements" element={<ErpComingSoon title="Abonnements" />} />
           <Route path="services" element={<ErpComingSoon title="Services" />} />
           <Route path="contrats" element={<ErpComingSoon title="Contrats" />} />
-          <Route path="taches" element={<ErpComingSoon title="Tâches" />} />
           <Route path="reservations" element={<ErpComingSoon title="Réservations" />} />
-          <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />
+
+          {/* Organisation — NOUVEAU MODULE v2 */}
+          <Route path="taches" element={<TachesList />} />
+          <Route path="calendrier" element={<Calendrier />} />
           
           {/* Paramètres — Actifs */}
           <Route path="parametres/systeme" element={<ParametresSysteme />} />
@@ -143,11 +161,14 @@ function App() {
           <Route path="parametres/numerotation" element={<NumerotationSettings />} />
           <Route path="parametres/notifications" element={<NotificationsSettings />} />
           
-          {/* Rapports — En développement */}
-          <Route path="ai-reports" element={<ErpComingSoon title="Rapports IA" description="Les rapports générés par intelligence artificielle seront bientôt disponibles." />} />
-          <Route path="rapports/stock" element={<ErpComingSoon title="Rapport de Stock" />} />
-          <Route path="rapports/ventes" element={<ErpComingSoon title="Rapport des Ventes" />} />
-          <Route path="rapports/achats" element={<ErpComingSoon title="Rapport des Achats" />} />
+          {/* Commissions — En développement */}
+          <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />
+
+          {/* Rapports & IA — NOUVEAU MODULE v2 */}
+          <Route path="ai-reports" element={<AiReports />} />
+          <Route path="rapports/stock" element={<RapportStock />} />
+          <Route path="rapports/ventes" element={<RapportVentes />} />
+          <Route path="rapports/achats" element={<RapportAchats />} />
         </Route>
       </Routes>
     </Router>

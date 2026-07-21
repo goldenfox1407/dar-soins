@@ -14,6 +14,7 @@ use App\Http\Requests\CommanderSoinRequest;
 use App\Http\Requests\CloturerInterventionRequest;
 use App\Services\ServiceAffectation;
 use App\Services\ServiceGeolocalisation;
+use App\Services\ServiceNotification;
 use App\Services\ServiceTarification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -85,10 +86,30 @@ class InterventionController extends Controller
             ]);
         });
 
+        // Notification : nouvelle demande d'intervention → gestionnaire(s)
+        $this->dispatchNotifications('nouvelle_intervention', $intervention, [
+            'url_cible' => "/gestionnaire/interventions/{$intervention->id}",
+        ]);
+
         return response()->json([
             'message'      => 'Commande enregistrée, en attente de validation',
             'intervention' => new InterventionResource($intervention->load(['produit'])),
         ], 201);
+    }
+
+    /**
+     * Helper interne pour dispatcher les notifications d'intervention.
+     */
+    protected function dispatchNotifications(string $evenement, Intervention $intervention, array $options = []): void
+    {
+        try {
+            ServiceNotification::dispatcher($evenement, $intervention->load(['client.user', 'infirmier.user', 'produit', 'devis', 'facture']), $options);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error("Erreur notification {$evenement}: ".$e->getMessage(), [
+                'intervention_id' => $intervention->id,
+                'exception'       => $e,
+            ]);
+        }
     }
 
     /**
@@ -161,6 +182,26 @@ class InterventionController extends Controller
 
             return [$intervention, $facture];
         });
+
+        // Notifications : Intervention clôturée → gestionnaire + client
+        $this->dispatchNotifications('intervention_cloturee', $intervention);
+
+        // Notification : Paiement reçu → gestionnaire (si paiement effectué)
+        if ($request->methode_paiement && $facture) {
+            try {
+                ServiceNotification::dispatcher('paiement_recu', [
+                    'reference' => $facture->reference,
+                    'montant'   => $facture->montant_total,
+                    'methode'   => $request->methode_paiement,
+                    'type'      => 'intervention',
+                    'id'        => $intervention->id,
+                ], [
+                    'url_cible' => "/gestionnaire/factures/{$facture->id}",
+                ]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('Erreur notification paiement_recu: '.$e->getMessage());
+            }
+        }
 
         return response()->json([
             'message'      => 'Intervention clôturée avec succès',
@@ -260,6 +301,11 @@ class InterventionController extends Controller
             $intervention->statut = 'en_attente_reponse_infirmier';
         }
         $intervention->save();
+
+        // Notification : Infirmier affecté → infirmier + client
+        $this->dispatchNotifications('infirmier_affecte', $intervention, [
+            'url_cible' => "/gestionnaire/interventions/{$intervention->id}",
+        ]);
 
         return response()->json([
             'message' => 'Infirmier affecté avec succès. En attente de sa confirmation.',
@@ -375,6 +421,12 @@ class InterventionController extends Controller
                 $intervention->devis->save();
             }
             $intervention->save();
+
+            // Notification : Devis accepté → gestionnaire + infirmier
+            $this->dispatchNotifications('devis_accepte', $intervention->load('devis'), [
+                'url_cible' => "/gestionnaire/interventions/{$intervention->id}",
+            ]);
+
             return response()->json(['message' => 'Devis accepté. Soin confirmé.']);
         } else {
             $intervention->statut = 'annulee';
@@ -383,6 +435,12 @@ class InterventionController extends Controller
                 $intervention->devis->save();
             }
             $intervention->save();
+
+            // Notification : Devis refusé → gestionnaire
+            $this->dispatchNotifications('devis_refuse', $intervention->load('devis'), [
+                'url_cible' => "/gestionnaire/interventions/{$intervention->id}",
+            ]);
+
             return response()->json(['message' => 'Devis refusé. Intervention annulée.']);
         }
     }

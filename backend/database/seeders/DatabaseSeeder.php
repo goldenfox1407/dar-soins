@@ -41,5 +41,16 @@ class DatabaseSeeder extends Seeder
         Materiel::create(['nom' => 'Compresses Stériles', 'stock_actuel' => 450, 'prix_unitaire' => 2]);
         Materiel::create(['nom' => 'Gants latex', 'stock_actuel' => 120, 'prix_unitaire' => 5]);
         Materiel::create(['nom' => 'Seringues 5ml', 'stock_actuel' => 12, 'prix_unitaire' => 3]);
+
+        // Assignation des rôles Spatie (au cas où RolesAndPermissionsSeeder ne les aurait pas assignés)
+        $admin->assignRole('gestionnaire');
+        $clientUser->assignRole('client');
+        $infUser->assignRole('infirmier');
+
+        // Nouveaux seeders pour les fonctionnalités v2
+        $this->call([
+            TacheSeeder::class,
+            NotificationSeeder::class,
+        ]);
     }
 }

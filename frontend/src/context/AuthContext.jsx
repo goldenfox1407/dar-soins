@@ -14,9 +14,15 @@ export function AuthProvider({ children }) {
         sessionStorage.setItem('user', JSON.stringify(userData));
         setToken(authToken);
         setUser(userData);
+
+        // Déclenche un event custom pour que le NotificationContext s'initialise
+        window.dispatchEvent(new CustomEvent('auth:login', { detail: { user: userData, token: authToken } }));
     };
 
     const logout = () => {
+        // Déclenche un event custom AVANT de vider le token pour que NotificationContext se désabonne
+        window.dispatchEvent(new CustomEvent('auth:logout'));
+
         sessionStorage.removeItem('auth_token');
         sessionStorage.removeItem('user');
         setToken(null);

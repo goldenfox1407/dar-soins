@@ -9,9 +9,11 @@ use App\Models\Gestionnaire;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
+use App\Services\ServiceNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class AuthController extends Controller
 {
@@ -48,6 +50,18 @@ class AuthController extends Controller
         $user->assignRole($user->role);
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Notification : Nouveau client inscrit → gestionnaire(s)
+        if ($user->role === 'client') {
+            try {
+                $user->load('client');
+                ServiceNotification::dispatcher('nouveau_client', $user, [
+                    'url_cible' => "/gestionnaire/clients/{$user->client->id}",
+                ]);
+            } catch (\Throwable $e) {
+                Log::error('Erreur notification nouveau_client: '.$e->getMessage(), ['exception' => $e]);
+            }
+        }
 
         return response()->json([
             'user' => new UserResource($user),
