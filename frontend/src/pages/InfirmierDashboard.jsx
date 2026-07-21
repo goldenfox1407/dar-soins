@@ -23,6 +23,7 @@ export default function InfirmierDashboard() {
   const [interventions, setInterventions] = useState([]);
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [expandedMission, setExpandedMission] = useState(null);
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -40,23 +41,29 @@ export default function InfirmierDashboard() {
     if (storedUser) setUser(JSON.parse(storedUser));
     fetchMissions();
     fetchProduits();
+
+    const interval = setInterval(() => {
+      fetchMissions(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchMissions = async () => {
+  const fetchMissions = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await api.get('/interventions');
       setInterventions(res.data);
       // Auto-set active intervention if any is en_cours
       const enCours = res.data.find(i => i.statut === 'en_cours');
-      if (enCours) {
+      if (enCours && !activeIntervention) {
         setActiveIntervention(enCours);
         setActiveTab('active');
       }
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -186,7 +193,7 @@ export default function InfirmierDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8 animate-fade-in">
         {/* Header */}
         <header className="mb-8">
-          <h1 className="text-3xl font-extrabold mb-1 text-[#1E293B]">Espace Soignant 👩‍⚕️</h1>
+          <h1 className="text-3xl font-extrabold mb-1 text-[#1E293B]">Bonjour, {user ? `${user.prenom || ''} ${user.nom || ''}`.trim() : 'Soignant'} 👩‍⚕️</h1>
           <p className="text-slate-500">Gérez vos missions et interventions</p>
         </header>
 
@@ -440,26 +447,86 @@ export default function InfirmierDashboard() {
             {historiqueMissions.length === 0 ? (
               <p className="text-slate-500">Aucun historique disponible.</p>
             ) : (
-              historiqueMissions.map(mission => (
-                <div key={mission.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-bold text-lg">{mission.produit?.nom}</h3>
-                      <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Terminée</span>
+              historiqueMissions.map(mission => {
+                const isExpanded = expandedMission === mission.id;
+                return (
+                  <div key={mission.id} className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-lg text-slate-800">{mission.produit?.nom}</h3>
+                          <span className="inline-block bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold mt-1">Terminée</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs text-slate-400 font-medium">{new Date(mission.date_heure).toLocaleDateString('fr-FR')}</span>
+                        </div>
+                      </div>
+                      <p className="text-sm text-slate-600 mb-2"><strong>Patient:</strong> {mission.client?.user?.name || 'Patient inconnu'}</p>
+                      <p className="text-sm text-slate-600 mb-3"><strong>Date:</strong> {new Date(mission.date_heure).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</p>
+
+                      <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 mb-3">
+                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Votre rémunération :</p>
+                        <p className="text-sm font-bold text-emerald-600">{mission.produit?.remuneration_soignant || 'N/A'} MAD</p>
+                      </div>
+
+                      {/* Zone Détails pliée/dépliée */}
+                      {isExpanded && (
+                        <div className="mt-4 border-t border-slate-100 pt-4 space-y-4 text-xs text-slate-600 animate-fade-in">
+                          {/* Constantes Médicales */}
+                          {mission.constantes && mission.constantes.length > 0 && (
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                              <h4 className="font-bold text-slate-500 uppercase tracking-wider mb-2">Constantes relevées</h4>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div><span className="text-slate-400">Tension:</span> <strong className="text-slate-800">{mission.constantes[0].tension || 'N/A'} mmHg</strong></div>
+                                <div><span className="text-slate-400">Glycémie:</span> <strong className="text-slate-800">{mission.constantes[0].glycemie || 'N/A'} g/L</strong></div>
+                                <div><span className="text-slate-400">Température:</span> <strong className="text-slate-800">{mission.constantes[0].temperature || 'N/A'} °C</strong></div>
+                                <div><span className="text-slate-400">Poids:</span> <strong className="text-slate-800">{mission.constantes[0].poids || 'N/A'} kg</strong></div>
+                              </div>
+                            </div>
+                          )}
+                          {/* Consommables */}
+                          {mission.consommations && mission.consommations.length > 0 && (
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                              <h4 className="font-bold text-slate-500 uppercase tracking-wider mb-2">Consommables utilisés</h4>
+                              <ul className="space-y-1">
+                                {mission.consommations.map((c, idx) => (
+                                  <li key={idx} className="flex justify-between">
+                                    <span>{c.produit?.nom || 'Consommable'} (x{c.quantite})</span>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {/* Notes infirmières */}
+                          {mission.compte_rendu && (
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                              <h4 className="font-bold text-slate-500 uppercase tracking-wider mb-1">Vos Notes de visite</h4>
+                              <p className="italic text-slate-600">{mission.compte_rendu}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <p className="text-sm text-slate-600 mb-2"><strong>Patient:</strong> {mission.client?.user?.name}</p>
-                    <p className="text-sm text-slate-600 mb-2"><strong>Date:</strong> {new Date(mission.date_heure).toLocaleString('fr-FR')}</p>
+                    <div className="mt-4 pt-4 border-t border-slate-100 flex gap-2">
+                      <button 
+                        type="button"
+                        onClick={() => setExpandedMission(isExpanded ? null : mission.id)}
+                        className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 rounded text-xs font-bold transition-colors"
+                      >
+                        {isExpanded ? 'Masquer détails' : 'Détails visite'}
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => mission.facture ? viewPdf(`/factures/${mission.facture.id}/pdf`) : alert("Aucune facture trouvée.")}
+                        className="flex-1 bg-slate-800 hover:bg-slate-900 text-white py-2 rounded flex justify-center items-center gap-1.5 text-xs font-semibold transition-colors"
+                      >
+                        <ClipboardList size={14} /> Facture PDF
+                      </button>
+                    </div>
                   </div>
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <button 
-                      onClick={() => mission.facture ? viewPdf(`/factures/${mission.facture.id}/pdf`) : alert("Aucune facture trouvée.")}
-                      className="w-full bg-slate-800 hover:bg-slate-900 text-white py-2 rounded flex justify-center gap-2 font-semibold transition-colors"
-                    >
-                      <ClipboardList size={18} /> Voir la Facture
-                    </button>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         ) : null}

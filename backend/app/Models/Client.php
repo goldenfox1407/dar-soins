@@ -16,6 +16,13 @@ class Client extends Model
         'latitude',
         'longitude',
         'adresse',
+        'code_client',
+        'pays',
+        'ville',
+        'code_postal',
+        'numero_taxe',
+        'limite_credit',
+        'notes_internes',
     ];
 
     public function user()

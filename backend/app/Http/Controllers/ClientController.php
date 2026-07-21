@@ -28,24 +28,39 @@ class ClientController extends Controller
     {
         $request->validate([
             'nom' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email'
+            'prenom' => 'nullable|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'nullable|string|min:6',
         ]);
 
         DB::beginTransaction();
         try {
             // Create user for the client
+            $password = $request->password ? Hash::make($request->password) : Hash::make(Str::random(12));
+            
             $user = User::create([
                 'nom' => $request->nom,
+                'prenom' => $request->prenom,
                 'email' => $request->email,
-                'password' => Hash::make(Str::random(12)), // Random password, they can reset it later
+                'password' => $password,
                 'role' => 'client'
             ]);
+
+            // Assign Spatie role
+            \Spatie\Permission\Models\Role::firstOrCreate(
+                ['name' => 'client', 'guard_name' => 'web']
+            );
+            $user->assignRole('client');
 
             // Create client profile
             $client = Client::create([
                 'user_id' => $user->id,
                 'code_client' => $request->code_client ?? 'CL-' . str_pad($user->id, 4, '0', STR_PAD_LEFT),
                 'telephone' => $request->telephone,
+                'date_naissance' => $request->date_naissance,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+                'adresse' => $request->adresse,
                 'pays' => $request->pays,
                 'ville' => $request->ville,
                 'code_postal' => $request->code_postal,

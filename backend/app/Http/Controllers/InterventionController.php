@@ -37,13 +37,13 @@ class InterventionController extends Controller
     {
         $user = Auth::user();
         if ($user->hasRole('client')) {
-            $interventions = Intervention::with(['infirmier.user', 'produit', 'constantes', 'devis', 'facture'])
+            $interventions = Intervention::with(['infirmier.user', 'produit', 'constantes', 'devis', 'facture', 'consommations.produit'])
                 ->where('client_id', $user->client->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
             return response()->json($interventions);
         } elseif ($user->hasRole('infirmier')) {
-            $interventions = Intervention::with(['client.user', 'produit', 'devis', 'localisation', 'facture'])
+            $interventions = Intervention::with(['client.user', 'produit', 'devis', 'localisation', 'facture', 'constantes', 'consommations.produit'])
                 ->where('infirmier_id', $user->infirmier->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -341,7 +341,15 @@ class InterventionController extends Controller
             return response()->json(['message' => 'Aucun devis généré pour cette intervention.'], 400);
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.devis', ['intervention' => $intervention, 'devis' => $intervention->devis]);
+        $config = \App\Models\Config::firstOrFail();
+        $devise = $config->devise_defaut ?? 'MAD';
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.devis', [
+            'intervention' => $intervention,
+            'devis' => $intervention->devis,
+            'config' => $config,
+            'devise' => $devise
+        ]);
         $pdfContent = $pdf->output();
 
         \Illuminate\Support\Facades\Mail::to($intervention->client->user->email)

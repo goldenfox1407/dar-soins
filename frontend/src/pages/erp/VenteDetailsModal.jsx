@@ -362,7 +362,7 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
 
                             <div style={{ borderTop: '1px solid var(--card-border)', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', fontSize: '0.9rem', color: '#10B981' }}>
                               <span>Total Estimé (TTC)</span>
-                              <span>{(((parseFloat(intervention.produit?.prix_client) || 0) + ((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0))) * 1.20).toFixed(2)} MAD</span>
+                              <span>{((parseFloat(intervention.produit?.prix_client) || 0) + ((parseFloat(distanceManuelle)||0) * (parseFloat(tarifKmManuel)||0))).toFixed(2)} MAD</span>
                             </div>
                           </div>
                         </div>

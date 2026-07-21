@@ -11,6 +11,7 @@ export default function ClientDashboard() {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [expandedIntervention, setExpandedIntervention] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,15 +36,21 @@ export default function ClientDashboard() {
       setUser(JSON.parse(storedUser));
     }
     fetchData();
-    
+
     if (location.state && location.state.selectedProduitId) {
       setShowOrderForm(true);
     }
+
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, [location.state]);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const [intRes, prodRes] = await Promise.all([
         api.get('/interventions'),
         api.get('/produits')
@@ -56,13 +63,13 @@ export default function ClientDashboard() {
       // If a product was selected from the catalog, select it, otherwise pick the first one
       if (location.state && location.state.selectedProduitId) {
         setFormData(prev => ({ ...prev, produit_id: location.state.selectedProduitId }));
-      } else if (allProds.length > 0) {
+      } else if (allProds.length > 0 && !formData.produit_id) {
         setFormData(prev => ({ ...prev, produit_id: allProds[0].id }));
       }
     } catch (err) {
       console.error("Erreur chargement donnees", err);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -186,7 +193,7 @@ export default function ClientDashboard() {
         {/* Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-extrabold mb-1 text-[#1E293B]">Bonjour, {user?.name?.split(' ')[0] || 'Patient'} 👋</h1>
+            <h1 className="text-3xl font-extrabold mb-1 text-[#1E293B]">Bonjour, {user ? `${user.prenom || ''} ${user.nom || ''}`.trim() : 'Patient'} 👋</h1>
             <p className="text-slate-500">Gérez vos soins et suivez votre santé en temps réel.</p>
           </div>
           <button 
@@ -433,6 +440,111 @@ export default function ClientDashboard() {
                 })}
               </div>
             )}
+
+            {/* Historique des Soins Passés */}
+            <div className="mt-8 space-y-6">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-[#1E293B]">
+                <FileText className="text-blue-600" /> Historique des soins reçus
+              </h2>
+
+              {loading ? null : pastInterventions.length === 0 ? (
+                <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+                  <p className="text-slate-400 text-sm">Aucun historique de soins terminés.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {pastInterventions.map(inter => {
+                    const isExpanded = expandedIntervention === inter.id;
+                    return (
+                      <div key={inter.id} className="bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="text-lg font-bold text-[#1E293B]">{inter.produit?.nom || 'Soin Infirmier'}</h3>
+                            <p className="text-xs text-slate-500 mt-1">
+                              Soignant : {inter.infirmier?.user ? `${inter.infirmier.user.prenom || ''} ${inter.infirmier.user.nom}` : 'Non spécifié'}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-slate-700">{new Date(inter.date_heure).toLocaleDateString('fr-FR')}</div>
+                            <div className="text-xs text-slate-400">{new Date(inter.date_heure).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+                          </div>
+                        </div>
+
+                        {/* Boutons d'actions principaux */}
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedIntervention(isExpanded ? null : inter.id)}
+                            className="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg font-bold transition-colors"
+                          >
+                            {isExpanded ? 'Masquer les détails' : 'Voir les détails'}
+                          </button>
+
+                          {inter.facture && (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                try {
+                                  const response = await api.get(`/factures/${inter.facture.id}/pdf`, { responseType: 'blob' });
+                                  const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+                                  window.open(url, '_blank');
+                                } catch (err) {
+                                  alert('Erreur lors du téléchargement de la facture.');
+                                }
+                              }}
+                              className="text-xs bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors flex items-center gap-1"
+                            >
+                              <FileText size={14}/> Télécharger Facture
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Zone détails dépliée */}
+                        {isExpanded && (
+                          <div className="mt-4 border-t border-slate-100 pt-4 space-y-4 text-sm text-slate-700 animate-fade-in">
+                            {/* Constantes Médicales */}
+                            {inter.constantes && inter.constantes.length > 0 && (
+                              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Constantes médicales relevées</h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                                  <div><span className="text-slate-400">Tension :</span> <strong className="text-[#1e293b]">{inter.constantes[0].tension || 'N/A'} mmHg</strong></div>
+                                  <div><span className="text-slate-400">Glycémie :</span> <strong className="text-[#1e293b]">{inter.constantes[0].glycemie || 'N/A'} g/L</strong></div>
+                                  <div><span className="text-slate-400">Température :</span> <strong className="text-[#1e293b]">{inter.constantes[0].temperature || 'N/A'} °C</strong></div>
+                                  <div><span className="text-slate-400">Poids :</span> <strong className="text-[#1e293b]">{inter.constantes[0].poids || 'N/A'} kg</strong></div>
+                                </div>
+                              </div>
+                            )}
+                            {/* Consommables */}
+                            {inter.consommations && inter.consommations.length > 0 && (
+                              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">Matériels et Consommables utilisés</h4>
+                                <ul className="space-y-1 text-xs">
+                                  {inter.consommations.map((c, idx) => (
+                                    <li key={idx} className="flex justify-between">
+                                      <span>{c.produit?.nom || 'Consommable'} (x{c.quantite})</span>
+                                      <strong className="text-[#1e293b]">{(c.quantite * (c.produit?.prix_client || 0)).toFixed(2)} MAD</strong>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+
+                            {/* Notes infirmières */}
+                            {inter.compte_rendu && (
+                              <div className="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                                <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-1">Notes Cliniques du Soignant</h4>
+                                <p className="text-xs italic text-slate-600">{inter.compte_rendu}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="space-y-6">

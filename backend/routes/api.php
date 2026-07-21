@@ -40,6 +40,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Factures (accessible par les utilisateurs authentifiés)
     Route::get('/factures', [App\Http\Controllers\FactureController::class, 'index']);
     Route::get('/factures/{id}/pdf', [App\Http\Controllers\FactureController::class, 'genererPdf']);
+    Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
 
     // Personnel
     Route::get('/personnel', [App\Http\Controllers\PersonnelController::class, 'index']);
@@ -84,7 +85,6 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('/interventions/{id}/generer-devis', [\App\Http\Controllers\InterventionController::class, 'genererDevis']);
         Route::post('/interventions/{id}/envoyer-devis', [\App\Http\Controllers\InterventionController::class, 'envoyerDevis']);
 
-        Route::get('/devis/{id}/pdf', [\App\Http\Controllers\DevisController::class, 'telechargerPdf']);
         Route::apiResource('devis', \App\Http\Controllers\DevisController::class);
         Route::apiResource('vente-lignes', \App\Http\Controllers\VenteLigneController::class);
         Route::apiResource('employes', \App\Http\Controllers\EmployeController::class);

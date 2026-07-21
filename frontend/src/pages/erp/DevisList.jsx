@@ -8,16 +8,23 @@ export default function DevisList() {
 
   useEffect(() => {
     fetchData();
+
+    const interval = setInterval(() => {
+      fetchData(true);
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (silent = false) => {
     try {
+      if (!silent) setLoading(true);
       const response = await api.get('/devis').catch(() => ({ data: [] }));
       setData(response.data?.data || response.data?.data || response.data || []);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 

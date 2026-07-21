@@ -37,8 +37,8 @@ class ServiceTarification
             $prixSoin *= $intervention->duree_heures;
         }
 
-        $montantHT = $prixSoin + $fraisDeplacement;
-        $montantTTC = $montantHT * (1 + ($config->tva / 100));
+        $montantTTC = $prixSoin + $fraisDeplacement;
+        $montantHT = $montantTTC / (1 + ($config->tva / 100));
 
         return [
             'prix_soin' => $prixSoin,
@@ -82,8 +82,8 @@ class ServiceTarification
             }
         }
 
-        $montantHT = $calcul['prix_soin'] + $calcul['frais_deplacement'] + $coutMateriels;
-        $montantTTC = $montantHT * (1 + ($calcul['config']->tva / 100));
+        $montantTTC = $calcul['prix_soin'] + $calcul['frais_deplacement'] + $coutMateriels;
+        $montantHT = $montantTTC / (1 + ($calcul['config']->tva / 100));
 
         $numerotation = new ServiceNumerotation();
         $reference = $numerotation->generer('facture');

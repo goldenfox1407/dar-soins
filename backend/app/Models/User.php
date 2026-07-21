@@ -50,6 +50,15 @@ class User extends Authenticatable
         ];
     }
 
+    protected $appends = [
+        'name',
+    ];
+
+    public function getNameAttribute()
+    {
+        return trim(($this->prenom ?? '') . ' ' . ($this->nom ?? ''));
+    }
+
     public function client()
     {
         return $this->hasOne(Client::class);

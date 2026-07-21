@@ -27,6 +27,14 @@ export default function AdminDashboard() {
     fetchProduits();
     fetchPersonnel();
     fetchFactures();
+
+    const interval = setInterval(() => {
+      fetchProduits();
+      fetchPersonnel();
+      fetchFactures();
+    }, 5000);
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchProduits = async () => {

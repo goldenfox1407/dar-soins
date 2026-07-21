@@ -39,6 +39,16 @@ class UserController extends Controller
             $rules['photo_diplome'] = 'required|image|max:5120';
         }
 
+        // Validation supplémentaire pour les clients
+        if ($request->role === 'client') {
+            $rules['prenom'] = 'required|string|max:255';
+            $rules['telephone'] = 'nullable|string|max:255';
+            $rules['date_naissance'] = 'nullable|date';
+            $rules['adresse'] = 'nullable|string';
+            $rules['latitude'] = 'nullable|numeric';
+            $rules['longitude'] = 'nullable|numeric';
+        }
+
         $request->validate($rules);
 
         $user = User::create([
@@ -53,7 +63,14 @@ class UserController extends Controller
 
         // Create specific profile based on role
         if ($request->role === 'client') {
-            Client::create(['user_id' => $user->id]);
+            Client::create([
+                'user_id' => $user->id,
+                'telephone' => $request->telephone,
+                'date_naissance' => $request->date_naissance,
+                'adresse' => $request->adresse,
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
+            ]);
         } elseif ($request->role === 'infirmier') {
             $infirmierData = [
                 'user_id' => $user->id,
@@ -103,6 +120,15 @@ class UserController extends Controller
             $rules['photo_diplome'] = 'nullable|image|max:5120';
         }
 
+        if ($request->role === 'client') {
+            $rules['prenom'] = 'nullable|string|max:255';
+            $rules['telephone'] = 'nullable|string|max:255';
+            $rules['date_naissance'] = 'nullable|date';
+            $rules['adresse'] = 'nullable|string';
+            $rules['latitude'] = 'nullable|numeric';
+            $rules['longitude'] = 'nullable|numeric';
+        }
+
         $request->validate($rules);
 
         $user->update([
@@ -119,6 +145,18 @@ class UserController extends Controller
         }
 
         $user->syncRoles([$request->role]);
+
+        // Mise à jour du profil client
+        if ($request->role === 'client') {
+            $client = Client::firstOrCreate(['user_id' => $user->id]);
+            $client->update([
+                'telephone' => $request->telephone ?? $client->telephone,
+                'date_naissance' => $request->date_naissance ?? $client->date_naissance,
+                'adresse' => $request->adresse ?? $client->adresse,
+                'latitude' => $request->latitude ?? $client->latitude,
+                'longitude' => $request->longitude ?? $client->longitude,
+            ]);
+        }
 
         // Mise à jour du profil infirmier
         if ($request->role === 'infirmier') {
