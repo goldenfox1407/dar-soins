@@ -34,23 +34,23 @@ class RolesAndPermissionsSeeder extends Seeder
             'parametres'
         ];
 
-        // Création de toutes les permissions
+        // Création de toutes les permissions (idempotent avec firstOrCreate)
         foreach ($modules as $module) {
-            Permission::create(['name' => "voir_$module", 'guard_name' => 'web']);
-            Permission::create(['name' => "ajouter_$module", 'guard_name' => 'web']);
-            Permission::create(['name' => "modifier_$module", 'guard_name' => 'web']);
-            Permission::create(['name' => "supprimer_$module", 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => "voir_$module", 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => "ajouter_$module", 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => "modifier_$module", 'guard_name' => 'web']);
+            Permission::firstOrCreate(['name' => "supprimer_$module", 'guard_name' => 'web']);
         }
 
         // Créer les rôles et assigner les permissions
         
         // 1. Gestionnaire (Admin - a tout)
-        $roleGestionnaire = Role::create(['name' => 'gestionnaire']);
-        $roleGestionnaire->givePermissionTo(Permission::all());
+        $roleGestionnaire = Role::firstOrCreate(['name' => 'gestionnaire']);
+        $roleGestionnaire->syncPermissions(Permission::all());
 
         // 2. Infirmier (accès limité)
-        $roleInfirmier = Role::create(['name' => 'infirmier']);
-        $roleInfirmier->givePermissionTo([
+        $roleInfirmier = Role::firstOrCreate(['name' => 'infirmier']);
+        $roleInfirmier->syncPermissions([
             'voir_tableau_de_bord',
             'voir_contacts',
             'voir_produits',
@@ -60,8 +60,8 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // 3. Client
-        $roleClient = Role::create(['name' => 'client']);
-        $roleClient->givePermissionTo([
+        $roleClient = Role::firstOrCreate(['name' => 'client']);
+        $roleClient->syncPermissions([
             'voir_tableau_de_bord',
             'voir_taches'
         ]);
