@@ -3,6 +3,38 @@ echo ===================================================
 echo   Demarrage de Dar-Soins (Backend + Frontend)
 echo ===================================================
 
+:: Verifier et installer les dependances backend (vendor/)
+if not exist "backend\vendor" (
+    echo [INFO] Le dossier backend\vendor n'existe pas. Installation des dependances PHP...
+    cd backend
+    composer install
+    if errorlevel 1 (
+        echo [ERREUR] Echec de composer install. Verifiez que Composer est installe.
+        pause
+        exit /b 1
+    )
+    cd ..
+    echo [OK] Dependances PHP installees avec succes.
+) else (
+    echo [OK] Dependances PHP deja installees.
+)
+
+:: Verifier et installer les dependances frontend (node_modules/)
+if not exist "frontend\node_modules" (
+    echo [INFO] Le dossier frontend\node_modules n'existe pas. Installation des dependances Node.js...
+    cd frontend
+    npm install
+    if errorlevel 1 (
+        echo [ERREUR] Echec de npm install. Verifiez que Node.js est installe.
+        pause
+        exit /b 1
+    )
+    cd ..
+    echo [OK] Dependances Node.js installees avec succes.
+) else (
+    echo [OK] Dependances Node.js deja installees.
+)
+
 :: Verifier le fichier .env du backend
 if not exist "backend\.env" (
     echo [INFO] Le fichier backend\.env n'existe pas. Creation a partir de .env.example...
