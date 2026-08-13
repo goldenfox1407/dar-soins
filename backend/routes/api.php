@@ -70,6 +70,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('ajustements', \App\Http\Controllers\AjustementController::class);
         Route::apiResource('transferts', \App\Http\Controllers\TransfertController::class);
         Route::patch('transferts/{id}/statut', [\App\Http\Controllers\TransfertController::class, 'updateStatut']);
+        Route::apiResource('retour-ventes', \App\Http\Controllers\RetourVenteController::class);
+        Route::patch('retour-ventes/{id}/statut', [\App\Http\Controllers\RetourVenteController::class, 'updateStatut']);
 
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);

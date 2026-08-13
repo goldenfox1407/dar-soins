@@ -36,6 +36,8 @@ import AchatsList from './pages/erp/AchatsList';
 import AchatsCreate from './pages/erp/AchatsCreate';
 import AchatsReturn from './pages/erp/AchatsReturn';
 import VentesList from './pages/erp/VentesList';
+import RetourVentesList from './pages/erp/RetourVentesList';
+import RetourVentesCreate from './pages/erp/RetourVentesCreate';
 import DevisList from './pages/erp/DevisList';
 import EntrepotsList from './pages/erp/EntrepotsList';
 import ParametresSysteme from './pages/erp/ParametresSysteme';
@@ -112,8 +114,9 @@ function App() {
           <Route path="ventes" element={<VentesList />} />
           <Route path="ventes/ajouter" element={<ErpComingSoon title="Nouvelle Vente" />} />
           
-          {/* Retours — En développement */}
-          <Route path="retours/ventes" element={<ErpComingSoon title="Retour des Ventes" />} />
+          {/* Retours Ventes — Fonctionnel */}
+          <Route path="retours/ventes" element={<RetourVentesList />} />
+          <Route path="retours/ventes/ajouter" element={<RetourVentesCreate />} />
           <Route path="retours/achats" element={<ErpComingSoon title="Retours Achats" />} />
           
           {/* Devis — Fonctionnel */}
