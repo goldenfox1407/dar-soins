@@ -198,7 +198,7 @@ export default function NotificationDropdown() {
           className="glass-panel custom-scrollbar shadow-2xl animate-scale-in"
           style={{
             position: 'absolute',
-            top: '48px',
+            top: '56px',
             right: 0,
             width: '380px',
             maxHeight: '520px',
@@ -386,7 +386,7 @@ export default function NotificationDropdown() {
           className="animate-slide-up shadow-2xl"
           style={{
             position: 'fixed',
-            bottom: '24px',
+            bottom: '10%',
             right: '24px',
             width: '340px',
             background: '#0F172A',
