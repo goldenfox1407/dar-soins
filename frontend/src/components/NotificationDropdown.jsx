@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Bell, Check, CheckCheck, Trash2, ExternalLink, RefreshCw, Send, X, Info } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, RefreshCw, Send, X } from 'lucide-react';
 import api from '../services/api';
 
 export default function NotificationDropdown() {
@@ -10,9 +11,12 @@ export default function NotificationDropdown() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState(null); // { id, titre, message, icone, url }
-  
+  const [toast, setToast] = useState(null); // { titre, message, icone, url }
+
   const dropdownRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
+  const seenIdsRef = useRef(new Set());
+  const isFirstFetchRef = useRef(true);
 
   // Settings from localStorage (configured in NotificationsSettings page)
   const getDisplaySettings = () => {
@@ -41,21 +45,33 @@ export default function NotificationDropdown() {
     };
   }, []);
 
-  const fetchNotifications = async (showToastOnNew = false) => {
+  const fetchNotifications = async () => {
     try {
       const response = await api.get('/notifications');
       const data = response.data;
-      
-      const newCount = data.unread_count || 0;
       const newList = data.notifications || [];
 
-      // If new unread notifications arrive while polling and toasts are enabled
-      if (showToastOnNew && settings.enableToast && newCount > unreadCount && newList.length > 0) {
-        const newest = newList[0];
-        triggerToast(newest.data?.titre || 'Nouvelle notification', newest.data?.message || '', newest.data?.icone || '🔔', newest.data?.url);
+      // Only toast TRULY NEW notifications that arrive AFTER initial page load
+      if (isFirstFetchRef.current) {
+        newList.forEach(n => seenIdsRef.current.add(n.id));
+        isFirstFetchRef.current = false;
+      } else {
+        const newlyArrived = newList.filter(n => !seenIdsRef.current.has(n.id));
+        if (newlyArrived.length > 0) {
+          newlyArrived.forEach(n => seenIdsRef.current.add(n.id));
+          const latest = newlyArrived[0];
+          if (settings.enableToast && !latest.read_at) {
+            triggerToast(
+              latest.data?.titre || 'Nouvelle notification',
+              latest.data?.message || '',
+              latest.data?.icone || '🔔',
+              latest.data?.url
+            );
+          }
+        }
       }
 
-      setUnreadCount(newCount);
+      setUnreadCount(data.unread_count || 0);
       setNotifications(newList);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -67,7 +83,7 @@ export default function NotificationDropdown() {
 
     const intervalTime = settings.pollingInterval || 15000;
     const interval = setInterval(() => {
-      fetchNotifications(true);
+      fetchNotifications();
     }, intervalTime);
 
     return () => clearInterval(interval);
@@ -86,7 +102,11 @@ export default function NotificationDropdown() {
 
   const triggerToast = (titre, message, icone = '🔔', url = null) => {
     if (!settings.enableToast) return;
-    
+
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+    }
+
     // Play audio beep if enabled
     if (settings.enableSound) {
       try {
@@ -106,7 +126,7 @@ export default function NotificationDropdown() {
     setToast({ titre, message, icone, url });
 
     if (settings.toastDuration > 0) {
-      setTimeout(() => {
+      toastTimeoutRef.current = setTimeout(() => {
         setToast(null);
       }, settings.toastDuration);
     }
@@ -198,7 +218,7 @@ export default function NotificationDropdown() {
           className="glass-panel custom-scrollbar shadow-2xl animate-scale-in"
           style={{
             position: 'absolute',
-            top: '56px',
+            top: '52px',
             right: 0,
             width: '380px',
             maxHeight: '520px',
@@ -380,39 +400,48 @@ export default function NotificationDropdown() {
         </div>
       )}
 
-      {/* Floating Toast Notification Popup */}
-      {toast && (
+      {/* Floating Toast Notification Popup - Rendered via React Portal onto document.body */}
+      {toast && createPortal(
         <div 
           className="animate-slide-up shadow-2xl"
+          onClick={() => {
+            if (toast.url) navigate(toast.url);
+            setToast(null);
+          }}
           style={{
             position: 'fixed',
-            bottom: '10%',
-            right: '24px',
-            width: '340px',
+            bottom: '32px',
+            right: '32px',
+            width: '360px',
             background: '#0F172A',
             color: '#FFFFFF',
-            padding: '16px',
-            borderRadius: '14px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4)',
-            zIndex: 99999,
+            padding: '16px 20px',
+            borderRadius: '16px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            zIndex: 999999,
             display: 'flex',
             alignItems: 'flex-start',
-            gap: '12px',
-            border: '1px solid #334155'
+            gap: '14px',
+            cursor: toast.url ? 'pointer' : 'default',
+            pointerEvents: 'auto'
           }}
         >
-          <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>{toast.icone}</span>
+          <span style={{ fontSize: '1.8rem', flexShrink: 0, lineHeight: 1 }}>{toast.icone}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h5 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#F8FAFC' }}>{toast.titre}</h5>
-            <p style={{ margin: '4px 0 0', fontSize: '0.8rem', color: '#94A3B8', lineHeight: 1.3 }}>{toast.message}</p>
+            <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#F8FAFC' }}>{toast.titre}</h5>
+            <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94A3B8', lineHeight: 1.4 }}>{toast.message}</p>
           </div>
           <button 
-            onClick={() => setToast(null)}
-            style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', padding: 0 }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setToast(null);
+            }}
+            style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', padding: 0, marginLeft: '4px' }}
           >
-            <X size={16} />
+            <X size={18} />
           </button>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
