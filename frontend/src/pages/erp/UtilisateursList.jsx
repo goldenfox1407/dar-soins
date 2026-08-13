@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Edit, Trash2, Plus, X, Search, MapPin, Map, CheckCircle, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, X, Search, MapPin, Map as MapIcon, CheckCircle, Eye } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import api from '../../services/api';
 
