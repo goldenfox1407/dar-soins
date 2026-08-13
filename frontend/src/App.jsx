@@ -113,7 +113,7 @@ function App() {
           <Route path="ventes/ajouter" element={<ErpComingSoon title="Nouvelle Vente" />} />
           
           {/* Retours — En développement */}
-          <Route path="retours/ventes" element={<ErpComingSoon title="Retours Ventes" />} />
+          <Route path="retours/ventes" element={<ErpComingSoon title="Retour des Ventes" />} />
           <Route path="retours/achats" element={<ErpComingSoon title="Retours Achats" />} />
           
           {/* Devis — Fonctionnel */}

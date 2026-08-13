@@ -39,7 +39,7 @@ const MENU_ITEMS = [
   ]},
   { id: 'ventes', title: 'Ventes', icon: TrendingUp, submenus: [
     { title: 'Liste des ventes', path: '/gestionnaire/ventes' },
-    { title: 'Retours ventes', path: '/gestionnaire/retours/ventes' },
+    { title: 'Retour des ventes', path: '/gestionnaire/retours/ventes' },
     { title: 'Devis', path: '/gestionnaire/devis' }
   ]},
   { id: 'hrm', title: 'Ressources Humaines', icon: Briefcase, submenus: [
