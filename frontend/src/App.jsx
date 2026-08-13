@@ -39,6 +39,10 @@ import VentesList from './pages/erp/VentesList';
 import RetourVentesList from './pages/erp/RetourVentesList';
 import RetourVentesCreate from './pages/erp/RetourVentesCreate';
 import DevisList from './pages/erp/DevisList';
+import EmployesList from './pages/erp/EmployesList';
+import PresencesList from './pages/erp/PresencesList';
+import CongesList from './pages/erp/CongesList';
+import PaieList from './pages/erp/PaieList';
 import EntrepotsList from './pages/erp/EntrepotsList';
 import ParametresSysteme from './pages/erp/ParametresSysteme';
 import TaxesList from './pages/erp/TaxesList';
@@ -122,11 +126,11 @@ function App() {
           {/* Devis — Fonctionnel */}
           <Route path="devis" element={<DevisList />} />
           
-          {/* RH — En développement */}
-          <Route path="hrm/employes" element={<ErpComingSoon title="Employés" description="La gestion des employés, fiches de paie et contrats sera bientôt disponible." />} />
-          <Route path="hrm/presences" element={<ErpComingSoon title="Présences" description="Le pointage et le suivi des présences sera bientôt disponible." />} />
-          <Route path="hrm/conges" element={<ErpComingSoon title="Congés" description="La gestion des congés et absences sera bientôt disponible." />} />
-          <Route path="hrm/paie" element={<ErpComingSoon title="Paie" description="Le module de gestion de la paie sera bientôt disponible." />} />
+          {/* RH — Fonctionnel */}
+          <Route path="hrm/employes" element={<EmployesList />} />
+          <Route path="hrm/presences" element={<PresencesList />} />
+          <Route path="hrm/conges" element={<CongesList />} />
+          <Route path="hrm/paie" element={<PaieList />} />
           
           {/* Comptabilité — En développement */}
           <Route path="compta/comptes" element={<ErpComingSoon title="Comptes Bancaires" description="La gestion des comptes bancaires et soldes sera bientôt disponible." />} />

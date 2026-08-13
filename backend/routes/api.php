@@ -71,7 +71,13 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::apiResource('transferts', \App\Http\Controllers\TransfertController::class);
         Route::patch('transferts/{id}/statut', [\App\Http\Controllers\TransfertController::class, 'updateStatut']);
         Route::apiResource('retour-ventes', \App\Http\Controllers\RetourVenteController::class);
-        Route::patch('retour-ventes/{id}/statut', [\App\Http\Controllers\RetourVenteController::class, 'updateStatut']);
+        // HRM Routes (Ressources Humaines)
+        Route::apiResource('employes', \App\Http\Controllers\EmployeController::class);
+        Route::apiResource('presences', \App\Http\Controllers\PresenceController::class);
+        Route::apiResource('conges', \App\Http\Controllers\CongeController::class);
+        Route::patch('conges/{id}/statut', [\App\Http\Controllers\CongeController::class, 'updateStatut']);
+        Route::apiResource('fiches-paie', \App\Http\Controllers\PaieController::class);
+        Route::patch('fiches-paie/{id}/statut', [\App\Http\Controllers\PaieController::class, 'updateStatut']);
 
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);

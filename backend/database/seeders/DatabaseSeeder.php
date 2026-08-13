@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             NotificationSeeder::class,
             StockSeeder::class,
             RetourVenteSeeder::class,
+            HrmSeeder::class,
         ]);
 
         $admin = User::firstOrCreate(
