@@ -28,6 +28,10 @@ import MarquesList from './pages/erp/MarquesList';
 import UnitesList from './pages/erp/UnitesList';
 import UnitesBaseList from './pages/erp/UnitesBaseList';
 import VariationsList from './pages/erp/VariationsList';
+import AjustementsList from './pages/erp/AjustementsList';
+import AjustementsCreate from './pages/erp/AjustementsCreate';
+import TransfertsList from './pages/erp/TransfertsList';
+import TransfertsCreate from './pages/erp/TransfertsCreate';
 import AchatsList from './pages/erp/AchatsList';
 import AchatsCreate from './pages/erp/AchatsCreate';
 import AchatsReturn from './pages/erp/AchatsReturn';
@@ -94,9 +98,11 @@ function App() {
           <Route path="produits/unites-base" element={<UnitesBaseList />} />
           <Route path="produits/variations" element={<VariationsList />} />
           
-          {/* Stock — En développement */}
-          <Route path="ajustements" element={<ErpComingSoon title="Ajustements de Stock" />} />
-          <Route path="ajustements/ajouter" element={<ErpComingSoon title="Nouvel Ajustement" />} />
+          {/* Stock — Fonctionnel */}
+          <Route path="ajustements" element={<AjustementsList />} />
+          <Route path="ajustements/ajouter" element={<AjustementsCreate />} />
+          <Route path="transferts" element={<TransfertsList />} />
+          <Route path="transferts/ajouter" element={<TransfertsCreate />} />
           
           {/* Achats & Ventes — Fonctionnel */}
           <Route path="achats" element={<AchatsList />} />
@@ -112,9 +118,6 @@ function App() {
           
           {/* Devis — Fonctionnel */}
           <Route path="devis" element={<DevisList />} />
-          
-          {/* Transferts — En développement */}
-          <Route path="transferts" element={<ErpComingSoon title="Transferts de Stock" />} />
           
           {/* RH — En développement */}
           <Route path="hrm/employes" element={<ErpComingSoon title="Employés" description="La gestion des employés, fiches de paie et contrats sera bientôt disponible." />} />

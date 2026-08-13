@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             DeviseSeeder::class,
             NotifConfigSeeder::class,
             NotificationSeeder::class,
+            StockSeeder::class,
         ]);
 
         $admin = User::firstOrCreate(

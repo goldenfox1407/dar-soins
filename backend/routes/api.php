@@ -66,6 +66,11 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::put('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'update']);
         Route::delete('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'destroy']);
 
+        // Stock Management Routes (Ajustements & Transferts)
+        Route::apiResource('ajustements', \App\Http\Controllers\AjustementController::class);
+        Route::apiResource('transferts', \App\Http\Controllers\TransfertController::class);
+        Route::patch('transferts/{id}/statut', [\App\Http\Controllers\TransfertController::class, 'updateStatut']);
+
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);
         Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
