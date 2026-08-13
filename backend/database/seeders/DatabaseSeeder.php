@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             TaxeSeeder::class,
             DeviseSeeder::class,
             NotifConfigSeeder::class,
+            NotificationSeeder::class,
         ]);
 
         $admin = User::firstOrCreate(

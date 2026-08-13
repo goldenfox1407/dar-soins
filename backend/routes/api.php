@@ -29,6 +29,14 @@ Route::get('/produits', [App\Http\Controllers\ProduitController::class, 'index']
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     
+    // Notifications System
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead']);
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead']);
+    Route::delete('/notifications/{id}', [\App\Http\Controllers\NotificationController::class, 'destroy']);
+    Route::post('/notifications/test', [\App\Http\Controllers\NotificationController::class, 'sendTest']);
+
+    
     // Interventions (accessible par client et infirmier)
     Route::get('/interventions', [App\Http\Controllers\InterventionController::class, 'index']);
     Route::post('/interventions/commander', [App\Http\Controllers\InterventionController::class, 'commanderSoin']);

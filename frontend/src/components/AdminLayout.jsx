@@ -7,6 +7,7 @@ import {
   BarChart, Menu, X, ChevronDown, ChevronRight, LogOut, Bell, Search
 } from 'lucide-react';
 import Logo from './Logo';
+import NotificationDropdown from './NotificationDropdown';
 
 const MENU_ITEMS = [
   { id: 'gens', title: 'Contacts & Gens', icon: Users, submenus: [
@@ -197,10 +198,7 @@ export default function AdminLayout() {
           </div>
 
           <div className="erp-topbar-right">
-            <button className="erp-icon-btn">
-              <Bell size={18} />
-              <span className="erp-badge">3</span>
-            </button>
+            <NotificationDropdown />
             
             <button 
               onClick={handleLogout}

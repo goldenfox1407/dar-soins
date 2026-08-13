@@ -1,6 +1,6 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import { ToggleLeft, ToggleRight, Mail, MessageSquare, Bell } from "lucide-react";
+import { ToggleLeft, ToggleRight, Mail, MessageSquare, Bell, Volume2, Clock, CheckCircle } from "lucide-react";
 
 function Toggle({ value, onChange, disabled }) {
   return (
@@ -32,6 +32,27 @@ export default function NotificationsSettings() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
   const [error, setError]   = useState(null);
+
+  // Display & Popup settings saved in localStorage
+  const [displaySettings, setDisplaySettings] = useState(() => {
+    const saved = localStorage.getItem('darsoins_notif_settings');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) {}
+    }
+    return {
+      enableToast: true,
+      toastDuration: 5000,
+      enableSound: true,
+      pollingInterval: 15000,
+    };
+  });
+
+  const handleDisplaySettingChange = (field, value) => {
+    const updated = { ...displaySettings, [field]: value };
+    setDisplaySettings(updated);
+    localStorage.setItem('darsoins_notif_settings', JSON.stringify(updated));
+    window.dispatchEvent(new Event('notif-settings-updated'));
+  };
 
   useEffect(() => { fetchData(); }, []);
 
@@ -73,8 +94,8 @@ export default function NotificationsSettings() {
   return (
     <div className="animate-fade-in" style={{ padding: "2rem" }}>
       <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "1.8rem", fontWeight: 700, color: "var(--primary-color)", marginBottom: "0.3rem" }}>Notifications</h1>
-        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Configurez les canaux de notification par evenement. Sauvegarde automatique.</p>
+        <h1 style={{ fontSize: "1.8rem", fontWeight: 700, color: "var(--primary-color)", marginBottom: "0.3rem" }}>Configuration des Notifications</h1>
+        <p style={{ color: "var(--text-muted)", fontSize: "0.9rem" }}>Gérez les canaux par événement ainsi que les paramètres d'affichage des popups en temps réel.</p>
       </div>
 
       {error && (
@@ -82,6 +103,9 @@ export default function NotificationsSettings() {
           {error}
         </div>
       )}
+
+      {/* Section 1 : Canaux par événements */}
+      <h2 style={{ fontSize: "1.2rem", fontWeight: 700, color: "#1e293b", marginBottom: "1rem" }}>Événements et Canaux de Diffusion</h2>
 
       <div className="glass-panel" style={{ overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -95,7 +119,7 @@ export default function NotificationsSettings() {
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><MessageSquare size={13} /> SMS</div>
               </th>
               <th style={{ padding: "1rem 1.2rem", textAlign: "center", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><Bell size={13} /> App</div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}><Bell size={13} /> App (In-App)</div>
               </th>
               <th style={{ padding: "1rem 1.2rem", textAlign: "left", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Destinataires</th>
               <th style={{ padding: "1rem 1.2rem", textAlign: "center", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Actif</th>
@@ -162,12 +186,86 @@ export default function NotificationsSettings() {
         </table>
       </div>
 
+      {/* Section 2 : Options d'Affichage & Popups */}
+      <div className="glass-panel" style={{ marginTop: '2rem', padding: '1.5rem', borderRadius: '16px' }}>
+        <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1e293b', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Volume2 size={20} color="#2563eb" /> Options d'Affichage & Popups Flottants (Toasts)
+        </h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
+          Personnalisez la façon dont les notifications système vous sont signalées à l'écran en temps réel.
+        </p>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+          {/* Active Toast */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>Popups Flottants (Toasts)</div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Afficher une bannière temporaire en bas à droite à chaque alerte.</div>
+            </div>
+            <Toggle 
+              value={displaySettings.enableToast} 
+              onChange={(v) => handleDisplaySettingChange('enableToast', v)} 
+            />
+          </div>
+
+          {/* Sound alert */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ fontWeight: 600, fontSize: '0.9rem', color: '#1e293b' }}>Signal Sonore (Bip Audio)</div>
+              <div style={{ fontSize: '0.8rem', color: '#64748b' }}>Jouer un signal sonore discret à la réception d'une notification.</div>
+            </div>
+            <Toggle 
+              value={displaySettings.enableSound} 
+              onChange={(v) => handleDisplaySettingChange('enableSound', v)} 
+            />
+          </div>
+
+          {/* Toast Duration */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.3rem' }}>
+              Durée d'affichage du Popup Toast
+            </label>
+            <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.8rem' }}>Temps d'affichage de la bannière avant fermeture automatique.</div>
+            <select 
+              value={displaySettings.toastDuration}
+              onChange={(e) => handleDisplaySettingChange('toastDuration', Number(e.target.value))}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#1e293b', fontWeight: 600 }}
+            >
+              <option value={3000}>3 Secondes (Court)</option>
+              <option value={5000}>5 Secondes (Standard)</option>
+              <option value={10000}>10 Secondes (Long)</option>
+              <option value={15000}>15 Secondes (Très long)</option>
+              <option value={0}>Maintenir jusqu'à fermeture manuelle</option>
+            </select>
+          </div>
+
+          {/* Polling Interval */}
+          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b', marginBottom: '0.3rem' }}>
+              Fréquence de Vérification (Temps Réel)
+            </label>
+            <div style={{ fontSize: '0.8rem', color: '#64748b', marginBottom: '0.8rem' }}>Intervalle de mise à jour des nouvelles notifications.</div>
+            <select 
+              value={displaySettings.pollingInterval}
+              onChange={(e) => handleDisplaySettingChange('pollingInterval', Number(e.target.value))}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid #cbd5e1', background: 'white', color: '#1e293b', fontWeight: 600 }}
+            >
+              <option value={5000}>Toutes les 5 secondes (Ultra-rapide)</option>
+              <option value={15000}>Toutes les 15 secondes (Recommandé)</option>
+              <option value={30000}>Toutes les 30 secondes</option>
+              <option value={60000}>Toutes les 60 secondes</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       {/* Legende */}
       <div style={{ marginTop: "1rem", display: "flex", gap: "1.5rem", fontSize: "0.82rem", color: "var(--text-muted)" }}>
-        <span>Les modifications sont sauvegardees immediatement.</span>
+        <span>Les modifications sont sauvegardées immédiatement.</span>
         <span>|</span>
-        <span>L''envoi reel necessite une configuration SMTP / SMS gateway.</span>
+        <span>L'envoi réel par email/SMS nécessite une configuration SMTP / Passerelle SMS.</span>
       </div>
     </div>
   );
 }
+
