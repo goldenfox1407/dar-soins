@@ -111,7 +111,7 @@ export default function ProduitsList() {
                         {item.remuneration_soignant ? `${item.remuneration_soignant} MAD` : '-'}
                       </td>
                       <td className="erp-table-actions" style={{ justifyContent: 'flex-end' }}>
-                        <button onClick={() => alert("Edition de la page complète non gérée, veuillez supprimer et recréer.")} className="erp-action-btn edit" title="Modifier">
+                        <button onClick={() => navigate(`/gestionnaire/produits/edit/${item.id}`)} className="erp-action-btn edit" title="Modifier">
                           <Edit size={18} />
                         </button>
                         <button onClick={() => handleDelete(item.id)} className="erp-action-btn delete" title="Supprimer">

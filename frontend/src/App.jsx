@@ -86,6 +86,7 @@ function App() {
           {/* Produits — Fonctionnel */}
           <Route path="produits" element={<ProduitsList />} />
           <Route path="produits/create" element={<ProduitsCreate />} />
+          <Route path="produits/edit/:id" element={<ProduitsCreate />} />
           <Route path="produits/code-barres" element={<PrintBarcode />} />
           <Route path="produits/categories" element={<CategoriesList />} />
           <Route path="produits/marques" element={<MarquesList />} />

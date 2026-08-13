@@ -24,6 +24,16 @@ class ProduitController extends Controller
     }
 
     /**
+     * Display the specified product.
+     */
+    public function show($id)
+    {
+        $produit = Produit::with('materiels')->findOrFail($id);
+        return response()->json(['data' => new ProduitResource($produit)]);
+    }
+
+
+    /**
      * Store a newly created product in storage.
      */
     public function store(StoreProduitRequest $request)

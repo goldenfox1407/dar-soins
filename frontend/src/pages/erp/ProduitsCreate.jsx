@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Save, X, Package, Barcode, Image as ImageIcon } from 'lucide-react';
 import api from '../../services/api';
 
 export default function ProduitsCreate() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const isEdit = Boolean(id);
   const [loading, setLoading] = useState(false);
   
   // Paramètres pour les selects
@@ -34,7 +36,40 @@ export default function ProduitsCreate() {
 
   useEffect(() => {
     fetchParams();
-  }, []);
+    if (id) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  const fetchProduct = async () => {
+    try {
+      const res = await api.get(`/produits/${id}`);
+      const prod = res.data?.data || res.data;
+      if (prod) {
+        setFormData({
+          nom: prod.nom || '',
+          type: prod.type || 'soin',
+          code_barres: prod.code_barres || '',
+          symbologie: prod.symbologie || 'CODE128',
+          categorie_id: prod.categorie_id || '',
+          marque_id: prod.marque_id || '',
+          unite_id: prod.unite_id || '',
+          prix_client: prod.prix_client || '',
+          prix_achat: prod.prix_achat || '',
+          stock_initial: prod.stock_initial || 0,
+          remuneration_soignant: prod.remuneration_soignant || '',
+          gerer_stock: Boolean(prod.gerer_stock),
+          quantite_alerte: prod.quantite_alerte || 0,
+          description: prod.description || '',
+          type_remise: prod.type_remise || 'none',
+          valeur_remise: prod.valeur_remise || 0,
+          image: null
+        });
+      }
+    } catch (error) {
+      console.error('Erreur chargement produit:', error);
+    }
+  };
 
   const fetchParams = async () => {
     try {
@@ -80,16 +115,25 @@ export default function ProduitsCreate() {
         }
       });
 
-      await api.post('/produits', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
+      if (isEdit) {
+        data.append('_method', 'PUT');
+        await api.post(`/produits/${id}`, data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } else {
+        await api.post('/produits', data, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      }
       navigate('/gestionnaire/produits');
     } catch (error) {
       const msg = error.response?.data?.message || "Erreur inconnue";
       const details = error.response?.data?.errors ? JSON.stringify(error.response.data.errors) : "";
-      alert(`Erreur lors de la création du produit: ${msg}\n${details}`);
+      alert(`Erreur lors de ${isEdit ? 'la modification' : 'la création'} du produit: ${msg}\n${details}`);
       console.error(error);
     } finally {
       setLoading(false);
@@ -100,15 +144,15 @@ export default function ProduitsCreate() {
     <div className="erp-page animate-fade-in">
       <header className="erp-page-header">
         <div>
-          <h1 className="erp-page-title">Ajouter un Produit</h1>
-          <p className="erp-page-subtitle">Créez un nouveau produit, service ou soin.</p>
+          <h1 className="erp-page-title">{isEdit ? 'Modifier le Produit' : 'Ajouter un Produit'}</h1>
+          <p className="erp-page-subtitle">{isEdit ? 'Modifiez les informations du produit ou service.' : 'Créez un nouveau produit, service ou soin.'}</p>
         </div>
         <div className="erp-page-actions">
           <button onClick={() => navigate('/gestionnaire/produits')} className="erp-btn-secondary">
             <X size={16} /> Annuler
           </button>
           <button onClick={handleSubmit} disabled={loading} className="erp-btn-primary">
-            <Save size={16} /> {loading ? 'Enregistrement...' : 'Enregistrer'}
+            <Save size={16} /> {loading ? 'Enregistrement...' : (isEdit ? 'Mettre à jour' : 'Enregistrer')}
           </button>
         </div>
       </header>

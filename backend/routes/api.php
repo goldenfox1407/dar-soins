@@ -53,6 +53,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     // Gestionnaire-only Routes
     Route::middleware('role:gestionnaire')->group(function () {
         // Admin Produit Routes (CRUD sauf index qui est public)
+        Route::get('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'show']);
         Route::post('/produits', [App\Http\Controllers\ProduitController::class, 'store']);
         Route::put('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'update']);
         Route::delete('/produits/{id}', [App\Http\Controllers\ProduitController::class, 'destroy']);
