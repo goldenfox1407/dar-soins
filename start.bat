@@ -164,6 +164,15 @@ if errorlevel 1 (
 )
 
 :: -------------------------------------------------------
+:: 3b. Configurer le fichier .env du frontend
+:: -------------------------------------------------------
+if not exist "%ROOT%\frontend\.env" (
+    echo [INFO] Creation du fichier frontend\.env...
+    echo VITE_API_URL=http://127.0.0.1:8000/api> "%ROOT%\frontend\.env"
+    echo [OK] Fichier frontend\.env cree.
+)
+
+:: -------------------------------------------------------
 :: 4. Creation de la base de donnees PostgreSQL
 :: -------------------------------------------------------
 echo.

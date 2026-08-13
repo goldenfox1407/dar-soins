@@ -25,7 +25,8 @@ export default function Login() {
       login(response.data.user, response.data.token);
       navigate(`/${response.data.user.role}`);
     } catch (error) {
-      setError("Identifiants incorrects. Veuillez réessayer.");
+      const serverMessage = error.response?.data?.message;
+      setError(serverMessage || "Identifiants incorrects ou serveur indisponible. Veuillez réessayer.");
     } finally {
       setIsLoading(false);
     }
