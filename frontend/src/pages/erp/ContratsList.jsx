@@ -92,259 +92,307 @@ export default function ContratsList() {
         <style>
           @page {
             size: A4 portrait;
-            margin: 12mm 15mm;
+            margin: 10mm 12mm;
           }
-          * { box-sizing: border-box; margin: 0; padding: 0; }
-          body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            color: #1e293b;
-            background: #fff;
-            font-size: 13px;
-            line-height: 1.5;
-            padding: 20px;
+          * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
           }
-          .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 2px solid #2563eb;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-          }
-          .brand-title {
-            font-size: 22px;
-            font-weight: 800;
-            color: #2563eb;
-            letter-spacing: 0.5px;
-          }
-          .brand-subtitle {
-            font-size: 11px;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 2px;
-          }
-          .contract-badge {
-            text-align: right;
-          }
-          .ref-number {
-            font-size: 16px;
-            font-weight: 800;
-            color: #0f172a;
-          }
-          .doc-title {
-            text-align: center;
-            font-size: 16px;
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #0f172a;
-            background: #f1f5f9;
-            padding: 8px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border: 1px solid #cbd5e1;
-          }
-          .parties-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-          }
-          .party-card {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 12px 14px;
-          }
-          .party-title {
-            font-size: 11px;
-            font-weight: 800;
-            color: #2563eb;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-            border-bottom: 1px solid #e2e8f0;
-            padding-bottom: 4px;
-          }
-          .details-table {
+          html, body {
             width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 18px;
-          }
-          .details-table th, .details-table td {
-            border: 1px solid #e2e8f0;
-            padding: 8px 12px;
-            font-size: 12px;
-          }
-          .details-table th {
-            background: #f8fafc;
-            color: #475569;
-            text-align: left;
-            width: 30%;
-          }
-          .section-title {
-            font-size: 13px;
-            font-weight: 700;
+            background: #ffffff;
             color: #0f172a;
-            margin: 14px 0 6px 0;
-            text-transform: uppercase;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9.5pt;
+            line-height: 1.35;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          .clause-box {
-            background: #fafafa;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            padding: 10px 14px;
-            font-size: 11.5px;
-            color: #334155;
-            white-space: pre-line;
-            line-height: 1.6;
-            margin-bottom: 15px;
+          .a4-wrapper {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
           }
-          .medical-box {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #7f1d1d;
-          }
-          .financial-card {
+          .no-print-bar {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 20px;
+          }
+          .btn-print {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+          }
+          .header-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 12px;
+          }
+          .brand-title {
+            font-size: 16pt;
+            font-weight: 800;
+            color: #2563eb;
+          }
+          .brand-sub {
+            font-size: 8pt;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+          }
+          .doc-banner {
+            text-align: center;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            padding: 6px 10px;
+            font-size: 11pt;
+            font-weight: 800;
+            color: #0f172a;
+            border-radius: 4px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+          }
+          .layout-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+          }
+          .card-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 8.5pt;
+          }
+          .card-header {
+            font-size: 8pt;
+            font-weight: 800;
+            color: #2563eb;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 3px;
+            margin-bottom: 5px;
+          }
+          .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 10px;
+          }
+          .data-table th, .data-table td {
+            border: 1px solid #e2e8f0;
+            padding: 5px 8px;
+            font-size: 8.5pt;
+            word-wrap: break-word;
+          }
+          .data-table th {
+            background: #f8fafc;
+            color: #475569;
+            width: 28%;
+            text-align: left;
+          }
+          .section-heading {
+            font-size: 9pt;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin: 10px 0 4px 0;
+            color: #0f172a;
+          }
+          .text-block {
+            background: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 8px 10px;
+            font-size: 8pt;
+            color: #334155;
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.4;
+            margin-bottom: 10px;
+          }
+          .medical-block {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+          }
+          .financial-table {
+            width: 100%;
+            border-collapse: collapse;
             background: #f0fdf4;
             border: 1.5px solid #86efac;
-            border-radius: 8px;
-            padding: 12px 16px;
-            margin: 18px 0;
+            border-radius: 6px;
+            margin: 10px 0;
           }
-          .signatures-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-top: 25px;
+          .financial-table td {
+            padding: 8px 12px;
+          }
+          .sig-table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            margin-top: 15px;
             page-break-inside: avoid;
+            break-inside: avoid;
           }
-          .signature-box {
+          .sig-cell {
             border: 1px dashed #94a3b8;
-            border-radius: 8px;
-            padding: 12px 14px;
-            min-height: 110px;
+            border-radius: 6px;
+            padding: 8px 10px;
+            height: 85px;
+            vertical-align: top;
+            background: #fafafa;
           }
-          .sig-title {
-            font-size: 11px;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 2px;
-          }
-          .sig-mention {
-            font-size: 10px;
-            color: #64748b;
-            font-style: italic;
-          }
-          .footer-note {
-            margin-top: 25px;
-            font-size: 9.5px;
-            color: #94a3b8;
+          .footer-text {
             text-align: center;
+            font-size: 7.5pt;
+            color: #94a3b8;
             border-top: 1px solid #e2e8f0;
-            padding-top: 8px;
+            padding-top: 6px;
+            margin-top: 15px;
           }
           @media print {
-            body { padding: 0; }
-            .no-print { display: none; }
+            .no-print-bar { display: none !important; }
+            body { padding: 0 !important; background: transparent !important; }
+            .a4-wrapper { padding: 0 !important; }
           }
         </style>
       </head>
       <body>
-        <div class="header">
-          <div>
-            <div class="brand-title">DAR-SOINS 🩺</div>
-            <div class="brand-subtitle">Établissement & Réseau de Soins Médicaux à Domicile</div>
-            <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
-              Agrément Ministère de la Santé | Rabat - Casablanca - Marrakech | Tél: 05 37 00 00 00
+        <div class="a4-wrapper">
+          <div class="no-print-bar">
+            <span>Aperçu du Contrat Officiel — ${contrat.reference}</span>
+            <div>
+              <button class="btn-print" onclick="window.print()">🖨️ Imprimer / Enregistrer en PDF</button>
             </div>
           </div>
-          <div class="contract-badge">
-            <div style="font-size: 11px; color: #64748b;">CONTRAT DE SERVICE</div>
-            <div class="ref-number">${contrat.reference}</div>
-            <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Date: ${contrat.date_debut}</div>
-          </div>
-        </div>
 
-        <div class="doc-title">
-          CONTRAT DE PRESTATION DE SERVICE DE GARDE INFIRMIÈRE À DOMICILE
-        </div>
+          <table class="header-table">
+            <tr>
+              <td style="vertical-align: top;">
+                <div class="brand-title">DAR-SOINS 🩺</div>
+                <div class="brand-sub">Soins Infirmiers & Garde Médicale à Domicile</div>
+                <div style="font-size: 7.5pt; color: #64748b; margin-top: 2px;">
+                  Agrément Ministère de la Santé | Tél: 05 37 00 00 00 | Rabat - Casablanca - Maroc
+                </div>
+              </td>
+              <td style="text-align: right; vertical-align: top; width: 220px;">
+                <div style="font-size: 8pt; color: #64748b; text-transform: uppercase;">CONTRAT DE SERVICE</div>
+                <div style="font-size: 13pt; font-weight: 800; color: #0f172a;">${contrat.reference}</div>
+                <div style="font-size: 8pt; color: #64748b; margin-top: 2px;">Date: ${contrat.date_debut}</div>
+              </td>
+            </tr>
+          </table>
 
-        <div class="parties-grid">
-          <div class="party-card">
-            <div class="party-title">1. Le Patient / Représentant Légal</div>
-            <p><strong>Nom & Prénom:</strong> ${clientName}</p>
-            <p><strong>Téléphone:</strong> ${clientTel}</p>
-            <p><strong>Adresse:</strong> ${clientAddr}</p>
-          </div>
-
-          <div class="party-card">
-            <div class="party-title">2. L'Infirmier(ère) Affecté(e)</div>
-            <p><strong>Personnel Soignant:</strong> ${infName}</p>
-            <p><strong>Coordination:</strong> DAR-SOINS Soins à Domicile</p>
-            <p><strong>Ligne Directe / Astreinte:</strong> ${infTel}</p>
-          </div>
-        </div>
-
-        <table class="details-table">
-          <tr>
-            <th>Type / Cas de la Garde</th>
-            <td><strong>${typeGardeLabel}</strong></td>
-          </tr>
-          <tr>
-            <th>Période de Garde</th>
-            <td>Du <strong>${contrat.date_debut}</strong> au <strong>${contrat.date_fin}</strong></td>
-          </tr>
-          <tr>
-            <th>Plage Horaire Convenu</th>
-            <td>${contrat.horaires_garde || 'Selon planning d\'intervention'}</td>
-          </tr>
-          <tr>
-            <th>Tarif Journalier Appliqué</th>
-            <td><strong>${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</strong></td>
-          </tr>
-        </table>
-
-        ${contrat.prescriptions_medicales ? `
-          <div class="section-title" style="color: #991b1b;">Protocole Médical & Prescriptions à Domicile</div>
-          <div class="clause-box medical-box">${contrat.prescriptions_medicales}</div>
-        ` : ''}
-
-        <div class="section-title">Clauses Spécifiques & Engagements Juridiques</div>
-        <div class="clause-box">${contrat.clauses_specifiques || 'Les parties s\'engagent au respect strict du protocole de soins et des règles de sécurité médicale.'}</div>
-
-        <div class="financial-card">
-          <div>
-            <div style="font-size: 11px; color: #166534; font-weight: 600;">TARIF JOURNALIER CONVENU</div>
-            <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="font-size: 11px; color: #166534; font-weight: 700;">MONTANT TOTAL DU CONTRAT</div>
-            <div style="font-size: 18px; font-weight: 900; color: #15803d;">${Number(contrat.montant_total).toFixed(2)} MAD</div>
-          </div>
-        </div>
-
-        <div class="signatures-grid">
-          <div class="signature-box">
-            <div class="sig-title">Le Client / Bénéficiaire</div>
-            <div class="sig-mention">"Lu et Approuvé, Bon pour Accord"</div>
+          <div class="doc-banner">
+            CONTRAT DE PRESTATION DE SERVICE DE GARDE INFIRMIÈRE
           </div>
 
-          <div class="signature-box">
-            <div class="sig-title">Pour la Direction DAR-SOINS</div>
-            <div class="sig-mention">Signature & Cachet Officiel de l'Établissement</div>
-          </div>
-        </div>
+          <!-- Parties Table -->
+          <table class="layout-table">
+            <tr>
+              <td style="width: 48%; vertical-align: top;">
+                <div class="card-box">
+                  <div class="card-header">1. Le Patient / Bénéficiaire</div>
+                  <p><strong>Nom & Prénom:</strong> ${clientName}</p>
+                  <p><strong>Téléphone:</strong> ${clientTel}</p>
+                  <p><strong>Adresse:</strong> ${clientAddr}</p>
+                </div>
+              </td>
+              <td style="width: 4%;"></td>
+              <td style="width: 48%; vertical-align: top;">
+                <div class="card-box">
+                  <div class="card-header">2. Infirmier(ère) Affecté(e)</div>
+                  <p><strong>Personnel Soignant:</strong> ${infName}</p>
+                  <p><strong>Coordination:</strong> DAR-SOINS Soins à Domicile</p>
+                  <p><strong>Ligne Directe / Astreinte:</strong> ${infTel}</p>
+                </div>
+              </td>
+            </tr>
+          </table>
 
-        <div class="footer-note">
-          DAR-SOINS SARL AU — Document officiel généré électroniquement conforme aux dispositions légales relatives aux contrats de services de santé à domicile au Maroc.
+          <!-- Guard Specifications Table -->
+          <table class="data-table">
+            <tr>
+              <th>Cas & Type de Garde</th>
+              <td><strong>${typeGardeLabel}</strong></td>
+            </tr>
+            <tr>
+              <th>Période d'Intervention</th>
+              <td>Du <strong>${contrat.date_debut}</strong> au <strong>${contrat.date_fin}</strong></td>
+            </tr>
+            <tr>
+              <th>Horaires Convenus</th>
+              <td>${contrat.horaires_garde || 'Selon planning médical établi'}</td>
+            </tr>
+            <tr>
+              <th>Tarif Journalier</th>
+              <td><strong>${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</strong></td>
+            </tr>
+          </table>
+
+          ${contrat.prescriptions_medicales ? `
+            <div class="section-heading" style="color: #991b1b;">Protocole Médical & Prescriptions à Domicile</div>
+            <div class="text-block medical-block">${contrat.prescriptions_medicales}</div>
+          ` : ''}
+
+          <div class="section-heading">Clauses Juridiques & Engagements de Garde</div>
+          <div class="text-block">${contrat.clauses_specifiques || 'Les parties s\'engagent au respect strict du protocole de soins et de la déontologie médicale.'}</div>
+
+          <!-- Financial Card -->
+          <table class="financial-table">
+            <tr>
+              <td style="width: 50%;">
+                <div style="font-size: 8pt; color: #166534; font-weight: 700; text-transform: uppercase;">TARIF JOURNALIER CONVENU</div>
+                <div style="font-size: 11pt; font-weight: 800; color: #0f172a;">${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</div>
+              </td>
+              <td style="text-align: right; width: 50%;">
+                <div style="font-size: 8pt; color: #166534; font-weight: 700; text-transform: uppercase;">MONTANT TOTAL DU CONTRAT</div>
+                <div style="font-size: 14pt; font-weight: 900; color: #15803d;">${Number(contrat.montant_total).toFixed(2)} MAD</div>
+              </td>
+            </tr>
+          </table>
+
+          <!-- Signatures Table -->
+          <table class="sig-table">
+            <tr>
+              <td style="width: 48%;" class="sig-cell">
+                <div style="font-size: 8.5pt; font-weight: 700; color: #0f172a;">Signature du Client / Représentant Légal</div>
+                <div style="font-size: 7.5pt; color: #64748b; font-style: italic; margin-top: 1px;">"Lu et Approuvé, Bon pour Accord"</div>
+              </td>
+              <td style="width: 4%;"></td>
+              <td style="width: 48%;" class="sig-cell">
+                <div style="font-size: 8.5pt; font-weight: 700; color: #0f172a;">Pour la Direction DAR-SOINS</div>
+                <div style="font-size: 7.5pt; color: #64748b; font-style: italic; margin-top: 1px;">Signature & Cachet de l'Établissement</div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="footer-text">
+            DAR-SOINS SARL AU — Document contractuel généré électroniquement conforme aux dispositions légales relatives aux prestations de soins à domicile au Maroc.
+          </div>
         </div>
 
         <script>
           window.onload = function() {
-            window.print();
+            setTimeout(function() {
+              window.print();
+            }, 400);
           };
         </script>
       </body>
