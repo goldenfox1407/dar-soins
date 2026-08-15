@@ -78,6 +78,8 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::patch('conges/{id}/statut', [\App\Http\Controllers\CongeController::class, 'updateStatut']);
         Route::apiResource('fiches-paie', \App\Http\Controllers\PaieController::class);
         Route::patch('fiches-paie/{id}/statut', [\App\Http\Controllers\PaieController::class, 'updateStatut']);
+        Route::apiResource('contrats', \App\Http\Controllers\ContratController::class);
+        Route::patch('contrats/{id}/statut', [\App\Http\Controllers\ContratController::class, 'updateStatut']);
 
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);

@@ -43,6 +43,8 @@ import EmployesList from './pages/erp/EmployesList';
 import PresencesList from './pages/erp/PresencesList';
 import CongesList from './pages/erp/CongesList';
 import PaieList from './pages/erp/PaieList';
+import ContratsList from './pages/erp/ContratsList';
+import ContratsCreate from './pages/erp/ContratsCreate';
 import EntrepotsList from './pages/erp/EntrepotsList';
 import ParametresSysteme from './pages/erp/ParametresSysteme';
 import TaxesList from './pages/erp/TaxesList';
@@ -132,10 +134,9 @@ function App() {
           <Route path="hrm/conges" element={<CongesList />} />
           <Route path="hrm/paie" element={<PaieList />} />
           
-          {/* Services — En développement */}
-          <Route path="abonnements" element={<ErpComingSoon title="Abonnements" />} />
-          <Route path="services" element={<ErpComingSoon title="Services" />} />
-          <Route path="contrats" element={<ErpComingSoon title="Contrats" />} />
+          {/* Contrats de Garde — Fonctionnel */}
+          <Route path="contrats" element={<ContratsList />} />
+          <Route path="contrats/ajouter" element={<ContratsCreate />} />
           <Route path="taches" element={<ErpComingSoon title="Tâches" />} />
           <Route path="reservations" element={<ErpComingSoon title="Réservations" />} />
           <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />

@@ -14,7 +14,7 @@ const MODULES_LIST = [
   { id: 'ventes', label: 'Ventes' },
   { id: 'devis', label: 'Devis' },
   { id: 'rh', label: 'Ressources Humaines' },
-  { id: 'services', label: 'Services & Contrats' },
+  { id: 'contrats', label: 'Contrats de Garde' },
   { id: 'taches', label: 'Organisation / Tâches' },
   { id: 'rapports', label: 'Rapports' },
   { id: 'parametres', label: 'Paramètres système' }

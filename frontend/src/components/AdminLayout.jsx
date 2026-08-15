@@ -48,10 +48,9 @@ const MENU_ITEMS = [
     { title: 'Congés', path: '/gestionnaire/hrm/conges' },
     { title: 'Paie', path: '/gestionnaire/hrm/paie' }
   ]},
-  { id: 'service', title: 'Services & Contrats', icon: Wrench, submenus: [
-    { title: 'Services', path: '/gestionnaire/services' },
-    { title: 'Abonnements', path: '/gestionnaire/abonnements' },
-    { title: 'Contrats', path: '/gestionnaire/contrats' }
+  { id: 'contrats', title: 'Contrats de Garde', icon: FileText, submenus: [
+    { title: 'Liste des Contrats', path: '/gestionnaire/contrats' },
+    { title: 'Nouveau Contrat', path: '/gestionnaire/contrats/ajouter' }
   ]},
   { id: 'taches', title: 'Organisation', icon: CheckSquare, submenus: [
     { title: 'Tâches', path: '/gestionnaire/taches' },

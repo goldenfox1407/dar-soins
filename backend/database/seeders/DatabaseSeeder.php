@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
             StockSeeder::class,
             RetourVenteSeeder::class,
             HrmSeeder::class,
+            ContratSeeder::class,
         ]);
 
         $admin = User::firstOrCreate(
