@@ -105,16 +105,23 @@ export default function ContratsCreate() {
 
   const fetchParams = async () => {
     try {
-      const [cliRes, infRes] = await Promise.all([
+      const [cliRes, infRes] = await Promise.allSettled([
         api.get('/clients'),
         api.get('/infirmiers')
       ]);
-      const fetchedClients = cliRes.data?.data || cliRes.data || [];
-      setClients(fetchedClients);
-      if (fetchedClients.length > 0) setClientId(fetchedClients[0].id);
 
-      const fetchedInf = infRes.data?.data || infRes.data || [];
-      setInfirmiers(fetchedInf);
+      if (cliRes.status === 'fulfilled') {
+        const fetchedClients = cliRes.value.data?.data || cliRes.value.data || [];
+        setClients(fetchedClients);
+        if (fetchedClients.length > 0) {
+          setClientId(fetchedClients[0].id);
+        }
+      }
+
+      if (infRes.status === 'fulfilled') {
+        const fetchedInf = infRes.value.data?.data || infRes.value.data || [];
+        setInfirmiers(fetchedInf);
+      }
     } catch (error) {
       console.error('Erreur chargement paramètres:', error);
     }
@@ -216,29 +223,32 @@ export default function ContratsCreate() {
               required
               value={clientId} 
               onChange={e => setClientId(e.target.value)}
-              style={{ color: '#1e293b', padding: '10px' }}
+              style={{ color: '#1e293b', background: '#FFFFFF', padding: '10px', width: '100%', fontSize: '0.9rem' }}
             >
+              <option value="">-- Choisir un Patient / Client --</option>
               {clients.map(c => {
-                const name = c.user ? `${c.user.prenom || ''} ${c.user.nom || ''}`.trim() : `Client #${c.id}`;
-                return <option key={c.id} value={c.id}>{name}</option>;
+                const name = c.nom || (c.user ? (c.user.name || `${c.user.prenom || ''} ${c.user.nom || ''}`.trim()) : `Client #${c.id}`);
+                const tel = c.telephone ? ` — Tél: ${c.telephone}` : (c.user?.email ? ` (${c.user.email})` : '');
+                return <option key={c.id} value={c.id}>{name}{tel}</option>;
               })}
             </select>
           </div>
 
           <div className="erp-form-group">
             <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-              Infirmier(ère) Affecté(e)
+              Infirmier(ère) Affecté(e) (Optionnel)
             </label>
             <select 
               className="glass-input" 
               value={infirmierId} 
               onChange={e => setInfirmierId(e.target.value)}
-              style={{ color: '#1e293b', padding: '10px' }}
+              style={{ color: '#1e293b', background: '#FFFFFF', padding: '10px', width: '100%', fontSize: '0.9rem' }}
             >
               <option value="">-- Non attribué (En attente) --</option>
               {infirmiers.map(inf => {
-                const name = inf.user ? `${inf.user.prenom || ''} ${inf.user.nom || ''}`.trim() : `Infirmier #${inf.id}`;
-                return <option key={inf.id} value={inf.id}>{name}</option>;
+                const name = inf.nom || (inf.user ? (inf.user.name || `${inf.user.prenom || ''} ${inf.user.nom || ''}`.trim()) : `Infirmier #${inf.id}`);
+                const spec = inf.specialite ? ` (${inf.specialite})` : '';
+                return <option key={inf.id} value={inf.id}>{name}{spec}</option>;
               })}
             </select>
           </div>

@@ -84,6 +84,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);
         Route::apiResource('clients', \App\Http\Controllers\ClientController::class);
+        Route::apiResource('infirmiers', \App\Http\Controllers\InfirmierController::class);
         Route::apiResource('fournisseurs', \App\Http\Controllers\FournisseurController::class);
         Route::apiResource('categories', \App\Http\Controllers\CategorieController::class);
         Route::apiResource('marques', \App\Http\Controllers\MarqueController::class);

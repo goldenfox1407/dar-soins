@@ -21,7 +21,7 @@ class ClientController extends Controller
             }
             return $data;
         });
-        return response()->json($clients);
+        return response()->json(['data' => $clients]);
     }
 
     public function store(Request $request)
