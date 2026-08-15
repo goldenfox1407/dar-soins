@@ -132,12 +132,6 @@ function App() {
           <Route path="hrm/conges" element={<CongesList />} />
           <Route path="hrm/paie" element={<PaieList />} />
           
-          {/* Comptabilité — En développement */}
-          <Route path="compta/comptes" element={<ErpComingSoon title="Comptes Bancaires" description="La gestion des comptes bancaires et soldes sera bientôt disponible." />} />
-          <Route path="compta/depots" element={<ErpComingSoon title="Dépôts" description="Le suivi des dépôts bancaires sera bientôt disponible." />} />
-          <Route path="compta/depenses" element={<ErpComingSoon title="Dépenses" description="Le suivi des dépenses sera bientôt disponible." />} />
-          <Route path="compta/transferts" element={<ErpComingSoon title="Transferts Financiers" description="Les transferts entre comptes seront bientôt disponibles." />} />
-          
           {/* Services — En développement */}
           <Route path="abonnements" element={<ErpComingSoon title="Abonnements" />} />
           <Route path="services" element={<ErpComingSoon title="Services" />} />

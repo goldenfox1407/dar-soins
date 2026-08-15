@@ -48,12 +48,6 @@ const MENU_ITEMS = [
     { title: 'Congés', path: '/gestionnaire/hrm/conges' },
     { title: 'Paie', path: '/gestionnaire/hrm/paie' }
   ]},
-  { id: 'compta', title: 'Comptabilité', icon: Calculator, submenus: [
-    { title: 'Comptes', path: '/gestionnaire/compta/comptes' },
-    { title: 'Dépôts', path: '/gestionnaire/compta/depots' },
-    { title: 'Dépenses', path: '/gestionnaire/compta/depenses' },
-    { title: 'Transferts', path: '/gestionnaire/compta/transferts' }
-  ]},
   { id: 'service', title: 'Services & Contrats', icon: Wrench, submenus: [
     { title: 'Services', path: '/gestionnaire/services' },
     { title: 'Abonnements', path: '/gestionnaire/abonnements' },
