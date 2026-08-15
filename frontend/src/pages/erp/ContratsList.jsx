@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, FileText, Eye, Trash2, X, CheckCircle, Clock, AlertTriangle, ShieldCheck, Printer, Calendar, User, HeartPulse } from 'lucide-react';
 import api from '../../services/api';
@@ -230,9 +231,37 @@ export default function ContratsList() {
       </div>
 
       {/* Details & PDF Contract Modal */}
-      {isModalOpen && selectedContrat && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-panel custom-scrollbar" style={{ width: '750px', maxHeight: '90vh', overflowY: 'auto', padding: '2.5rem', background: '#FFFFFF', borderRadius: '16px' }}>
+      {isModalOpen && selectedContrat && createPortal(
+        <div 
+          onClick={() => setIsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            overflowY: 'auto',
+            padding: '70px 16px 40px 16px',
+            zIndex: 999999
+          }}
+        >
+          <div 
+            className="glass-panel custom-scrollbar animate-scale-in"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '760px',
+              maxWidth: '95vw',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              padding: '2.5rem',
+              background: '#FFFFFF',
+              borderRadius: '20px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8)',
+              margin: '0 auto'
+            }}
+          >
             
             {/* Contract Document Header */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '2px solid #0f172a', paddingBottom: '1.2rem', marginBottom: '1.5rem' }}>
@@ -358,7 +387,8 @@ export default function ContratsList() {
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

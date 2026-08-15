@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, ArrowRight, Eye, Trash2, X, CheckCircle, Clock, XCircle, FileText } from 'lucide-react';
 import api from '../../services/api';
@@ -172,9 +173,37 @@ export default function TransfertsList() {
       </div>
 
       {/* Details Modal */}
-      {isModalOpen && selectedTransfert && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-panel custom-scrollbar" style={{ width: '650px', maxHeight: '85vh', overflowY: 'auto', padding: '2rem', background: '#FFFFFF', borderRadius: '16px' }}>
+      {isModalOpen && selectedTransfert && createPortal(
+        <div 
+          onClick={() => setIsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            overflowY: 'auto',
+            padding: '70px 16px 40px 16px',
+            zIndex: 999999
+          }}
+        >
+          <div 
+            className="glass-panel custom-scrollbar animate-scale-in"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '650px',
+              maxWidth: '95vw',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              padding: '2rem',
+              background: '#FFFFFF',
+              borderRadius: '18px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              margin: '0 auto'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', pb: '1rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1e293b', margin: 0 }}>
@@ -257,7 +286,8 @@ export default function TransfertsList() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

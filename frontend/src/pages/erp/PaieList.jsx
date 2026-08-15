@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Plus, Search, DollarSign, CheckCircle, Clock, Trash2, X, Eye, FileText, Download } from 'lucide-react';
 import api from '../../services/api';
 
@@ -238,9 +239,37 @@ export default function PaieList() {
       </div>
 
       {/* Details Modal */}
-      {isDetailsOpen && selectedFiche && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-panel custom-scrollbar" style={{ width: '600px', padding: '2rem', background: '#FFFFFF', borderRadius: '16px' }}>
+      {isDetailsOpen && selectedFiche && createPortal(
+        <div 
+          onClick={() => setIsDetailsOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            overflowY: 'auto',
+            padding: '70px 16px 40px 16px',
+            zIndex: 999999
+          }}
+        >
+          <div 
+            className="glass-panel custom-scrollbar animate-scale-in"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '600px',
+              maxWidth: '95vw',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              padding: '2rem',
+              background: '#FFFFFF',
+              borderRadius: '18px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              margin: '0 auto'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', pb: '1rem' }}>
               <div>
                 <h2 style={{ fontSize: '1.3rem', fontWeight: 700, color: '#1e293b', margin: 0 }}>
@@ -316,13 +345,42 @@ export default function PaieList() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Modal Generation */}
-      {isModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }}>
-          <div className="glass-panel custom-scrollbar" style={{ width: '550px', padding: '2rem', background: '#FFFFFF', borderRadius: '16px' }}>
+      {isModalOpen && createPortal(
+        <div 
+          onClick={() => setIsModalOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(15, 23, 42, 0.7)',
+            backdropFilter: 'blur(6px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            overflowY: 'auto',
+            padding: '70px 16px 40px 16px',
+            zIndex: 999999
+          }}
+        >
+          <div 
+            className="glass-panel custom-scrollbar animate-scale-in"
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '550px',
+              maxWidth: '95vw',
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              padding: '2rem',
+              background: '#FFFFFF',
+              borderRadius: '18px',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
+              margin: '0 auto'
+            }}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #e2e8f0', pb: '1rem' }}>
               <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: '#1e293b', margin: 0 }}>
                 Générer un Bulletin de Paie
@@ -444,7 +502,8 @@ export default function PaieList() {
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
