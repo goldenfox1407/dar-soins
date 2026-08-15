@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, FileText, Eye, Trash2, X, CheckCircle, Clock, AlertTriangle, ShieldCheck, Printer, Calendar, User, HeartPulse } from 'lucide-react';
+import { Plus, Search, FileText, Eye, Trash2, X, CheckCircle, Clock, AlertTriangle, ShieldCheck, Printer, Calendar, User, HeartPulse, FileDown, Download } from 'lucide-react';
 import api from '../../services/api';
 
 export default function ContratsList() {
@@ -53,6 +53,307 @@ export default function ContratsList() {
   const handleShowDetails = (contrat) => {
     setSelectedContrat(contrat);
     setIsModalOpen(true);
+  };
+
+  // Dedicated PDF Generation & Print Function for each row
+  const handleGeneratePdf = (contrat) => {
+    if (!contrat) return;
+
+    const clientName = contrat.client?.user 
+      ? `${contrat.client.user.prenom || ''} ${contrat.client.user.nom || ''}`.trim() 
+      : `Client #${contrat.client_id}`;
+    
+    const clientTel = contrat.client?.telephone || contrat.client?.user?.telephone || 'Non renseigné';
+    const clientAddr = contrat.client?.adresse || 'Non renseignée';
+
+    const infName = contrat.infirmier?.user 
+      ? `${contrat.infirmier.user.prenom || ''} ${contrat.infirmier.user.nom || ''}`.trim() 
+      : 'Infirmier de garde désigné par la direction';
+    const infTel = contrat.infirmier?.telephone || contrat.infirmier?.user?.telephone || 'Ligne d\'urgence DAR-SOINS';
+
+    let typeGardeLabel = 'Garde de Nuit (20h - 08h)';
+    if (contrat.type_garde === 'jour') typeGardeLabel = 'Garde de Jour (08h - 20h)';
+    if (contrat.type_garde === '24h') typeGardeLabel = 'Garde Continue 24h/24 (Relève d\'équipe)';
+    if (contrat.type_garde === 'post_operatoire') typeGardeLabel = 'Soins Post-opératoires Intensifs';
+    if (contrat.type_garde === 'accompagnement_senior') typeGardeLabel = 'Accompagnement Senior Dépendance';
+
+    const pdfWindow = window.open('', '_blank');
+    if (!pdfWindow) {
+      alert("Veuillez autoriser les popups pour ouvrir le contrat PDF.");
+      return;
+    }
+
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html lang="fr">
+      <head>
+        <meta charset="UTF-8">
+        <title>Contrat de Garde — ${contrat.reference}</title>
+        <style>
+          @page {
+            size: A4 portrait;
+            margin: 12mm 15mm;
+          }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: #1e293b;
+            background: #fff;
+            font-size: 13px;
+            line-height: 1.5;
+            padding: 20px;
+          }
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+          }
+          .brand-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #2563eb;
+            letter-spacing: 0.5px;
+          }
+          .brand-subtitle {
+            font-size: 11px;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 2px;
+          }
+          .contract-badge {
+            text-align: right;
+          }
+          .ref-number {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+          }
+          .doc-title {
+            text-align: center;
+            font-size: 16px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: #0f172a;
+            background: #f1f5f9;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #cbd5e1;
+          }
+          .parties-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+          }
+          .party-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 12px 14px;
+          }
+          .party-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #2563eb;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 4px;
+          }
+          .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 18px;
+          }
+          .details-table th, .details-table td {
+            border: 1px solid #e2e8f0;
+            padding: 8px 12px;
+            font-size: 12px;
+          }
+          .details-table th {
+            background: #f8fafc;
+            color: #475569;
+            text-align: left;
+            width: 30%;
+          }
+          .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 14px 0 6px 0;
+            text-transform: uppercase;
+          }
+          .clause-box {
+            background: #fafafa;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 11.5px;
+            color: #334155;
+            white-space: pre-line;
+            line-height: 1.6;
+            margin-bottom: 15px;
+          }
+          .medical-box {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #7f1d1d;
+          }
+          .financial-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f0fdf4;
+            border: 1.5px solid #86efac;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 18px 0;
+          }
+          .signatures-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 25px;
+            page-break-inside: avoid;
+          }
+          .signature-box {
+            border: 1px dashed #94a3b8;
+            border-radius: 8px;
+            padding: 12px 14px;
+            min-height: 110px;
+          }
+          .sig-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 2px;
+          }
+          .sig-mention {
+            font-size: 10px;
+            color: #64748b;
+            font-style: italic;
+          }
+          .footer-note {
+            margin-top: 25px;
+            font-size: 9.5px;
+            color: #94a3b8;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 8px;
+          }
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <div>
+            <div class="brand-title">DAR-SOINS 🩺</div>
+            <div class="brand-subtitle">Établissement & Réseau de Soins Médicaux à Domicile</div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 3px;">
+              Agrément Ministère de la Santé | Rabat - Casablanca - Marrakech | Tél: 05 37 00 00 00
+            </div>
+          </div>
+          <div class="contract-badge">
+            <div style="font-size: 11px; color: #64748b;">CONTRAT DE SERVICE</div>
+            <div class="ref-number">${contrat.reference}</div>
+            <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Date: ${contrat.date_debut}</div>
+          </div>
+        </div>
+
+        <div class="doc-title">
+          CONTRAT DE PRESTATION DE SERVICE DE GARDE INFIRMIÈRE À DOMICILE
+        </div>
+
+        <div class="parties-grid">
+          <div class="party-card">
+            <div class="party-title">1. Le Patient / Représentant Légal</div>
+            <p><strong>Nom & Prénom:</strong> ${clientName}</p>
+            <p><strong>Téléphone:</strong> ${clientTel}</p>
+            <p><strong>Adresse:</strong> ${clientAddr}</p>
+          </div>
+
+          <div class="party-card">
+            <div class="party-title">2. L'Infirmier(ère) Affecté(e)</div>
+            <p><strong>Personnel Soignant:</strong> ${infName}</p>
+            <p><strong>Coordination:</strong> DAR-SOINS Soins à Domicile</p>
+            <p><strong>Ligne Directe / Astreinte:</strong> ${infTel}</p>
+          </div>
+        </div>
+
+        <table class="details-table">
+          <tr>
+            <th>Type / Cas de la Garde</th>
+            <td><strong>${typeGardeLabel}</strong></td>
+          </tr>
+          <tr>
+            <th>Période de Garde</th>
+            <td>Du <strong>${contrat.date_debut}</strong> au <strong>${contrat.date_fin}</strong></td>
+          </tr>
+          <tr>
+            <th>Plage Horaire Convenu</th>
+            <td>${contrat.horaires_garde || 'Selon planning d\'intervention'}</td>
+          </tr>
+          <tr>
+            <th>Tarif Journalier Appliqué</th>
+            <td><strong>${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</strong></td>
+          </tr>
+        </table>
+
+        ${contrat.prescriptions_medicales ? `
+          <div class="section-title" style="color: #991b1b;">Protocole Médical & Prescriptions à Domicile</div>
+          <div class="clause-box medical-box">${contrat.prescriptions_medicales}</div>
+        ` : ''}
+
+        <div class="section-title">Clauses Spécifiques & Engagements Juridiques</div>
+        <div class="clause-box">${contrat.clauses_specifiques || 'Les parties s\'engagent au respect strict du protocole de soins et des règles de sécurité médicale.'}</div>
+
+        <div class="financial-card">
+          <div>
+            <div style="font-size: 11px; color: #166534; font-weight: 600;">TARIF JOURNALIER CONVENU</div>
+            <div style="font-size: 14px; font-weight: 700; color: #0f172a;">${Number(contrat.tarif_journalier).toFixed(2)} MAD / jour</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 11px; color: #166534; font-weight: 700;">MONTANT TOTAL DU CONTRAT</div>
+            <div style="font-size: 18px; font-weight: 900; color: #15803d;">${Number(contrat.montant_total).toFixed(2)} MAD</div>
+          </div>
+        </div>
+
+        <div class="signatures-grid">
+          <div class="signature-box">
+            <div class="sig-title">Le Client / Bénéficiaire</div>
+            <div class="sig-mention">"Lu et Approuvé, Bon pour Accord"</div>
+          </div>
+
+          <div class="signature-box">
+            <div class="sig-title">Pour la Direction DAR-SOINS</div>
+            <div class="sig-mention">Signature & Cachet Officiel de l'Établissement</div>
+          </div>
+        </div>
+
+        <div class="footer-note">
+          DAR-SOINS SARL AU — Document officiel généré électroniquement conforme aux dispositions légales relatives aux contrats de services de santé à domicile au Maroc.
+        </div>
+
+        <script>
+          window.onload = function() {
+            window.print();
+          };
+        </script>
+      </body>
+      </html>
+    `;
+
+    pdfWindow.document.open();
+    pdfWindow.document.write(htmlContent);
+    pdfWindow.document.close();
   };
 
   const renderTypeGardeBadge = (type) => {
@@ -139,7 +440,7 @@ export default function ContratsList() {
       <header className="erp-page-header">
         <div>
           <h1 className="erp-page-title">Contrats de Garde Médicale</h1>
-          <p className="erp-page-subtitle">Gérez les contrats de services de garde à domicile selon les besoins spécifiques du patient.</p>
+          <p className="erp-page-subtitle">Gérez les contrats de services de garde à domicile et générez les documents officiels en PDF.</p>
         </div>
         <button onClick={() => navigate('/gestionnaire/contrats/ajouter')} className="erp-btn-primary">
           <Plus size={18} /> Nouveau Contrat de Garde
@@ -212,10 +513,24 @@ export default function ContratsList() {
                           {Number(item.montant_total).toFixed(2)} MAD
                         </td>
                         <td>{renderStatusBadge(item.statut)}</td>
-                        <td className="erp-table-actions" style={{ justifyContent: 'flex-end' }}>
+                        <td className="erp-table-actions" style={{ justifyContent: 'flex-end', gap: '6px' }}>
+                          
+                          {/* Direct PDF Form View Button in each row */}
+                          <button 
+                            onClick={() => handleGeneratePdf(item)} 
+                            className="erp-action-btn" 
+                            title="Voir & Télécharger le Contrat sous forme PDF"
+                            style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #fca5a5' }}
+                          >
+                            <FileDown size={18} />
+                          </button>
+
+                          {/* Details Modal View Button */}
                           <button onClick={() => handleShowDetails(item)} className="erp-action-btn view" title="Voir le contrat détaillé">
                             <Eye size={18} />
                           </button>
+                          
+                          {/* Delete Button */}
                           <button onClick={() => handleDelete(item.id)} className="erp-action-btn delete" title="Supprimer">
                             <Trash2 size={18} />
                           </button>
@@ -400,8 +715,12 @@ export default function ContratsList() {
               </div>
 
               <div style={{ display: 'flex', gap: '12px' }}>
-                <button onClick={() => window.print()} className="erp-btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Printer size={16} /> Imprimer Contrat
+                <button 
+                  onClick={() => handleGeneratePdf(selectedContrat)} 
+                  className="erp-btn-secondary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#dc2626', borderColor: '#fca5a5' }}
+                >
+                  <FileDown size={16} /> Ouvrir Format PDF
                 </button>
                 <button onClick={() => setIsModalOpen(false)} className="erp-btn-primary">
                   Fermer
