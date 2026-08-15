@@ -508,23 +508,21 @@ export default function ContratsList() {
             </tr>
           </table>
 
-          <!-- Official Company Stamp / Cachet -->
-          <div style="text-align: center; margin: 10px 0;">
-            <div style="font-size: 8.5px; font-weight: bold; text-transform: uppercase; color: #64748B; margin-bottom: 4px;">Cachet &amp; Visa de la Société</div>
-            <img src="${cachetSrc}" style="max-height: 65px; max-width: 140px; display: inline-block;" alt="Cachet Dar-Soins">
-          </div>
-
-          <!-- Signatures Table -->
+          <!-- Signatures Table with Cachet -->
           <table class="signatures-table">
             <tr>
               <td style="width: 48%;" class="sig-box">
                 <div class="sig-label">Le Client / Bénéficiaire</div>
                 <div class="sig-text">"Lu et Approuvé, Bon pour Accord"</div>
+                <div style="height: 55px;"></div>
               </td>
               <td style="width: 4%;"></td>
               <td style="width: 48%;" class="sig-box">
                 <div class="sig-label">Pour la Direction DAR-SOINS</div>
                 <div class="sig-text">Signature & Cachet de l'Établissement</div>
+                <div style="text-align: center; margin-top: 4px;">
+                  <img src="${cachetSrc}" style="max-height: 55px; max-width: 130px; display: inline-block;" alt="Cachet Dar-Soins">
+                </div>
               </td>
             </tr>
           </table>
@@ -897,21 +895,13 @@ export default function ContratsList() {
               </div>
             </div>
 
-            {/* Official Stamp / Cachet */}
-            <div style={{ textAlign: 'center', margin: '15px 0' }}>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', marginBottom: '4px' }}>
-                Cachet & Visa de la Société
-              </div>
-              <img src={contractAssets.cachet || '/images/cachet.jpg'} alt="Cachet" style={{ maxHeight: '70px', maxWidth: '150px', display: 'inline-block' }} />
-            </div>
-
-            {/* Official Signatures Block */}
+            {/* Official Signatures Block with Cachet */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', background: '#fafafa', border: '1px dashed #cbd5e1', padding: '18px 20px', borderRadius: '12px', marginBottom: '1.5rem' }}>
               <div>
                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
                   Signature du Client / Représentant Légal
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '35px' }}>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '55px' }}>
                   (Précédée de la mention manuscrite "Lu et Approuvé")
                 </div>
                 <div style={{ borderBottom: '1px solid #94a3b8', width: '80%' }} />
@@ -921,10 +911,13 @@ export default function ContratsList() {
                 <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
                   Pour la Direction DAR-SOINS
                 </div>
-                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '35px' }}>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '4px' }}>
                   (Direction Médicale & Cachet Officiel)
                 </div>
-                <div style={{ borderBottom: '1px solid #94a3b8', width: '80%' }} />
+                <div style={{ textAlign: 'center', margin: '4px 0' }}>
+                  <img src={contractAssets.cachet || '/images/cachet.jpg'} alt="Cachet" style={{ maxHeight: '60px', maxWidth: '140px', display: 'inline-block' }} />
+                </div>
+                <div style={{ borderBottom: '1px solid #94a3b8', width: '80%', margin: '0 auto' }} />
               </div>
             </div>
 

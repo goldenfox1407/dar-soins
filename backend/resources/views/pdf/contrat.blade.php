@@ -397,25 +397,23 @@
     </tr>
   </table>
 
-  {{-- ══ CACHET OFFICIEL DE LA SOCIÉTÉ ══ --}}
-  <div style="text-align: center; margin: 10px 0;">
-    <div style="font-size: 8.5px; font-weight: bold; text-transform: uppercase; color: #64748B; margin-bottom: 4px;">Cachet &amp; Visa de la Société</div>
-    <img src="{{ public_path('images/cachet.jpg') }}" style="max-height: 65px; max-width: 140px; display: inline-block;" alt="Cachet Dar-Soins">
-  </div>
-
-  {{-- ══ SIGNATURES ══ --}}
+  {{-- ══ SIGNATURES & CACHET ══ --}}
   <table class="signatures-table">
     <tr>
       <td style="padding-right: 6px;">
         <div class="sig-box">
           <div class="sig-label">Le Client / Bénéficiaire</div>
           <div class="sig-text">"Lu et Approuvé, Bon pour Accord"</div>
+          <div style="height: 55px;"></div>
         </div>
       </td>
       <td style="padding-left: 6px;">
         <div class="sig-box">
           <div class="sig-label">Pour la Direction DAR-SOINS</div>
           <div class="sig-text">Signature & Cachet de l'Établissement</div>
+          <div style="text-align: center; margin-top: 4px;">
+            <img src="{{ public_path('images/cachet.jpg') }}" style="max-height: 55px; max-width: 130px; display: inline-block;" alt="Cachet Dar-Soins">
+          </div>
         </div>
       </td>
     </tr>
