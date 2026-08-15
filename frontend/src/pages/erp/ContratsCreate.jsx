@@ -1,7 +1,84 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Save, X, FileText, HeartPulse, ShieldCheck, User } from 'lucide-react';
+import { Save, X, FileText, HeartPulse, ShieldCheck, User, RotateCcw, Sparkles } from 'lucide-react';
 import api from '../../services/api';
+
+export const READY_CLAUSES = {
+  nuit: {
+    label: '🌙 Garde de Nuit (20h - 08h)',
+    horaires: '20h00 - 08h00',
+    tarif: 450,
+    prescriptions: `1. Surveillance nocturne continue et assistance au coucher / lever.
+2. Administration du traitement médical du soir à 21h00 selon prescription.
+3. Prise et relevé des constantes vitales (Tension artérielle, Fréquence cardiaque, Température, Glycémie) à 22h00, 02h00 et 06h00.
+4. Surveillance de l'oxygénation et aide aux changements de position pour prévention des escarres.`,
+    clauses: `Article 1 - Objet & Horaires : Le prestataire DAR-SOINS met à disposition un(e) infirmier(ère) qualifié(e) pour assurer la garde de nuit de 20h00 à 08h00.
+Article 2 - Continuité des soins : L'infirmier(ère) s'engage à assurer une présence vigilante continue sans interruption, et à administrer les prescriptions médicales validées par le médecin traitant.
+Article 3 - Protocole d'Urgence : En cas d'altération brutale de l'état clinique ou de détresse vitale, l'infirmier(ère) contacte immédiatement le médecin régulateur / SAMU (141) et avertit la famille référente.
+Article 4 - Hygiène et Déontologie : Respect strict des règles d'asepsie, du secret médical et de l'intimité du patient.
+Article 5 - Modification et Préavis : Toute modification de planning ou annulation nécessite un préavis minimum de 24 heures.`
+  },
+  jour: {
+    label: '☀️ Garde de Jour (08h - 20h)',
+    horaires: '08h00 - 20h00',
+    tarif: 400,
+    prescriptions: `1. Aide à la toilette complète, soins d'hygiène corporelle et réfection du lit.
+2. Administration des traitements du matin (08h30) et du midi (13h00) selon prescriptions.
+3. Réfection des pansements stériles et surveillance de la cicatrisation.
+4. Contrôle des paramètres vitaux avant et après les repas.
+5. Aide aux repas, hydratation régulière et mobilisation motrice douce.`,
+    clauses: `Article 1 - Objet de la prestation : Mise à disposition d'un personnel soignant pour la surveillance et les soins de jour de 08h00 à 20h00.
+Article 2 - Rôle Soignant : Exécution des soins infirmiers prescrits, aide à l'alimentation, hydratation et surveillance de l'état général du patient.
+Article 3 - Traçabilité : Enregistrement de chaque acte et des consommations de matériel médical sur le carnet de soins DAR-SOINS.
+Article 4 - Urgence Médicale : Prise en charge immédiate des incidents et liaison constante avec les proches du patient et les services d'urgence.
+Article 5 - Résiliation : Possibilité de prorogation ou d'interruption du contrat par accord mutuel avec un préavis de 24 heures.`
+  },
+  '24h': {
+    label: '⏳ Garde Continue 24h/24',
+    horaires: '24h / 24 (Relève 2 infirmiers 08h-20h / 20h-08h)',
+    tarif: 900,
+    prescriptions: `1. Surveillance médicale continue 24h/24 avec relève soignante à 08h00 et 20h00.
+2. Soins d'hygiène complets, prévention rigoureuse des escarres (changements de position toutes les 3h).
+3. Administration des traitements oraux et injectables selon protocole médical strict.
+4. Surveillance de la diurèse, du transit et des apports hydriques journaliers.
+5. Relevé continu des constantes (Tension, SpO2, Pouls, Glycémie).`,
+    clauses: `Article 1 - Prestation Continue 24h/24 : Présence ininterrompue au chevet du patient assurée par un binôme d'infirmiers en rotation coordonnée par DAR-SOINS.
+Article 2 - Cahier de Transmission Médicale : Transmission obligatoire et consignation écrite des observations cliniques entre les équipes soignantes.
+Article 3 - Remplacement Immédiat : En cas d'indisponibilité fortuite d'un soignant, DAR-SOINS garantit son remplacement sous un délai maximal de 2 heures.
+Article 4 - Sécurité & Matériel : Le patient ou sa famille met à disposition l'ordonnance médicale valide et les dispositifs médicaux prescrits.
+Article 5 - Facturation & Paiement : Règlement hebdomadaire ou mensuel selon les modalités convenues lors de la signature.`
+  },
+  post_operatoire: {
+    label: '🏥 Soins Post-opératoires Intensifs',
+    horaires: '20h00 - 08h00 (ou selon protocole chirurgical)',
+    tarif: 550,
+    prescriptions: `1. Surveillance post-chirurgicale rapprochée (réveil, conscience, hémodynamique).
+2. Surveillance et vidange des drains chirurgicaux (Redon, sonde urinaire) avec quantification.
+3. Gestion multimodale de la douleur (EVA) et administration des antalgiques / perfusions IV.
+4. Réfection des pansements chirurgicaux avec respect rigoureux des règles d'asepsie.
+5. Dépistage précoce des complications thromboemboliques (injections d'anticoagulants HBPM).`,
+    clauses: `Article 1 - Soins Hautement Qualifiés : Affectation exclusive d'un(e) infirmier(ère) expérimenté(e) en soins intensifs et réanimation post-opératoire.
+Article 2 - Liaison avec le Chirurgien : Communication directe avec le chirurgien traitant ou la clinique en cas de saignement anormal, fièvre (>38.5°C) ou douleur réfractaire.
+Article 3 - Protocoles Hospitaliers à Domicile : Application conforme des protocoles de soins hospitaliers et gestion stricte des voies veineuses périphériques.
+Article 4 - Confidentialité : Respect absolu du dossier médical et des antécédents chirurgicaux du patient.
+Article 5 - Clôture de Prise en Charge : Bilan de fin d'intervention transmis au médecin référent à l'issue du contrat.`
+  },
+  accompagnement_senior: {
+    label: '👵 Accompagnement Senior Dépendance',
+    horaires: '09h00 - 18h00',
+    tarif: 350,
+    prescriptions: `1. Accompagnement dans les actes de la vie quotidienne pour personne âgée dépendante.
+2. Préparation et aide à la prise sécurisée du traitement médicamenteux chronique (pilulier).
+3. Surveillance de l'équilibre nutritionnel et hydratation régulière tout au long de la journée.
+4. Exercices de maintien de l'autonomie, marche assistée et stimulation cognitive.
+5. Surveillance des signes de fatigue, confusion ou altération de l'humeur.`,
+    clauses: `Article 1 - Objet & Mission : Accompagnement bienveillant et surveillance soignante de jour dédiée aux personnes âgées ou en perte d'autonomie.
+Article 2 - Bien-être & Sécurité : Maintien d'un environnement sécurisé évitant les risques de chutes et d'accidents domestiques.
+Article 3 - Coordination Familiale : Rapport quotidien aux proches sur l'alimentation, le moral et l'état général de santé du bénéficiaire.
+Article 4 - Éthique & Respect : Préservation de la dignité, du rythme de vie et des habitudes du patient dans son cadre de vie familial.
+Article 5 - Flexibilité : Possibilité d'adapter les plages horaires selon l'évolution du degré d'autonomie (GIR).`
+  }
+};
 
 export default function ContratsCreate() {
   const navigate = useNavigate();
@@ -14,11 +91,13 @@ export default function ContratsCreate() {
   const [typeGarde, setTypeGarde] = useState('nuit');
   const [dateDebut, setDateDebut] = useState(new Date().toISOString().split('T')[0]);
   const [dateFin, setDateFin] = useState(new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0]);
-  const [horairesGarde, setHorairesGarde] = useState('20h00 - 08h00');
-  const [tarifJournalier, setTarifJournalier] = useState(450);
+  
+  // Pre-filled with ready-to-use clauses for "nuit"
+  const [horairesGarde, setHorairesGarde] = useState(READY_CLAUSES.nuit.horaires);
+  const [tarifJournalier, setTarifJournalier] = useState(READY_CLAUSES.nuit.tarif);
   const [statut, setStatut] = useState('actif');
-  const [prescriptionsMedicales, setPrescriptionsMedicales] = useState('');
-  const [clausesSpecifiques, setClausesSpecifiques] = useState('');
+  const [prescriptionsMedicales, setPrescriptionsMedicales] = useState(READY_CLAUSES.nuit.prescriptions);
+  const [clausesSpecifiques, setClausesSpecifiques] = useState(READY_CLAUSES.nuit.clauses);
 
   useEffect(() => {
     fetchParams();
@@ -43,34 +122,22 @@ export default function ContratsCreate() {
 
   const handleTypeGardeChange = (type) => {
     setTypeGarde(type);
-    switch (type) {
-      case 'nuit':
-        setHorairesGarde('20h00 - 08h00');
-        setTarifJournalier(450);
-        setClausesSpecifiques('Surveillance nocturne continue, prise des constantes toutes les 4h, administration des traitements du soir et du matin.');
-        break;
-      case 'jour':
-        setHorairesGarde('08h00 - 20h00');
-        setTarifJournalier(400);
-        setClausesSpecifiques('Aide aux soins d\'hygiène du matin, prise de constantes avant les repas, réfection des pansements et suivi des constantes.');
-        break;
-      case '24h':
-        setHorairesGarde('24h / 24 (Roulement 2 infirmiers)');
-        setTarifJournalier(900);
-        setClausesSpecifiques('Assistance et présence continue 24h/24. Roulement quotidien d\'équipe infirmière.');
-        break;
-      case 'post_operatoire':
-        setHorairesGarde('20h00 - 08h00 (ou selon ordonnance)');
-        setTarifJournalier(550);
-        setClausesSpecifiques('Surveillance stricte du réveil post-opératoire, soins de drains, gestion de la douleur et prévention des escarres.');
-        break;
-      case 'accompagnement_senior':
-        setHorairesGarde('09h00 - 18h00');
-        setTarifJournalier(350);
-        setClausesSpecifiques('Accompagnement quotidien des personnes âgées dépendantes, aide à la prise de médicaments et maintien du lien social.');
-        break;
-      default:
-        break;
+    const template = READY_CLAUSES[type];
+    if (template) {
+      setHorairesGarde(template.horaires);
+      setTarifJournalier(template.tarif);
+      setPrescriptionsMedicales(template.prescriptions);
+      setClausesSpecifiques(template.clauses);
+    }
+  };
+
+  const handleResetTemplate = () => {
+    const template = READY_CLAUSES[typeGarde];
+    if (template) {
+      setHorairesGarde(template.horaires);
+      setTarifJournalier(template.tarif);
+      setPrescriptionsMedicales(template.prescriptions);
+      setClausesSpecifiques(template.clauses);
     }
   };
 
@@ -124,7 +191,7 @@ export default function ContratsCreate() {
       <header className="erp-page-header">
         <div>
           <h1 className="erp-page-title">Nouveau Contrat de Garde Médicale</h1>
-          <p className="erp-page-subtitle">Établissez un contrat de garde infirmière personnalisé selon le cas de santé du patient.</p>
+          <p className="erp-page-subtitle">Établissez un contrat de garde infirmière officiel avec clauses légales et protocoles médicaux pré-remplis.</p>
         </div>
         <div className="erp-page-actions">
           <button onClick={() => navigate('/gestionnaire/contrats')} className="erp-btn-secondary">
@@ -139,7 +206,7 @@ export default function ContratsCreate() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         
         {/* Client & Infirmier Selection */}
-        <div className="erp-card p-6" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px' }}>
+        <div className="erp-card p-6" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr', gap: '20px' }}>
           <div className="erp-form-group">
             <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b', marginBottom: '6px', display: 'block' }}>
               Patient / Client *
@@ -160,7 +227,7 @@ export default function ContratsCreate() {
 
           <div className="erp-form-group">
             <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-              Infirmier(ère) Affecté(e) (Optionnel)
+              Infirmier(ère) Affecté(e)
             </label>
             <select 
               className="glass-input" 
@@ -177,9 +244,19 @@ export default function ContratsCreate() {
           </div>
 
           <div className="erp-form-group">
-            <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b', marginBottom: '6px', display: 'block' }}>
-              Cas & Type de Garde *
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b' }}>
+                Cas & Type de Garde *
+              </label>
+              <button 
+                type="button" 
+                onClick={handleResetTemplate}
+                style={{ background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '6px', padding: '2px 8px', fontSize: '0.75rem', fontWeight: 600, color: '#475569', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                title="Recharger les clauses prêtes par défaut pour ce cas"
+              >
+                <RotateCcw size={12} /> Réinitialiser Clauses
+              </button>
+            </div>
             <select 
               className="glass-input" 
               required
@@ -197,7 +274,7 @@ export default function ContratsCreate() {
         </div>
 
         {/* Schedule & Pricing Details */}
-        <div className="erp-card p-6" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '20px' }}>
+        <div className="erp-card p-6" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.2fr 1fr', gap: '20px' }}>
           <div className="erp-form-group">
             <label style={{ fontWeight: 600, fontSize: '0.88rem', color: '#1e293b', marginBottom: '6px', display: 'block' }}>
               Date Début *
@@ -256,46 +333,56 @@ export default function ContratsCreate() {
           </div>
         </div>
 
-        {/* Medical Prescriptions & Clauses */}
+        {/* Medical Prescriptions & Ready Clauses */}
         <div className="erp-card p-6" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
           <div className="erp-form-group">
-            <label style={{ fontWeight: 700, fontSize: '0.9rem', color: '#991b1b', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <HeartPulse size={18} /> Prescriptions Médicales & Protocole de Soins Pendant la Garde
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontWeight: 700, fontSize: '0.9rem', color: '#991b1b', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <HeartPulse size={18} /> Protocoles Médicaux & Prescriptions de Garde (Pré-remplis)
+              </label>
+              <span style={{ fontSize: '0.78rem', color: '#059669', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <Sparkles size={14} /> Protocole prêt à l'emploi
+              </span>
+            </div>
             <textarea 
-              rows="3"
+              rows="5"
               className="glass-input"
-              placeholder="ex: Heures de prise de médicaments, surveillance du drain, fréquence de prise de constantes, régime alimentaire..."
               value={prescriptionsMedicales}
               onChange={e => setPrescriptionsMedicales(e.target.value)}
-              style={{ color: '#1e293b', padding: '12px' }}
+              style={{ color: '#1e293b', padding: '12px', lineHeight: 1.5 }}
             />
           </div>
 
           <div className="erp-form-group">
-            <label style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', marginBottom: '6px', display: 'block' }}>
-              Clauses Spécifiques, Pauses & Engagements de Garde
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <ShieldCheck size={18} /> Clauses Juridiques & Engagements Contractuels (Prêts à l'emploi)
+              </label>
+              <span style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <FileText size={14} /> Clauses réglementaires officielles
+              </span>
+            </div>
             <textarea 
-              rows="3"
+              rows="7"
               className="glass-input"
-              placeholder="ex: Modalités de garde, procédure d'urgence médicale, conditions d'annulation..."
               value={clausesSpecifiques}
               onChange={e => setClausesSpecifiques(e.target.value)}
-              style={{ color: '#1e293b', padding: '12px' }}
+              style={{ color: '#1e293b', padding: '12px', lineHeight: 1.5 }}
             />
           </div>
 
-          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '16px 20px', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          {/* Price Preview Card */}
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', padding: '18px 24px', borderRadius: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 600 }}>Durée totale du contrat:</span>
-              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#15803d' }}>
-                {calculateDays()} jours
+              <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 600 }}>Durée totale calculée :</span>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800, color: '#15803d' }}>
+                {calculateDays()} jours ({tarifJournalier} MAD / jour)
               </div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 600 }}>Montant Total du Contrat :</span>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#15803d' }}>
+              <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 600 }}>MONTANT TOTAL DU CONTRAT :</span>
+              <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#15803d' }}>
                 {calculateTotal().toFixed(2)} MAD
               </div>
             </div>

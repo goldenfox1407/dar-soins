@@ -367,6 +367,29 @@ export default function ContratsList() {
               </div>
             </div>
 
+            {/* Official Signatures Block */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', background: '#fafafa', border: '1px dashed #cbd5e1', padding: '18px 20px', borderRadius: '12px', marginBottom: '1.5rem' }}>
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                  Signature du Client / Représentant Légal
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '35px' }}>
+                  (Précédée de la mention manuscrite "Lu et Approuvé")
+                </div>
+                <div style={{ borderBottom: '1px solid #94a3b8', width: '80%' }} />
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a', marginBottom: '4px' }}>
+                  Pour l'Établissement DAR-SOINS
+                </div>
+                <div style={{ fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic', marginBottom: '35px' }}>
+                  (Direction Médicale & Cachet Officiel)
+                </div>
+                <div style={{ borderBottom: '1px solid #94a3b8', width: '80%' }} />
+              </div>
+            </div>
+
             {/* Footer Actions */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid #e2e8f0', paddingTop: '1.2rem' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
