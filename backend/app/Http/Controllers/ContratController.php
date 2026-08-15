@@ -90,4 +90,15 @@ class ContratController extends Controller
 
         return response()->json(['message' => 'Contrat supprimé avec succès']);
     }
+
+    public function telechargerPdf($id)
+    {
+        $contrat = Contrat::with(['client.user', 'infirmier.user', 'user'])->findOrFail($id);
+        $config = \App\Models\Config::first();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.contrat', [
+            'contrat' => $contrat,
+            'config'  => $config,
+        ]);
+        return $pdf->download('contrat_'.$contrat->reference.'.pdf');
+    }
 }
