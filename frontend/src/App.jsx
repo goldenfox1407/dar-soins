@@ -35,6 +35,8 @@ import TransfertsCreate from './pages/erp/TransfertsCreate';
 import AchatsList from './pages/erp/AchatsList';
 import AchatsCreate from './pages/erp/AchatsCreate';
 import AchatsReturn from './pages/erp/AchatsReturn';
+import RetourAchatsList from './pages/erp/RetourAchatsList';
+import RetourAchatsCreate from './pages/erp/RetourAchatsCreate';
 import VentesList from './pages/erp/VentesList';
 import RetourVentesList from './pages/erp/RetourVentesList';
 import RetourVentesCreate from './pages/erp/RetourVentesCreate';
@@ -112,18 +114,19 @@ function App() {
           <Route path="transferts" element={<TransfertsList />} />
           <Route path="transferts/ajouter" element={<TransfertsCreate />} />
           
-          {/* Achats & Ventes — Fonctionnel */}
+          {/* Achats & Retours Achats — Fonctionnel */}
           <Route path="achats" element={<AchatsList />} />
           <Route path="achats/ajouter" element={<AchatsCreate />} />
           <Route path="achats/modifier/:id" element={<AchatsCreate />} />
-          <Route path="achats/retour/:id" element={<AchatsReturn />} />
+          <Route path="achats/retour/:id" element={<RetourAchatsCreate />} />
+          <Route path="retours/achats" element={<RetourAchatsList />} />
+          <Route path="retours/achats/ajouter" element={<RetourAchatsCreate />} />
+          
+          {/* Ventes & Retours Ventes — Fonctionnel */}
           <Route path="ventes" element={<VentesList />} />
           <Route path="ventes/ajouter" element={<ErpComingSoon title="Nouvelle Vente" />} />
-          
-          {/* Retours Ventes — Fonctionnel */}
           <Route path="retours/ventes" element={<RetourVentesList />} />
           <Route path="retours/ventes/ajouter" element={<RetourVentesCreate />} />
-          <Route path="retours/achats" element={<ErpComingSoon title="Retours Achats" />} />
           
           {/* Devis — Fonctionnel */}
           <Route path="devis" element={<DevisList />} />

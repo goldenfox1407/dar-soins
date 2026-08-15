@@ -35,7 +35,7 @@ const MENU_ITEMS = [
   { id: 'achats', title: 'Achats', icon: ShoppingCart, submenus: [
     { title: 'Liste des achats', path: '/gestionnaire/achats' },
     { title: 'Ajouter Achat', path: '/gestionnaire/achats/ajouter' },
-    { title: 'Retours achats', path: '/gestionnaire/retours/achats' }
+    { title: "Retour d'achat", path: '/gestionnaire/retours/achats' }
   ]},
   { id: 'ventes', title: 'Ventes', icon: TrendingUp, submenus: [
     { title: 'Liste des ventes', path: '/gestionnaire/ventes' },

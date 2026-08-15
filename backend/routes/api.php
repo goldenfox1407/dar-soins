@@ -103,6 +103,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::post('achats/{achat}/retourner', [\App\Http\Controllers\AchatController::class, 'marquerRetourne']);
         Route::apiResource('achat-lignes', \App\Http\Controllers\AchatLigneController::class);
         Route::apiResource('retour-achats', \App\Http\Controllers\RetourAchatController::class);
+        Route::patch('retour-achats/{id}/statut', [\App\Http\Controllers\RetourAchatController::class, 'updateStatut']);
         Route::apiResource('ventes', \App\Http\Controllers\VenteController::class);
 
         // New Routes for Workflow V2
