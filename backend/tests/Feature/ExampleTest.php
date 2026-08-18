@@ -16,4 +16,14 @@ class ExampleTest extends TestCase
 
         $response->assertStatus(200);
     }
+
+    public function test_storage_file_access(): void
+    {
+        \Illuminate\Support\Facades\Storage::disk('public')->put('test_prescription.txt', 'Prescription content');
+
+        $response = $this->get('/storage/test_prescription.txt');
+        $response->assertStatus(200);
+
+        \Illuminate\Support\Facades\Storage::disk('public')->delete('test_prescription.txt');
+    }
 }

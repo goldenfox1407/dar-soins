@@ -28,6 +28,7 @@ Route::get('/produits', [App\Http\Controllers\ProduitController::class, 'index']
 
 Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
     
     // Notifications System
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index']);
@@ -42,6 +43,7 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
     Route::post('/interventions/commander', [App\Http\Controllers\InterventionController::class, 'commanderSoin']);
     Route::post('/interventions/{id}/cloturer', [App\Http\Controllers\InterventionController::class, 'cloturerIntervention']);
     Route::post('/interventions/{id}/reponse-client', [\App\Http\Controllers\InterventionController::class, 'repondreDevisClient']);
+    Route::post('/interventions/{id}/annuler-client', [\App\Http\Controllers\InterventionController::class, 'annulerClient']);
     Route::post('/interventions/{id}/reponse-infirmier', [\App\Http\Controllers\InterventionController::class, 'repondreInfirmier']);
     Route::post('/interventions/{id}/arriver', [\App\Http\Controllers\InterventionController::class, 'arriverSurSite']);
 
@@ -81,6 +83,10 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('contrats/{id}/pdf', [\App\Http\Controllers\ContratController::class, 'telechargerPdf']);
         Route::apiResource('contrats', \App\Http\Controllers\ContratController::class);
         Route::patch('contrats/{id}/statut', [\App\Http\Controllers\ContratController::class, 'updateStatut']);
+
+        // Organisation — Tâches
+        Route::apiResource('taches', \App\Http\Controllers\TacheController::class);
+        Route::patch('taches/{id}/statut', [\App\Http\Controllers\TacheController::class, 'updateStatut']);
 
         // ERP Routes Generated
         Route::apiResource('comptes-bancaires', \App\Http\Controllers\CompteBancaireController::class);

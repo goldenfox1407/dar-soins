@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
-import { LogOut, Activity, Calendar, Clock, MapPin, CheckCircle, FileText, Syringe, HeartPulse, UploadCloud, Map, TrendingUp, CreditCard, AlertCircle } from 'lucide-react';
+import { compressImage } from '../utils/imageCompressor';
+import { LogOut, Activity, Calendar, Clock, MapPin, CheckCircle, FileText, Syringe, HeartPulse, UploadCloud, Map, TrendingUp, CreditCard, AlertCircle, XCircle } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Navbar from '../components/Navbar';
 
@@ -35,41 +36,51 @@ export default function ClientDashboard() {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
-    fetchData();
+    fetchInterventions();
+    fetchProduits();
 
     if (location.state && location.state.selectedProduitId) {
       setShowOrderForm(true);
+      setFormData(prev => ({ ...prev, produit_id: location.state.selectedProduitId }));
     }
 
     const interval = setInterval(() => {
-      fetchData(true);
+      fetchInterventions(true);
     }, 5000);
 
     return () => clearInterval(interval);
   }, [location.state]);
 
-  const fetchData = async (silent = false) => {
+  const fetchInterventions = async (silent = false) => {
     try {
       if (!silent) setLoading(true);
-      const [intRes, prodRes] = await Promise.all([
-        api.get('/interventions'),
-        api.get('/produits')
-      ]);
-      setInterventions(intRes.data || []);
-      const allProds = prodRes.data.data || prodRes.data || [];
-      // Keep all products so that gardes can also be requested
-      setProduits(allProds);
-      
-      // If a product was selected from the catalog, select it, otherwise pick the first one
-      if (location.state && location.state.selectedProduitId) {
-        setFormData(prev => ({ ...prev, produit_id: location.state.selectedProduitId }));
-      } else if (allProds.length > 0 && !formData.produit_id) {
-        setFormData(prev => ({ ...prev, produit_id: allProds[0].id }));
-      }
+      const res = await api.get('/interventions');
+      setInterventions(res.data || []);
     } catch (err) {
-      console.error("Erreur chargement donnees", err);
+      console.error("Erreur chargement interventions", err);
     } finally {
       if (!silent) setLoading(false);
+    }
+  };
+
+  const fetchProduits = async () => {
+    try {
+      const prodRes = await api.get('/produits');
+      const allProds = prodRes.data.data || prodRes.data || [];
+      setProduits(allProds);
+      
+      setFormData(prev => {
+        if (prev.produit_id) return prev;
+        if (location.state && location.state.selectedProduitId) {
+          return { ...prev, produit_id: location.state.selectedProduitId };
+        }
+        if (allProds.length > 0) {
+          return { ...prev, produit_id: allProds[0].id };
+        }
+        return prev;
+      });
+    } catch (err) {
+      console.error("Erreur chargement produits", err);
     }
   };
 
@@ -138,8 +149,16 @@ export default function ClientDashboard() {
       
       alert('Demande envoyée avec succès ! Un infirmier vous a été affecté.');
       setShowOrderForm(false);
-      setFormData({ ...formData, details: '', fichier: null });
-      fetchData();
+      setFormData(prev => ({
+        produit_id: produits.length > 0 ? produits[0].id : '',
+        date_heure: '',
+        latitude: '',
+        longitude: '',
+        details: '',
+        fichier: null
+      }));
+      setAddress('');
+      fetchInterventions();
     } catch (err) {
       console.error("Erreur commande", err);
       let errorMsg = 'Erreur lors de la commande.';
@@ -158,15 +177,30 @@ export default function ClientDashboard() {
   const handleDevisResponse = async (id, accepte) => {
     try {
       await api.post(`/interventions/${id}/reponse-client`, { accepte });
-      alert(accepte ? "Devis accepté avec succès !" : "Devis refusé.");
-      fetchData();
+      alert(accepte ? "Devis accepté avec succès ! Soin confirmé." : "Devis refusé. Demande annulée.");
+      fetchInterventions();
     } catch (err) {
       alert("Erreur lors de la réponse au devis.");
     }
   };
 
-  const activeInterventions = interventions.filter(i => i.statut !== 'terminee');
-  const pastInterventions = interventions.filter(i => i.statut === 'terminee');
+  const handleCancelIntervention = async (id) => {
+    if (!window.confirm("Êtes-vous sûr de vouloir annuler cette demande de soin ?")) {
+      return;
+    }
+    try {
+      await api.post(`/interventions/${id}/annuler-client`);
+      alert("Votre demande de soin a été annulée avec succès.");
+      fetchInterventions();
+    } catch (err) {
+      console.error("Erreur annulation", err);
+      const msg = err.response?.data?.message || "Erreur lors de l'annulation de la demande.";
+      alert(msg);
+    }
+  };
+
+  const activeInterventions = interventions.filter(i => i.statut !== 'terminee' && i.statut !== 'annulee');
+  const pastInterventions = interventions.filter(i => i.statut === 'terminee' || i.statut === 'annulee');
   const actionRequired = activeInterventions.filter(i => i.statut === 'en_attente_reponse_client');
 
   const getStatusInfo = (statut) => {
@@ -179,6 +213,7 @@ export default function ClientDashboard() {
       'acceptee': { label: 'Confirmée', color: 'success', icon: CheckCircle },
       'en_cours': { label: 'En cours', color: 'success', icon: Activity },
       'terminee': { label: 'Terminée', color: 'neutral', icon: CheckCircle },
+      'annulee': { label: 'Annulée', color: 'danger', icon: XCircle },
     };
     return map[statut] || { label: statut, color: 'neutral', icon: Clock };
   };
@@ -262,7 +297,7 @@ export default function ClientDashboard() {
                 <select 
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-[#1E293B] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                   value={formData.produit_id}
-                  onChange={e => setFormData({...formData, produit_id: e.target.value})}
+                  onChange={e => setFormData(prev => ({ ...prev, produit_id: e.target.value }))}
                   required
                 >
                   {produits.map(p => (
@@ -279,7 +314,7 @@ export default function ClientDashboard() {
                   required
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-[#1E293B] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none transition-all"
                   value={formData.date_heure}
-                  onChange={e => setFormData({...formData, date_heure: e.target.value})}
+                  onChange={e => setFormData(prev => ({ ...prev, date_heure: e.target.value }))}
                 />
               </div>
 
@@ -325,7 +360,7 @@ export default function ClientDashboard() {
                   className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-[#1E293B] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 outline-none resize-none transition-all"
                   placeholder="Décrivez vos symptômes ou les détails du soin..."
                   value={formData.details}
-                  onChange={e => setFormData({...formData, details: e.target.value})}
+                  onChange={e => setFormData(prev => ({ ...prev, details: e.target.value }))}
                 />
               </div>
 
@@ -333,11 +368,20 @@ export default function ClientDashboard() {
                 <label className="text-sm font-semibold text-slate-700">Joindre un fichier (Optionnel)</label>
                 <div className="border-2 border-dashed border-slate-200 hover:border-blue-400 bg-slate-50 hover:bg-blue-50/50 rounded-xl p-5 transition-all flex items-center justify-center gap-4 relative cursor-pointer">
                   <UploadCloud className="text-slate-400" size={24} />
-                  <span className="text-sm text-slate-600">{formData.fichier ? formData.fichier.name : 'Photo ou ordonnance (Max 5MB)'}</span>
+                  <span className="text-sm text-slate-600">{formData.fichier ? formData.fichier.name : 'Photo ou ordonnance (PDF ou Image)'}</span>
                   <input 
                     type="file" 
                     accept="image/*,.pdf"
-                    onChange={e => setFormData({...formData, fichier: e.target.files[0]})}
+                    onChange={async (e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        try {
+                          const compressed = await compressImage(e.target.files[0]);
+                          setFormData(prev => ({ ...prev, fichier: compressed }));
+                        } catch (err) {
+                          setFormData(prev => ({ ...prev, fichier: e.target.files[0] }));
+                        }
+                      }
+                    }}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
                 </div>
@@ -402,6 +446,19 @@ export default function ClientDashboard() {
                         </div>
                       </div>
                       
+                      {['en_attente_affectation', 'en_attente_reponse_infirmier', 'infirmier_accepte', 'devis_genere'].includes(inter.statut) && (
+                        <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center">
+                          <span className="text-xs text-slate-400">Demande modifiable avant validation du devis</span>
+                          <button
+                            type="button"
+                            onClick={() => handleCancelIntervention(inter.id)}
+                            className="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 shadow-sm"
+                          >
+                            <XCircle size={14} /> Annuler la demande
+                          </button>
+                        </div>
+                      )}
+
                       {inter.statut === 'en_attente_reponse_client' && (
                         <div className="mt-4 border-t border-slate-100 pt-4 space-y-3 animate-fade-in">
                           <div className="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-100">
@@ -427,10 +484,10 @@ export default function ClientDashboard() {
                               ✓ Accepter le devis
                             </button>
                             <button 
-                              onClick={() => handleDevisResponse(inter.id, false)}
-                              className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2.5 rounded-xl font-semibold text-sm transition-colors"
+                              onClick={() => handleCancelIntervention(inter.id)}
+                              className="flex-1 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-2.5 rounded-xl font-semibold text-sm transition-colors flex items-center justify-center gap-1.5"
                             >
-                              Refuser
+                              <XCircle size={15} /> Refuser & Annuler
                             </button>
                           </div>
                         </div>
@@ -444,25 +501,30 @@ export default function ClientDashboard() {
             {/* Historique des Soins Passés */}
             <div className="mt-8 space-y-6">
               <h2 className="text-xl font-bold flex items-center gap-2 text-[#1E293B]">
-                <FileText className="text-blue-600" /> Historique des soins reçus
+                <FileText className="text-blue-600" /> Historique des soins
               </h2>
 
               {loading ? null : pastInterventions.length === 0 ? (
                 <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
-                  <p className="text-slate-400 text-sm">Aucun historique de soins terminés.</p>
+                  <p className="text-slate-400 text-sm">Aucun historique de soins terminés ou annulés.</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {pastInterventions.map(inter => {
+                    const status = getStatusInfo(inter.statut);
+                    const StatusIcon = status.icon;
                     const isExpanded = expandedIntervention === inter.id;
                     return (
                       <div key={inter.id} className="bg-white border border-slate-200 rounded-2xl p-6 relative overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-300" />
+                        <div className={`absolute left-0 top-0 bottom-0 w-1 ${status.color === 'danger' ? 'bg-rose-400' : 'bg-slate-300'}`} />
                         <div className="flex justify-between items-start mb-2">
                           <div>
+                            <span className={`status-badge ${status.color} mb-2 inline-flex`}>
+                              <StatusIcon size={12} /> {status.label}
+                            </span>
                             <h3 className="text-lg font-bold text-[#1E293B]">{inter.produit?.nom || 'Soin Infirmier'}</h3>
                             <p className="text-xs text-slate-500 mt-1">
-                              Soignant : {inter.infirmier?.user ? `${inter.infirmier.user.prenom || ''} ${inter.infirmier.user.nom}` : 'Non spécifié'}
+                              Soignant : {inter.infirmier?.user ? `${inter.infirmier.user.prenom || ''} ${inter.infirmier.user.nom}` : 'Non assigné'}
                             </p>
                           </div>
                           <div className="text-right">

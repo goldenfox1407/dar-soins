@@ -26,9 +26,9 @@ export default function NotificationDropdown() {
     }
     return {
       enableToast: true,
-      toastDuration: 5000, // 5s
+      toastDuration: 5000, // 5s for standard alerts
       enableSound: true,
-      pollingInterval: 15000, // 15s
+      pollingInterval: 5000, // 5s for fast reactivity
     };
   };
 
@@ -51,21 +51,40 @@ export default function NotificationDropdown() {
       const data = response.data;
       const newList = data.notifications || [];
 
-      // Only toast TRULY NEW notifications that arrive AFTER initial page load
       if (isFirstFetchRef.current) {
         newList.forEach(n => seenIdsRef.current.add(n.id));
         isFirstFetchRef.current = false;
+
+        // Show popup for the latest unread notification on first load if any
+        const unreadList = newList.filter(n => !n.read_at);
+        if (unreadList.length > 0 && settings.enableToast) {
+          const latest = unreadList[0];
+          const isIntervention = latest.data?.evenement === 'nouvelle_intervention';
+          const isPersistent = isIntervention || settings.toastDuration === 0;
+          triggerToast(
+            latest.data?.titre || 'Nouvelle notification',
+            latest.data?.message || '',
+            latest.data?.icone || '🔔',
+            latest.data?.url || '/gestionnaire',
+            isPersistent,
+            latest.data?.evenement
+          );
+        }
       } else {
         const newlyArrived = newList.filter(n => !seenIdsRef.current.has(n.id));
         if (newlyArrived.length > 0) {
           newlyArrived.forEach(n => seenIdsRef.current.add(n.id));
           const latest = newlyArrived[0];
           if (settings.enableToast && !latest.read_at) {
+            const isIntervention = latest.data?.evenement === 'nouvelle_intervention';
+            const isPersistent = isIntervention || settings.toastDuration === 0;
             triggerToast(
               latest.data?.titre || 'Nouvelle notification',
               latest.data?.message || '',
               latest.data?.icone || '🔔',
-              latest.data?.url
+              latest.data?.url || '/gestionnaire',
+              isPersistent,
+              latest.data?.evenement
             );
           }
         }
@@ -81,7 +100,7 @@ export default function NotificationDropdown() {
   useEffect(() => {
     fetchNotifications();
 
-    const intervalTime = settings.pollingInterval || 15000;
+    const intervalTime = settings.pollingInterval || 5000;
     const interval = setInterval(() => {
       fetchNotifications();
     }, intervalTime);
@@ -100,11 +119,12 @@ export default function NotificationDropdown() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const triggerToast = (titre, message, icone = '🔔', url = null) => {
+  const triggerToast = (titre, message, icone = '🔔', url = null, persistent = false, evenement = 'general') => {
     if (!settings.enableToast) return;
 
     if (toastTimeoutRef.current) {
       clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = null;
     }
 
     // Play audio beep if enabled
@@ -115,17 +135,18 @@ export default function NotificationDropdown() {
         const gain = audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5 note
-        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
         osc.connect(gain);
         gain.connect(audioCtx.destination);
         osc.start();
-        osc.stop(audioCtx.currentTime + 0.2);
+        osc.stop(audioCtx.currentTime + 0.25);
       } catch (e) {}
     }
 
-    setToast({ titre, message, icone, url });
+    setToast({ titre, message, icone, url, persistent, evenement });
 
-    if (settings.toastDuration > 0) {
+    // Only auto-dismiss if NOT persistent and duration > 0
+    if (!persistent && settings.toastDuration > 0) {
       toastTimeoutRef.current = setTimeout(() => {
         setToast(null);
       }, settings.toastDuration);
@@ -404,41 +425,93 @@ export default function NotificationDropdown() {
       {toast && createPortal(
         <div 
           className="animate-slide-up shadow-2xl"
-          onClick={() => {
-            if (toast.url) navigate(toast.url);
-            setToast(null);
-          }}
           style={{
             position: 'fixed',
             bottom: '32px',
             right: '32px',
-            width: '360px',
+            width: '400px',
+            maxWidth: 'calc(100vw - 48px)',
             background: '#0F172A',
             color: '#FFFFFF',
-            padding: '16px 20px',
+            padding: '18px 20px',
             borderRadius: '16px',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1)',
             zIndex: 999999,
             display: 'flex',
             alignItems: 'flex-start',
             gap: '14px',
-            cursor: toast.url ? 'pointer' : 'default',
-            pointerEvents: 'auto'
+            cursor: 'default',
+            pointerEvents: 'auto',
+            borderLeft: toast.persistent ? '4px solid #3b82f6' : '4px solid #10b981'
           }}
         >
-          <span style={{ fontSize: '1.8rem', flexShrink: 0, lineHeight: 1 }}>{toast.icone}</span>
+          <span style={{ fontSize: '2rem', flexShrink: 0, lineHeight: 1 }}>{toast.icone}</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#F8FAFC' }}>{toast.titre}</h5>
-            <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: '#94A3B8', lineHeight: 1.4 }}>{toast.message}</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+              <h5 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#F8FAFC' }}>{toast.titre}</h5>
+              {toast.persistent && (
+                <span style={{ fontSize: '0.65rem', background: '#2563eb', color: 'white', padding: '2px 6px', borderRadius: '6px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Action Requise
+                </span>
+              )}
+            </div>
+            <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: '#94A3B8', lineHeight: 1.4 }}>{toast.message}</p>
+            {toast.url && (
+              <button
+                onClick={() => {
+                  navigate(toast.url);
+                  setToast(null);
+                }}
+                style={{
+                  background: '#2563eb',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '6px 14px',
+                  fontSize: '0.78rem',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '5px',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = '#1d4ed8'}
+                onMouseLeave={e => e.currentTarget.style.background = '#2563eb'}
+              >
+                Consulter
+              </button>
+            )}
           </div>
           <button 
             onClick={(e) => {
               e.stopPropagation();
               setToast(null);
             }}
-            style={{ background: 'none', border: 'none', color: '#64748B', cursor: 'pointer', padding: 0, marginLeft: '4px' }}
+            title="Fermer la notification"
+            style={{ 
+              background: 'rgba(255,255,255,0.1)', 
+              border: 'none', 
+              color: '#94A3B8', 
+              cursor: 'pointer', 
+              padding: '6px', 
+              borderRadius: '6px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+              e.currentTarget.style.color = '#ef4444';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+              e.currentTarget.style.color = '#94A3B8';
+            }}
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>,
         document.body

@@ -83,4 +83,77 @@ describe('Intervention API', function () {
         $response->assertStatus(200)
             ->assertJsonPath('message', 'Devis accepté. Soin confirmé.');
     });
+
+    it('allows client to cancel intervention before devis acceptance', function () {
+        $owner = \App\Models\User::factory()->client()->create();
+        $intervention = \App\Models\Intervention::factory()->create([
+            'client_id' => $owner->client->id,
+            'statut' => 'en_attente_affectation',
+        ]);
+
+        $response = $this->actingAs($owner, 'sanctum')
+            ->postJson("/api/interventions/{$intervention->id}/annuler-client");
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Demande de soin annulée avec succès.');
+
+        expect($intervention->fresh()->statut)->toBe('annulee');
+    });
+
+    it('blocks client from cancelling intervention after it is already accepted', function () {
+        $owner = \App\Models\User::factory()->client()->create();
+        $intervention = \App\Models\Intervention::factory()->create([
+            'client_id' => $owner->client->id,
+            'statut' => 'acceptee',
+        ]);
+
+        $response = $this->actingAs($owner, 'sanctum')
+            ->postJson("/api/interventions/{$intervention->id}/annuler-client");
+
+        $response->assertStatus(422);
+        expect($intervention->fresh()->statut)->toBe('acceptee');
+    });
+
+    it('allows assigned infirmier to check in with photo', function () {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $infirmier = \App\Models\User::factory()->infirmier()->create();
+        $intervention = \App\Models\Intervention::factory()->create([
+            'infirmier_id' => $infirmier->infirmier->id,
+            'statut' => 'acceptee',
+        ]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('selfie.jpg');
+
+        $response = $this->actingAs($infirmier, 'sanctum')
+            ->postJson("/api/interventions/{$intervention->id}/arriver", [
+                'photo' => $file,
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('message', 'Arrivée confirmée avec succès.');
+
+        expect($intervention->fresh()->statut)->toBe('en_cours');
+        expect($intervention->fresh()->photo_validation_arrivee)->not->toBeNull();
+    });
+
+    it('blocks another infirmier from checking in to someone elses intervention', function () {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $infirmier1 = \App\Models\User::factory()->infirmier()->create();
+        $infirmier2 = \App\Models\User::factory()->infirmier()->create();
+        $intervention = \App\Models\Intervention::factory()->create([
+            'infirmier_id' => $infirmier1->infirmier->id,
+            'statut' => 'acceptee',
+        ]);
+
+        $file = \Illuminate\Http\UploadedFile::fake()->image('selfie.jpg');
+
+        $response = $this->actingAs($infirmier2, 'sanctum')
+            ->postJson("/api/interventions/{$intervention->id}/arriver", [
+                'photo' => $file,
+            ]);
+
+        $response->assertStatus(403);
+    });
 });

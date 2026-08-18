@@ -9,6 +9,7 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import api from '../services/api';
+import { compressImage } from '../utils/imageCompressor';
 
 // Fix leaflet icon
 let DefaultIcon = L.icon({
@@ -94,22 +95,35 @@ export default function InfirmierDashboard() {
 
   const handleCheckIn = async (mission) => {
     if (!photo) {
-      alert("Veuillez prendre une photo pour valider votre arrivée.");
+      alert("Veuillez prendre ou sélectionner une photo pour valider votre arrivée.");
       return;
     }
-    const formData = new FormData();
-    formData.append('photo', photo);
 
     try {
       setLoading(true);
+      const readyPhoto = await compressImage(photo);
+      const formData = new FormData();
+      formData.append('photo', readyPhoto);
+
       const res = await api.post(`/interventions/${mission.id}/arriver`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      alert("Arrivée confirmée ! Vous pouvez commencer les soins.");
-      fetchMissions();
+      alert(res.data?.message || "Arrivée confirmée ! Vous pouvez commencer les soins.");
+      setPhoto(null);
+      await fetchMissions();
+      setActiveTab('active');
     } catch (err) {
-      alert("Erreur lors du check-in.");
-      console.error(err);
+      console.error("Erreur check-in", err);
+      let errorMsg = "Erreur lors du check-in.";
+      if (err.response?.data?.message) {
+        errorMsg += "\n\n" + err.response.data.message;
+      }
+      if (err.response?.data?.errors) {
+        const details = Object.values(err.response.data.errors).flat().join("\n");
+        errorMsg += "\n" + details;
+      }
+      alert(errorMsg);
+    } finally {
       setLoading(false);
     }
   };
@@ -427,15 +441,45 @@ export default function InfirmierDashboard() {
                     <div className="bg-blue-50 p-4 border-t border-blue-100">
                       <p className="text-sm text-blue-800 font-semibold mb-3">Valider votre arrivée sur place :</p>
                       <div className="flex items-center gap-3">
-                        <label className="flex-1 bg-white border border-blue-200 text-blue-700 px-4 py-2 rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors">
+                        <label className="flex-1 bg-white border border-blue-200 text-blue-700 px-4 py-2.5 rounded-lg cursor-pointer flex items-center justify-center gap-2 hover:bg-blue-100 transition-colors shadow-sm text-sm font-semibold">
                           <Camera size={18} /> Prendre Photo (Selfie)
-                          <input type="file" accept="image/*" capture="user" className="hidden" onChange={(e) => setPhoto(e.target.files[0])} />
+                          <input 
+                            type="file" 
+                            accept="image/*" 
+                            capture="user" 
+                            className="hidden" 
+                            onChange={async (e) => {
+                              if (e.target.files && e.target.files[0]) {
+                                try {
+                                  const compressed = await compressImage(e.target.files[0]);
+                                  setPhoto(compressed);
+                                } catch (err) {
+                                  setPhoto(e.target.files[0]);
+                                }
+                              }
+                            }} 
+                          />
                         </label>
-                        <button onClick={() => handleCheckIn(mission)} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold shadow-md">
-                          Arrivée
+                        <button 
+                          disabled={loading || !photo} 
+                          onClick={() => handleCheckIn(mission)} 
+                          className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-2.5 rounded-lg font-bold shadow-md transition-all flex items-center gap-1.5"
+                        >
+                          {loading ? 'Validation...' : 'Arrivé(e)'}
                         </button>
                       </div>
-                      {photo && <p className="text-xs text-emerald-600 mt-2">✓ Photo sélectionnée</p>}
+                      {photo && (
+                        <div className="mt-3 flex items-center justify-between text-xs bg-white border border-emerald-300 text-emerald-700 p-2.5 rounded-lg shadow-sm">
+                          <span className="truncate max-w-[250px]">✓ Photo prête : <strong>{photo.name}</strong></span>
+                          <button 
+                            type="button" 
+                            onClick={() => setPhoto(null)} 
+                            className="text-rose-500 font-semibold hover:underline ml-2 flex-shrink-0"
+                          >
+                            Retirer
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

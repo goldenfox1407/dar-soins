@@ -23,8 +23,14 @@ export function AuthProvider({ children }) {
         setUser(null);
     };
 
+    const updateUser = (updatedData) => {
+        const newUser = { ...(user || {}), ...updatedData };
+        sessionStorage.setItem('user', JSON.stringify(newUser));
+        setUser(newUser);
+    };
+
     return (
-        <AuthContext.Provider value={{ user, token, login, logout }}>
+        <AuthContext.Provider value={{ user, token, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );

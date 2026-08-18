@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { 
   Users, UserCog, Package, ArrowRightLeft, ShoppingCart, TrendingUp, 
   RotateCcw, FileText, Briefcase, Calculator, Repeat, Wrench, 
   FileSignature, CheckSquare, Calendar, Percent, Settings, Brain, 
-  BarChart, Menu, X, ChevronDown, ChevronRight, LogOut, Bell, Search
+  BarChart, Menu, X, ChevronDown, ChevronRight, LogOut, Bell, Search,
+  User, MoreVertical, Shield, ChevronUp
 } from 'lucide-react';
 import Logo from './Logo';
 import NotificationDropdown from './NotificationDropdown';
+import AdminProfileModal from './AdminProfileModal';
+import { useAuth } from '../context/AuthContext';
 
 const MENU_ITEMS = [
   { id: 'gens', title: 'Contacts & Gens', icon: Users, submenus: [
@@ -126,14 +129,37 @@ const SidebarItem = ({ item, isOpen, toggleOpen, currentPath }) => {
 export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [openMenuId, setOpenMenuId] = useState(null);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const profileMenuRef = useRef(null);
+
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Close profile popup on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    if (isProfileMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isProfileMenuOpen]);
+
   const handleLogout = () => {
-    sessionStorage.removeItem('auth_token');
-    sessionStorage.removeItem('user');
+    logout();
     navigate('/login');
   };
+
+  const displayName = [user?.prenom, user?.nom].filter(Boolean).join(' ') || user?.name || user?.email?.split('@')[0] || 'Administrateur';
+  const initials = [user?.prenom?.[0], user?.nom?.[0]].filter(Boolean).join('').toUpperCase() || user?.name?.[0]?.toUpperCase() || user?.email?.[0]?.toUpperCase() || 'A';
+  const userRole = user?.role === 'gestionnaire' ? 'Admin / Gestionnaire' : (user?.role || 'Admin');
 
   return (
     <div className="erp-layout">
@@ -162,16 +188,205 @@ export default function AdminLayout() {
           ))}
         </div>
         
-        <div className="erp-sidebar-footer">
-          <div className="erp-user-profile">
-            <div className="erp-avatar">A</div>
-            <div className="erp-user-info">
-              <p className="erp-user-name">Admin User</p>
-              <p className="erp-user-role">Admin</p>
+        {/* SIDEBAR FOOTER WITH PROFILE */}
+        <div className="erp-sidebar-footer" ref={profileMenuRef} style={{ position: 'relative' }}>
+          {/* PROFILE POPOVER MENU */}
+          {isProfileMenuOpen && (
+            <div 
+              className="erp-profile-popover animate-scale-in"
+              style={{
+                position: 'absolute',
+                bottom: '100%',
+                left: '12px',
+                right: '12px',
+                marginBottom: '10px',
+                background: '#FFFFFF',
+                borderRadius: '16px',
+                boxShadow: '0 20px 40px -8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(226, 232, 240, 0.9)',
+                padding: '12px',
+                zIndex: 100,
+              }}
+            >
+              {/* Header preview in popup */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '8px 8px 12px 8px',
+                borderBottom: '1px solid #F1F5F9',
+                marginBottom: '8px',
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: '700',
+                  fontSize: '0.95rem',
+                  flexShrink: 0,
+                }}>
+                  {initials}
+                </div>
+                <div style={{ overflow: 'hidden' }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: '0.88rem', color: '#1E293B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {displayName}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.75rem', color: '#64748B', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                <button
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    setIsProfileModalOpen(true);
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#334155',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#2563EB'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#334155'; }}
+                >
+                  <User size={16} />
+                  <span>Mon Profil & Sécurité</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    navigate('/gestionnaire/parametres/systeme');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#334155',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#F1F5F9'; e.currentTarget.style.color = '#2563EB'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#334155'; }}
+                >
+                  <Settings size={16} />
+                  <span>Paramètres Système</span>
+                </button>
+
+                <div style={{ height: '1px', background: '#F1F5F9', margin: '4px 0' }} />
+
+                <button
+                  onClick={() => {
+                    setIsProfileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    width: '100%',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#DC2626',
+                    fontSize: '0.85rem',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                    textAlign: 'left',
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = '#FEF2F2'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+                >
+                  <LogOut size={16} />
+                  <span>Se Déconnecter</span>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* MAIN PROFILE CARD TRIGGER */}
+          <div 
+            className="erp-user-profile"
+            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+            title="Cliquez pour gérer votre profil"
+            style={{
+              position: 'relative',
+              background: isProfileMenuOpen ? '#EEF2FF' : '#F8FAFC',
+              borderColor: isProfileMenuOpen ? '#818CF8' : 'var(--card-border)',
+            }}
+          >
+            {/* AVATAR WITH STATUS DOT */}
+            <div style={{ position: 'relative' }}>
+              <div className="erp-avatar" style={{
+                background: 'linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)',
+                color: '#FFFFFF',
+                fontWeight: '700',
+              }}>
+                {initials}
+              </div>
+              <span style={{
+                position: 'absolute',
+                bottom: '-1px',
+                right: '-1px',
+                width: '10px',
+                height: '10px',
+                borderRadius: '50%',
+                background: '#10B981',
+                border: '2px solid #FFFFFF',
+              }} />
+            </div>
+
+            {/* INFO */}
+            <div className="erp-user-info" style={{ flex: 1, minWidth: 0 }}>
+              <p className="erp-user-name" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {displayName}
+              </p>
+              <p className="erp-user-role" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {userRole}
+              </p>
+            </div>
+
+            {/* EXPAND ICON */}
+            <div style={{ color: '#94A3B8', display: 'flex', alignItems: 'center' }}>
+              {isProfileMenuOpen ? <ChevronDown size={16} /> : <ChevronUp size={16} />}
             </div>
           </div>
         </div>
       </aside>
+
+      {/* ADMIN PROFILE MODAL */}
+      <AdminProfileModal 
+        isOpen={isProfileModalOpen} 
+        onClose={() => setIsProfileModalOpen(false)} 
+      />
 
       {/* MAIN CONTENT */}
       <main className="erp-main">

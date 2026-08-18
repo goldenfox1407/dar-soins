@@ -47,6 +47,8 @@ import CongesList from './pages/erp/CongesList';
 import PaieList from './pages/erp/PaieList';
 import ContratsList from './pages/erp/ContratsList';
 import ContratsCreate from './pages/erp/ContratsCreate';
+import TachesList from './pages/erp/TachesList';
+import CalendrierPage from './pages/erp/CalendrierPage';
 import EntrepotsList from './pages/erp/EntrepotsList';
 import ParametresSysteme from './pages/erp/ParametresSysteme';
 import TaxesList from './pages/erp/TaxesList';
@@ -140,7 +142,8 @@ function App() {
           {/* Contrats de Garde — Fonctionnel */}
           <Route path="contrats" element={<ContratsList />} />
           <Route path="contrats/ajouter" element={<ContratsCreate />} />
-          <Route path="taches" element={<ErpComingSoon title="Tâches" />} />
+          <Route path="taches" element={<TachesList />} />
+          <Route path="calendrier" element={<CalendrierPage />} />
           <Route path="reservations" element={<ErpComingSoon title="Réservations" />} />
           <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />
           

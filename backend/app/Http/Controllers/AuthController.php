@@ -81,4 +81,34 @@ class AuthController extends Controller
 
         return response()->json(new UserResource($user));
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'nom' => 'required|string|max:255',
+            'prenom' => 'nullable|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users')->ignore($user->id)],
+            'current_password' => 'nullable|string',
+            'new_password' => 'nullable|string|min:6',
+        ]);
+
+        if ($request->filled('new_password')) {
+            if (!$request->filled('current_password') || !Hash::check($request->current_password, $user->password)) {
+                return response()->json(['message' => 'Le mot de passe actuel est incorrect.'], 422);
+            }
+            $user->password = Hash::make($request->new_password);
+        }
+
+        $user->nom = $request->nom;
+        $user->prenom = $request->prenom;
+        $user->email = $request->email;
+        $user->save();
+
+        return response()->json([
+            'message' => 'Profil mis à jour avec succès',
+            'user' => new UserResource($user)
+        ]);
+    }
 }

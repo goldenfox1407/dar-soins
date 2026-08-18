@@ -7,6 +7,8 @@ use App\Models\Localisation;
 use App\Models\Materiel;
 use App\Models\Consommation;
 use App\Models\ConstanteMedicale;
+use App\Models\User;
+use App\Notifications\GenericSystemNotification;
 use App\Http\Resources\InterventionResource;
 use App\Http\Resources\FactureResource;
 use App\Http\Resources\DevisResource;
@@ -18,6 +20,7 @@ use App\Services\ServiceTarification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InterventionController extends Controller
 {
@@ -85,6 +88,28 @@ class InterventionController extends Controller
             ]);
         });
 
+        // Notifier tous les gestionnaires / admins
+        try {
+            $intervention->load(['produit']);
+            $admins = User::where('role', 'gestionnaire')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+                ->get();
+            $clientNom = $user->name ?: trim(($user->prenom ?? '') . ' ' . ($user->nom ?? ''));
+            $soinNom = $intervention->produit ? $intervention->produit->nom : 'Soin infirmier';
+
+            foreach ($admins as $admin) {
+                $admin->notify(new GenericSystemNotification(
+                    "Nouvelle Demande d'Intervention",
+                    "Le client {$clientNom} a demandé un soin : {$soinNom}.",
+                    'nouvelle_intervention',
+                    '🏥',
+                    '/gestionnaire'
+                ));
+            }
+        } catch (\Exception $e) {
+            Log::error("Erreur notification nouvelle intervention : " . $e->getMessage());
+        }
+
         return response()->json([
             'message'      => 'Commande enregistrée, en attente de validation',
             'intervention' => new InterventionResource($intervention->load(['produit'])),
@@ -98,9 +123,9 @@ class InterventionController extends Controller
     {
         $intervention = Intervention::findOrFail($id);
         $user         = Auth::user();
-
-        if ($user->hasRole('infirmier') && $intervention->infirmier_id !== $user->infirmier->id) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+        $isInfirmier  = ($user->role === 'infirmier') || (method_exists($user, 'hasRole') && $user->hasRole('infirmier'));
+        if ($isInfirmier && (!$user->infirmier || (int)$intervention->infirmier_id !== (int)$user->infirmier->id)) {
+            return response()->json(['message' => 'Non autorisé. Cette intervention ne vous est pas assignée.'], 403);
         }
 
         $intervention->load(['infirmier', 'localisation']);
@@ -162,6 +187,25 @@ class InterventionController extends Controller
             return [$intervention, $facture];
         });
 
+        try {
+            $intervention->load(['client.user', 'produit']);
+            $clientNom = $intervention->client?->user?->name ?? 'Un client';
+            $admins = User::where('role', 'gestionnaire')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+                ->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new GenericSystemNotification(
+                    "Intervention Clôturée",
+                    "L'intervention pour le client {$clientNom} a été clôturée.",
+                    'intervention_cloturee',
+                    '🏁',
+                    '/gestionnaire'
+                ));
+            }
+        } catch (\Exception $e) {
+            Log::error("Erreur notification clôture intervention : " . $e->getMessage());
+        }
+
         return response()->json([
             'message'      => 'Intervention clôturée avec succès',
             'intervention' => new InterventionResource($intervention->load(['constantes', 'consommations'])),
@@ -177,12 +221,34 @@ class InterventionController extends Controller
         $intervention = Intervention::findOrFail($id);
         $user = Auth::user();
 
-        if (!$user->hasRole('infirmier') || $intervention->infirmier_id !== $user->infirmier->id) {
-            return response()->json(['message' => 'Non autorisé'], 403);
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié'], 401);
+        }
+
+        $isInfirmier = ($user->role === 'infirmier') || (method_exists($user, 'hasRole') && $user->hasRole('infirmier'));
+        if (!$isInfirmier) {
+            return response()->json(['message' => 'Non autorisé. Rôle soignant requis.'], 403);
+        }
+
+        if (!$user->infirmier) {
+            return response()->json(['message' => 'Profil soignant introuvable pour ce compte.'], 404);
+        }
+
+        if ((int)$intervention->infirmier_id !== (int)$user->infirmier->id) {
+            return response()->json(['message' => 'Non autorisé. Cette mission ne vous est pas assignée.'], 403);
+        }
+
+        if (in_array($intervention->statut, ['terminee', 'annulee'])) {
+            return response()->json(['message' => 'Cette mission est déjà terminée ou annulée.'], 422);
         }
 
         $request->validate([
-            'photo' => 'required|image|max:5120'
+            'photo' => 'required|file|mimes:jpeg,png,jpg,gif,webp,heic,heif,bmp|max:15360'
+        ], [
+            'photo.required' => 'La photo selfie d\'arrivée est obligatoire.',
+            'photo.file' => 'Le fichier photo est invalide.',
+            'photo.mimes' => 'Format d\'image non supporté (utilisez JPG, PNG, WEBP, HEIC, etc.).',
+            'photo.max' => 'La photo ne doit pas dépasser 15 Mo.'
         ]);
 
         $path = $request->file('photo')->store('interventions/arrivees', 'public');
@@ -190,8 +256,30 @@ class InterventionController extends Controller
         $intervention->statut = 'en_cours';
         $intervention->save();
 
+        try {
+            $intervention->load(['client.user', 'produit']);
+            $clientNom = $intervention->client?->user?->name ?? 'Un patient';
+            $infirmierNom = $user->name ?: trim(($user->prenom ?? '') . ' ' . ($user->nom ?? ''));
+            $soinNom = $intervention->produit ? $intervention->produit->nom : 'Soin';
+            $admins = User::where('role', 'gestionnaire')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+                ->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new GenericSystemNotification(
+                    "Soignant arrivé sur site",
+                    "L'infirmier {$infirmierNom} est arrivé chez {$clientNom} pour {$soinNom}.",
+                    'infirmier_arrive',
+                    '📍',
+                    '/gestionnaire'
+                ));
+            }
+        } catch (\Exception $e) {
+            Log::error("Erreur notification arrivée infirmier : " . $e->getMessage());
+        }
+
         return response()->json([
-            'message' => 'Arrivée confirmée.',
+            'message' => 'Arrivée confirmée avec succès.',
             'intervention' => $intervention
         ]);
     }
@@ -274,17 +362,16 @@ class InterventionController extends Controller
     {
         $request->validate(['accepte' => 'required|boolean']);
         $intervention = Intervention::findOrFail($id);
-        $user = Auth::user();
-
-        if (!$user->hasRole('infirmier')) {
-            return response()->json(['message' => 'Non autorisé. Rôle incorrect.'], 403);
+        $isInfirmier = ($user->role === 'infirmier') || (method_exists($user, 'hasRole') && $user->hasRole('infirmier'));
+        if (!$isInfirmier) {
+            return response()->json(['message' => 'Non autorisé. Rôle soignant requis.'], 403);
         }
 
         if (!$user->infirmier) {
-            return response()->json(['message' => 'Profil infirmier introuvable pour cet utilisateur.'], 403);
+            return response()->json(['message' => 'Profil soignant introuvable pour cet utilisateur.'], 403);
         }
 
-        if ($intervention->infirmier_id !== $user->infirmier->id) {
+        if ((int)$intervention->infirmier_id !== (int)$user->infirmier->id) {
             return response()->json(['message' => 'Non autorisé. Cette intervention ne vous est pas assignée.'], 403);
         }
 
@@ -376,6 +463,12 @@ class InterventionController extends Controller
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
+        $intervention->load(['client.user', 'produit']);
+        $clientNom = $intervention->client?->user?->name ?? 'Un client';
+        $admins = User::where('role', 'gestionnaire')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+            ->get();
+
         if ($request->accepte) {
             $intervention->statut = 'acceptee';
             if ($intervention->devis) {
@@ -383,6 +476,21 @@ class InterventionController extends Controller
                 $intervention->devis->save();
             }
             $intervention->save();
+
+            try {
+                foreach ($admins as $admin) {
+                    $admin->notify(new GenericSystemNotification(
+                        "Devis Accepté par le client",
+                        "Le client {$clientNom} a validé le devis de son soin.",
+                        'devis_accepte',
+                        '✅',
+                        '/gestionnaire'
+                    ));
+                }
+            } catch (\Exception $e) {
+                Log::error("Erreur notification devis accepté : " . $e->getMessage());
+            }
+
             return response()->json(['message' => 'Devis accepté. Soin confirmé.']);
         } else {
             $intervention->statut = 'annulee';
@@ -391,7 +499,76 @@ class InterventionController extends Controller
                 $intervention->devis->save();
             }
             $intervention->save();
+
+            try {
+                foreach ($admins as $admin) {
+                    $admin->notify(new GenericSystemNotification(
+                        "Devis Refusé par le client",
+                        "Le client {$clientNom} a refusé le devis de son soin.",
+                        'devis_refuse',
+                        '❌',
+                        '/gestionnaire'
+                    ));
+                }
+            } catch (\Exception $e) {
+                Log::error("Erreur notification devis refusé : " . $e->getMessage());
+            }
+
             return response()->json(['message' => 'Devis refusé. Intervention annulée.']);
         }
+    }
+
+    /**
+     * 7. Client annule sa demande de soin (avant acceptation du devis)
+     */
+    public function annulerClient(Request $request, $id)
+    {
+        $intervention = Intervention::with(['devis', 'client.user', 'produit'])->findOrFail($id);
+        $user = Auth::user();
+
+        if ($intervention->client->user_id !== $user->id) {
+            return response()->json(['message' => 'Non autorisé'], 403);
+        }
+
+        // On ne peut annuler que si l'intervention n'a pas encore été acceptée, commencée ou clôturée
+        $statutsNonAnnulables = ['acceptee', 'en_cours', 'terminee', 'annulee'];
+        if (in_array($intervention->statut, $statutsNonAnnulables)) {
+            return response()->json([
+                'message' => 'Impossible d\'annuler cette demande de soin dans son état actuel.'
+            ], 422);
+        }
+
+        $intervention->statut = 'annulee';
+        if ($intervention->devis) {
+            $intervention->devis->statut = 'refuse';
+            $intervention->devis->save();
+        }
+        $intervention->save();
+
+        // Notifier les gestionnaires
+        try {
+            $clientNom = $user->name ?: trim(($user->prenom ?? '') . ' ' . ($user->nom ?? ''));
+            $soinNom = $intervention->produit ? $intervention->produit->nom : 'Soin infirmier';
+            $admins = User::where('role', 'gestionnaire')
+                ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+                ->get();
+
+            foreach ($admins as $admin) {
+                $admin->notify(new GenericSystemNotification(
+                    "Demande de soin annulée par le client",
+                    "Le client {$clientNom} a annulé sa demande de soin : {$soinNom}.",
+                    'intervention_annulee',
+                    '🚫',
+                    '/gestionnaire'
+                ));
+            }
+        } catch (\Exception $e) {
+            Log::error("Erreur notification annulation intervention : " . $e->getMessage());
+        }
+
+        return response()->json([
+            'message' => 'Demande de soin annulée avec succès.',
+            'intervention' => $intervention
+        ]);
     }
 }

@@ -149,15 +149,15 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
                   </p>
                 </div>
                 {intervention.fichier_joint && (
-                  <div style={{ paddingTop: '8px' }}>
-                    <strong className="text-sm">Ordonnance / Pièce jointe :</strong>
+                  <div style={{ paddingTop: '10px' }}>
+                    <strong className="text-sm block mb-1">Ordonnance / Pièce jointe :</strong>
                     <a 
-                      href={`http://127.0.0.1:8000/storage/${intervention.fichier_joint}`} 
+                      href={intervention.fichier_joint.startsWith('http') ? intervention.fichier_joint : `http://127.0.0.1:8000/storage/${intervention.fichier_joint.replace(/^\/+/, '')}`} 
                       target="_blank" 
                       rel="noreferrer" 
-                      className="text-blue-500 hover:text-blue-700 block text-sm mt-1 font-semibold hover:underline"
+                      className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all hover:shadow-sm"
                     >
-                      Voir la pièce jointe
+                      <FileText size={15} /> Consulter l'ordonnance / document
                     </a>
                   </div>
                 )}
