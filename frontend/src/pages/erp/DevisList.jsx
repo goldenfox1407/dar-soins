@@ -1,30 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { FileText, Download, Eye, Send, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import api from '../../services/api';
-import { FileText, Download } from 'lucide-react';
+import { openOrDownloadPdf } from '../../utils/pdfViewer';
 
 export default function DevisList() {
-  const [data, setData] = useState([]);
+  const [devis, setDevis] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchData();
-
-    const interval = setInterval(() => {
-      fetchData(true);
-    }, 5000);
-
-    return () => clearInterval(interval);
+    fetchDevis();
   }, []);
 
-  const fetchData = async (silent = false) => {
+  const fetchDevis = async () => {
     try {
-      if (!silent) setLoading(true);
-      const response = await api.get('/devis').catch(() => ({ data: [] }));
-      setData(response.data?.data || response.data?.data || response.data || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
+      const res = await api.get('/devis');
+      setDevis(res.data.data ? res.data.data : res.data);
+    } catch (err) {
+      console.error(err);
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -38,14 +32,8 @@ export default function DevisList() {
     }
   };
 
-  const telechargerPdf = async (id) => {
-    try {
-      const response = await api.get(`/devis/${id}/pdf`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-    } catch (err) {
-      alert("Erreur lors du téléchargement du PDF.");
-    }
+  const telechargerPdf = (id) => {
+    openOrDownloadPdf(`/devis/${id}/pdf`, `devis_${id}.pdf`);
   };
 
   return (

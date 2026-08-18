@@ -361,7 +361,13 @@ class InterventionController extends Controller
     public function repondreInfirmier(Request $request, $id)
     {
         $request->validate(['accepte' => 'required|boolean']);
-        $intervention = Intervention::findOrFail($id);
+        $intervention = Intervention::with(['client.user', 'produit'])->findOrFail($id);
+        $user = Auth::user() ?? $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Non authentifié. Veuillez vous reconnecter.'], 401);
+        }
+
         $isInfirmier = ($user->role === 'infirmier') || (method_exists($user, 'hasRole') && $user->hasRole('infirmier'));
         if (!$isInfirmier) {
             return response()->json(['message' => 'Non autorisé. Rôle soignant requis.'], 403);
@@ -375,15 +381,55 @@ class InterventionController extends Controller
             return response()->json(['message' => 'Non autorisé. Cette intervention ne vous est pas assignée.'], 403);
         }
 
+        $infirmierNom = $user->name ?: trim(($user->prenom ?? '') . ' ' . ($user->nom ?? ''));
+        $clientNom = $intervention->client?->user?->name ?? 'Un patient';
+        $soinNom = $intervention->produit?->nom ?? 'Soin infirmier';
+
+        $admins = User::where('role', 'gestionnaire')
+            ->orWhereHas('roles', fn($q) => $q->where('name', 'gestionnaire'))
+            ->get();
+
         if ($request->accepte) {
             $intervention->statut = 'infirmier_accepte';
             $intervention->save();
-            return response()->json(['message' => 'Intervention acceptée. En attente du devis gestionnaire.']);
+
+            try {
+                foreach ($admins as $admin) {
+                    $admin->notify(new GenericSystemNotification(
+                        "Mission acceptée par le soignant",
+                        "L'infirmier {$infirmierNom} a accepté la mission pour {$clientNom} ({$soinNom}).",
+                        'infirmier_accepte',
+                        '🩺',
+                        '/gestionnaire'
+                    ));
+                }
+            } catch (\Exception $e) {
+                Log::error("Erreur notification acceptation infirmier : " . $e->getMessage());
+            }
+
+            return response()->json(['message' => 'Intervention acceptée avec succès. En attente du devis gestionnaire.']);
         } else {
-            $intervention->infirmiers_refuses()->attach($user->infirmier->id);
+            if (method_exists($intervention, 'infirmiers_refuses')) {
+                $intervention->infirmiers_refuses()->syncWithoutDetaching([$user->infirmier->id]);
+            }
             $intervention->infirmier_id = null;
             $intervention->statut = 'en_attente_affectation'; // Return to manager map
             $intervention->save();
+
+            try {
+                foreach ($admins as $admin) {
+                    $admin->notify(new GenericSystemNotification(
+                        "Mission refusée par le soignant",
+                        "L'infirmier {$infirmierNom} a décliné l'intervention pour {$clientNom} ({$soinNom}). Réassignation nécessaire.",
+                        'infirmier_refus',
+                        '⚠️',
+                        '/gestionnaire'
+                    ));
+                }
+            } catch (\Exception $e) {
+                Log::error("Erreur notification refus infirmier : " . $e->getMessage());
+            }
+
             return response()->json(['message' => 'Intervention refusée.']);
         }
     }

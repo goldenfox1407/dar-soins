@@ -8,6 +8,7 @@ export default function Logo({ className = '', size = 32, light = false }) {
     <div className={`flex items-center gap-3 ${className}`}>
       <img 
         src={logoUrl} 
+        onError={(e) => { e.target.onerror = null; e.target.src = '/images/logo.png'; }}
         alt="Dar-Soins Logo" 
         style={{ width: `${size}px`, height: `${size}px`, borderRadius: '6px', objectFit: 'contain' }} 
       />

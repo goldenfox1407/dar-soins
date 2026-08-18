@@ -10,6 +10,7 @@ import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import api from '../services/api';
 import { compressImage } from '../utils/imageCompressor';
+import { openOrDownloadPdf } from '../utils/pdfViewer';
 
 // Fix leaflet icon
 let DefaultIcon = L.icon({
@@ -85,11 +86,13 @@ export default function InfirmierDashboard() {
 
   const repondreMission = async (id, accepte) => {
     try {
-      await api.post(`/interventions/${id}/reponse-infirmier`, { accepte });
-      alert(accepte ? "Mission acceptée !" : "Mission refusée.");
-      fetchMissions();
+      const res = await api.post(`/interventions/${id}/reponse-infirmier`, { accepte });
+      alert(res.data?.message || (accepte ? "Mission acceptée avec succès !" : "Mission refusée."));
+      await fetchMissions();
     } catch (err) {
-      alert("Erreur lors de la réponse.");
+      console.error("Erreur réponse mission:", err);
+      const msg = err.response?.data?.message || "Erreur lors de la réponse à la mission.";
+      alert(msg);
     }
   };
 
@@ -142,18 +145,8 @@ export default function InfirmierDashboard() {
     });
   };
 
-  const viewPdf = async (url) => {
-    try {
-      setLoading(true);
-      const response = await api.get(url, { responseType: 'blob' });
-      const blobUrl = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(blobUrl, '_blank');
-    } catch (err) {
-      alert("Erreur lors de l'ouverture du document.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+  const viewPdf = (url, filename = 'document.pdf') => {
+    openOrDownloadPdf(url, filename);
   };
 
   const handleCloturer = async () => {

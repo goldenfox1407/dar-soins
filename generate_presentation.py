@@ -222,8 +222,8 @@ add_textbox(slide, Inches(1.6), Inches(0.3), Inches(10), Inches(0.6),
 plan_items = [
     ("01", "Contexte Général et Problématique"),
     ("02", "Présentation du Projet Dar-Soins"),
-    ("03", "Étude de Marché et Analyse Concurrentielle"),
-    ("04", "Business Model & Business Plan"),
+    ("03", "Étude de Marché & Modèle Économique"),
+    ("04", "Business Plan & Projections Financières"),
     ("05", "Cahier des Charges Fonctionnel"),
     ("06", "Conception UML & Modélisation"),
     ("07", "Architecture Technique & Stack Technologique"),
@@ -425,18 +425,20 @@ L'Espace Gestionnaire, qui est un véritable ERP, offre une administration compl
 Notre proposition de valeur repose sur quatre piliers : la transparence tarifaire, l'affectation intelligente par géolocalisation, la traçabilité complète du dossier patient, et l'intégration d'un ERP complet dans la même plateforme.""")
 
 # ════════════════════════════════════════════════════════════════════
-# DIAPO 7 — ÉTUDE DE MARCHÉ
+# DIAPO 7 — TITRE SECTION : ÉTUDE DE MARCHÉ & MODÈLE ÉCONOMIQUE
 # ════════════════════════════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
-add_section_title(slide, "III. Étude de Marché",
-                  "Analyse concurrentielle et positionnement")
+add_section_title(slide, "III. Étude de Marché & Modèle Économique",
+                  "Benchmark concurrentiel, diagnostic SWOT et Business Model Canvas")
 
-set_notes(slide, """Avant de concevoir la solution technique, il était indispensable de réaliser une étude de marché approfondie pour valider le besoin, identifier les acteurs existants et positionner Dar-Soins de manière différenciante.
+set_notes(slide, """Nous abordons à présent l'étude de marché et le modèle économique de Dar-Soins.
 
-Nous allons analyser les concurrents directs et indirects ainsi que l'analyse SWOT du projet.""")
+Avant de concevoir la solution technique, il était primordial de mener une analyse stratégique rigoureuse : évaluer l'écosystème de la santé au Maroc, analyser les concurrents directs et indirects, formaliser le diagnostic SWOT, et structurer un Business Model pérenne et scalable.
+
+Cette démarche garantit que Dar-Soins ne soit pas seulement une prouesse technique, mais également une opportunité à fort impact socio-économique.""")
 
 # ════════════════════════════════════════════════════════════════════
-# DIAPO 8 — ANALYSE CONCURRENTIELLE & SWOT
+# DIAPO 8 (1/3) — ÉTUDE DE MARCHÉ & ANALYSE CONCURRENTIELLE
 # ════════════════════════════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 add_bg(slide, FOND_SLIDE)
@@ -444,64 +446,189 @@ add_side_bar(slide, color=BLEU_ROYAL)
 add_accent_bar(slide, top=0, height=Inches(0.06), color=VERT_EMERAUDE)
 add_logo(slide, left=Inches(0.6), top=Inches(0.25))
 
-add_textbox(slide, Inches(1.6), Inches(0.3), Inches(10), Inches(0.6),
-            "Analyse Concurrentielle & SWOT", font_size=28, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(1.6), Inches(0.25), Inches(10.5), Inches(0.55),
+            "Étude de Marché & Analyse Concurrentielle", font_size=26, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(1.6), Inches(0.72), Inches(10.5), Inches(0.35),
+            "Benchmark du secteur e-santé et des soins à domicile au Maroc", font_size=13, color=GRIS_CLAIR)
 
-# Concurrents
-add_textbox(slide, Inches(0.8), Inches(1.1), Inches(5), Inches(0.4),
-            "Concurrents Identifiés", font_size=18, color=BLEU_FONCE, bold=True)
+# Left Column — Typologie des concurrents
+add_textbox(slide, Inches(0.7), Inches(1.15), Inches(5.8), Inches(0.35),
+            "Cartographie des Acteurs Existants", font_size=16, color=BLEU_FONCE, bold=True)
 
-concurrents = [
-    "SOS Médecins Maroc — Urgences médicales, pas de soins planifiés",
-    "DabaDoc — Prise de RDV cabinet, pas de soins à domicile",
-    "Infirmiers Freelance — Pas de plateforme, bouche-à-oreille",
-    "Cliniques privées — Services à domicile limités, prix élevé",
-]
-add_bullet_list(slide, Inches(0.8), Inches(1.6), Inches(5.6), Inches(2.2), concurrents, font_size=13)
-
-# SWOT Grid
-swot = [
-    ("Forces", "Stack moderne, ERP intégré,\nUX soignée, code sécurisé", VERT_EMERAUDE),
-    ("Faiblesses", "Projet académique,\npas encore déployé en prod", ROUGE),
-    ("Opportunités", "Marché inexploité,\nAMO généralisée, digitalisation", BLEU_ROYAL),
-    ("Menaces", "Nouveaux entrants,\nrésistance au changement", ORANGE),
+concurrents_data = [
+    ("DabaDoc / Plateformes RDV", "Prise de RDV cabinet uniquement · Aucun acte infirmier à domicile · Zéro suivi matériel/constantes.", RGBColor(0x3B, 0x82, 0xF6)),
+    ("SOS Médecins / SAMU privé", "Focalisé sur l'urgence vitale ponctuelle · Tarifs très élevés (>600 MAD) · Non adapté aux soins réguliers.", RGBColor(0xEF, 0x44, 0x44)),
+    ("Infirmiers Libéraux (Informel)", "Pratique par bouche-à-oreille · Aucune transparence tarifaire · Zéro traçabilité légale ni dossier patient.", RGBColor(0xF5, 0x9E, 0x0B)),
+    ("Cliniques Privées", "Offre à domicile marginale · Démarches administratives lourdes · Délais longs et tarification opaque.", RGBColor(0x8B, 0x5C, 0xF6)),
 ]
 
-for i, (title, body, color) in enumerate(swot):
-    x = Inches(7.0 + (i % 2) * 3.1)
-    y = Inches(1.1 + (i // 2) * 2.8)
+for idx, (c_name, c_desc, c_col) in enumerate(concurrents_data):
+    cy = Inches(1.55 + idx * 1.12)
+    card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.7), cy, Inches(5.6), Inches(1.02))
+    card.fill.solid()
+    card.fill.fore_color.rgb = BLANC
+    card.line.color.rgb = c_col
+    card.line.width = Pt(1.5)
     
-    box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, Inches(2.8), Inches(2.4))
+    add_textbox(slide, Inches(0.85), cy + Inches(0.08), Inches(5.3), Inches(0.32),
+                c_name, font_size=13, color=c_col, bold=True)
+    add_textbox(slide, Inches(0.85), cy + Inches(0.38), Inches(5.3), Inches(0.58),
+                c_desc, font_size=10.5, color=GRIS_FONCE)
+
+# Right Column — Matrice comparative des fonctionnalités
+add_textbox(slide, Inches(6.6), Inches(1.15), Inches(6.2), Inches(0.35),
+            "Matrice Comparative des Solutions", font_size=16, color=BLEU_FONCE, bold=True)
+
+# Table headers
+mat_y = Inches(1.55)
+cols_mat = [("Critères Clés", Inches(6.6), Inches(2.3)),
+            ("Dar-Soins", Inches(8.95), Inches(1.1)),
+            ("DabaDoc", Inches(10.1), Inches(0.9)),
+            ("SOS Méd.", Inches(11.05), Inches(0.9)),
+            ("Freelance", Inches(12.0), Inches(0.9))]
+
+for title, mx, mw in cols_mat:
+    hdr = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, mx, mat_y, mw, Inches(0.36))
+    hdr.fill.solid()
+    hdr.fill.fore_color.rgb = VERT_EMERAUDE if "Dar-Soins" in title else BLEU_ROYAL
+    hdr.line.fill.background()
+    add_textbox(slide, mx + Inches(0.02), mat_y + Inches(0.04), mw - Inches(0.04), Inches(0.28),
+                title, font_size=10, color=BLANC, bold=True, alignment=PP_ALIGN.CENTER)
+
+mat_rows = [
+    ("Soins infirmiers à domicile", "OUI", "NON", "Partiel", "OUI"),
+    ("Dispatch & Géolocalisation", "OUI", "NON", "Partiel", "NON"),
+    ("Devis & Facturation auto", "OUI", "NON", "NON", "NON"),
+    ("Suivi constantes & Dossier", "OUI", "Partiel", "NON", "NON"),
+    ("ERP & Gestion des stocks", "OUI", "NON", "NON", "NON"),
+    ("Contrats garde longue durée", "OUI", "NON", "NON", "Partiel"),
+]
+
+for ridx, (crit, c_dar, c_dab, c_sos, c_fre) in enumerate(mat_rows):
+    ry = Inches(1.95 + ridx * 0.44)
+    rbg = BLANC if ridx % 2 == 0 else FOND_SLIDE
+    
+    for val, vx, vw in [(crit, Inches(6.6), Inches(2.3)),
+                         (c_dar, Inches(8.95), Inches(1.1)),
+                         (c_dab, Inches(10.1), Inches(0.9)),
+                         (c_sos, Inches(11.05), Inches(0.9)),
+                         (c_fre, Inches(12.0), Inches(0.9))]:
+        cell = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, vx, ry, vw, Inches(0.40))
+        cell.fill.solid()
+        cell.fill.fore_color.rgb = rbg
+        cell.line.color.rgb = RGBColor(0xE2, 0xE8, 0xF0)
+        cell.line.width = Pt(1)
+        
+        is_dar = (vx == Inches(8.95))
+        v_col = VERT_FONCE if (val == "OUI" and is_dar) else (VERT_EMERAUDE if val == "OUI" else (ROUGE if val == "NON" else (ORANGE if val == "Partiel" else GRIS_FONCE)))
+        v_bold = True if is_dar or vx == Inches(6.6) else False
+        v_align = PP_ALIGN.LEFT if vx == Inches(6.6) else PP_ALIGN.CENTER
+        
+        add_textbox(slide, vx + Inches(0.06), ry + Inches(0.06), vw - Inches(0.12), Inches(0.3),
+                    val, font_size=9.5, color=v_col, bold=v_bold, alignment=v_align)
+
+# Bottom Advantage Banner
+banner = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.6), Inches(4.75), Inches(6.3), Inches(1.5))
+banner.fill.solid()
+banner.fill.fore_color.rgb = RGBColor(0xEE, 0xF2, 0xFF)
+banner.line.color.rgb = BLEU_ROYAL
+banner.line.width = Pt(1.5)
+
+add_textbox(slide, Inches(6.75), Inches(4.85), Inches(6.0), Inches(0.3),
+            "Positionnement Unique & Avantage Concurrentiel", font_size=12, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(6.75), Inches(5.18), Inches(6.0), Inches(0.98),
+            "Dar-Soins comble un vide stratégique au Maroc en combinant un portail patient intuitif, un dispatch soignant géolocalisé et un ERP médical complet avec traçabilité et conformité réglementaire.", font_size=10, color=GRIS_FONCE)
+
+add_footer(slide)
+set_notes(slide, """Notre étude de marché montre qu'il existe un besoin massif et non comblé de soins à domicile structurés au Maroc.
+
+L'analyse de la concurrence fait ressortir quatre catégories d'acteurs :
+1. Les plateformes de téléconsultation et de prise de rendez-vous comme DabaDoc, qui se limitent aux consultations en cabinet médical.
+2. Les services d'urgence mobile comme SOS Médecins, réservés aux urgences médicales lourdes à des tarifs très élevés.
+3. Les infirmiers libéraux indépendants, qui constituent l'essentiel de l'offre actuelle mais fonctionnent de manière informelle, sans régulation tarifaire ni suivi médical formel.
+4. Les cliniques privées, dont les prestations à domicile sont marginales, lentes et très coûteuses.
+
+Comme le prouve notre matrice comparative, Dar-Soins est la seule plateforme capable de centraliser la demande de soins, l'affectation géolocalisée temps réel, la facturation automatisée, le dossier médical partagé et un ERP de gestion des stocks et du personnel.""")
+
+# ════════════════════════════════════════════════════════════════════
+# DIAPO 9 (2/3) — ANALYSE STRATÉGIQUE SWOT
+# ════════════════════════════════════════════════════════════════════
+slide = prs.slides.add_slide(prs.slide_layouts[6])
+add_bg(slide, FOND_SLIDE)
+add_side_bar(slide, color=BLEU_ROYAL)
+add_accent_bar(slide, top=0, height=Inches(0.06), color=VERT_EMERAUDE)
+add_logo(slide, left=Inches(0.6), top=Inches(0.25))
+
+add_textbox(slide, Inches(1.6), Inches(0.25), Inches(10.5), Inches(0.55),
+            "Analyse Stratégique SWOT Approfondie", font_size=26, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(1.6), Inches(0.72), Inches(10.5), Inches(0.35),
+            "Diagnostic interne (Forces / Faiblesses) et externe (Opportunités / Menaces)", font_size=13, color=GRIS_CLAIR)
+
+swot_cards = [
+    ("FORCES (Strengths)", [
+        "Architecture moderne & robuste (Laravel 12 REST API + React 19)",
+        "ERP médical complet intégré (Stocks, RH, Facturation, Contrats)",
+        "Dispatch géolocalisé & calcul kilométrique automatique",
+        "Traçabilité rigoureuse (constantes, signature, selfie check-in)",
+        "Transparence tarifaire avec devis validé avant intervention"
+    ], VERT_EMERAUDE, Inches(0.7), Inches(1.2), Inches(5.7), Inches(2.55)),
+    
+    ("FAIBLESSES (Weaknesses)", [
+        "Projet en phase de lancement (notoriété de marque à bâtir)",
+        "Dépendance initiale à la taille du réseau d'infirmiers certifiés",
+        "Nécessité d'une connectivité mobile permanente sur le terrain",
+        "Délai d'adoption de l'application par les seniors sans aide familiale"
+    ], ROUGE, Inches(6.8), Inches(1.2), Inches(5.8), Inches(2.55)),
+    
+    ("OPPORTUNITÉS (Opportunities)", [
+        "Généralisation de l'Assurance Maladie Obligatoire (AMO) au Maroc",
+        "Vieillissement de la population et hausse des maladies chroniques",
+        "Accélération de la digitalisation et appétence pour la e-santé",
+        "Partenariats mutuelles, cliniques, laboratoires et assurances",
+        "Extension possible aux soins de kinésithérapie et garde de nuit"
+    ], BLEU_ROYAL, Inches(0.7), Inches(3.95), Inches(5.7), Inches(2.65)),
+    
+    ("MENACES (Threats)", [
+        "Résistance culturelle au paiement en ligne et aux outils digitaux",
+        "Évolution du cadre réglementaire et juridique de la télésanté",
+        "Risque de contournement de la plateforme par le relationnel direct",
+        "Arrivée potentielle d'acteurs internationaux du secteur"
+    ], ORANGE, Inches(6.8), Inches(3.95), Inches(5.8), Inches(2.65)),
+]
+
+for title, points, color, sx, sy, sw, sh in swot_cards:
+    box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, sx, sy, sw, sh)
     box.fill.solid()
     box.fill.fore_color.rgb = BLANC
     box.line.color.rgb = color
     box.line.width = Pt(2)
     
-    add_textbox(slide, x + Inches(0.15), y + Inches(0.15), Inches(2.5), Inches(0.35),
-                title, font_size=16, color=color, bold=True, alignment=PP_ALIGN.CENTER)
-    add_textbox(slide, x + Inches(0.15), y + Inches(0.65), Inches(2.5), Inches(1.5),
-                body, font_size=12, color=GRIS_FONCE, alignment=PP_ALIGN.CENTER)
+    # Title badge header
+    hdr_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, sx + Inches(0.12), sy + Inches(0.1), sw - Inches(0.24), Inches(0.38))
+    hdr_box.fill.solid()
+    hdr_box.fill.fore_color.rgb = color
+    hdr_box.line.fill.background()
+    
+    add_textbox(slide, sx + Inches(0.2), sy + Inches(0.12), sw - Inches(0.4), Inches(0.32),
+                title, font_size=13, color=BLANC, bold=True, alignment=PP_ALIGN.CENTER)
+    
+    # Bullets
+    add_bullet_list(slide, sx + Inches(0.2), sy + Inches(0.55), sw - Inches(0.4), sh - Inches(0.65),
+                    points, font_size=10.5, color=GRIS_FONCE, bullet_color=color)
 
 add_footer(slide)
-set_notes(slide, """Notre étude de marché révèle qu'il n'existe actuellement aucune plateforme marocaine spécialisée exclusivement dans la mise en relation digitale patient-infirmier à domicile avec un parcours complet intégré.
+set_notes(slide, """L'analyse SWOT met en évidence les atouts majeurs et les leviers de réussite de Dar-Soins :
 
-SOS Médecins Maroc se concentre sur les urgences médicales ponctuelles. DabaDoc est un excellent outil de prise de rendez-vous en cabinet, mais ne couvre pas les soins à domicile. Les infirmiers freelance travaillent majoritairement par bouche-à-oreille, sans traçabilité ni transparence tarifaire. Les cliniques privées proposent parfois des services à domicile, mais à des tarifs premium et sans plateforme dédiée.
+Parmi nos Forces principales : une architecture technologique d'excellence avec Laravel 12 et React 19, l'intégration native d'un ERP de gestion hospitalière, un système d'affectation géolocalisée et une traçabilité médicale complète conforme aux standards de sécurité les plus stricts.
 
-L'analyse SWOT montre des forces significatives : un stack technologique moderne (Laravel 12, React 19), un ERP intégré, une UX glassmorphism soignée et un code sécurisé dès la conception. Les faiblesses sont principalement liées à la nature académique du projet. Les opportunités sont immenses avec la généralisation de l'AMO et la tendance mondiale vers la digitalisation de la santé. Les menaces restent mesurées : des acteurs internationaux pourraient entrer sur le marché, et il existe une résistance culturelle au changement dans le secteur médical.""")
+Nos Faiblesses sont classiques pour un nouveau produit : la nécessité d'amorcer le réseau d'infirmiers et d'accompagner les utilisateurs les moins familiers du digital via une ergonomie ultra-simplifiée.
 
-# ════════════════════════════════════════════════════════════════════
-# DIAPO 9 — BUSINESS MODEL
-# ════════════════════════════════════════════════════════════════════
-slide = prs.slides.add_slide(prs.slide_layouts[6])
-add_section_title(slide, "IV. Business Model & Business Plan",
-                  "Modèle économique et projections financières")
+Les Opportunités sont historiques au Maroc : le déploiement généralisé de l'AMO, la transition démographique avec l'augmentation des affections de longue durée, et la volonté nationale de moderniser le système de santé.
 
-set_notes(slide, """Passons maintenant à la partie économique du projet. Tout projet technologique, même académique, doit démontrer sa viabilité financière.
-
-Nous allons détailler le Business Model Canvas de Dar-Soins, suivi des projections financières sur 3 ans.""")
+Face aux Menaces comme le risque de désintermédiation ou la résistance au paiement en ligne, Dar-Soins apporte des réponses concrètes : flexibilité des moyens de paiement (espèces, carte, virement), sécurisation du dossier patient et fidélisation des soignants grâce à un outil ERP gratuit et complet pour leur gestion.""")
 
 # ════════════════════════════════════════════════════════════════════
-# DIAPO 10 — BUSINESS MODEL CANVAS
+# DIAPO 10 (3/3) — BUSINESS MODEL CANVAS ENRICHI
 # ════════════════════════════════════════════════════════════════════
 slide = prs.slides.add_slide(prs.slide_layouts[6])
 add_bg(slide, FOND_SLIDE)
@@ -509,48 +636,82 @@ add_side_bar(slide, color=BLEU_ROYAL)
 add_accent_bar(slide, top=0, height=Inches(0.06), color=VERT_EMERAUDE)
 add_logo(slide, left=Inches(0.6), top=Inches(0.25))
 
-add_textbox(slide, Inches(1.6), Inches(0.3), Inches(10), Inches(0.6),
-            "Business Model Canvas", font_size=28, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(1.6), Inches(0.25), Inches(10.5), Inches(0.55),
+            "Business Model Canvas Enrichi", font_size=26, color=BLEU_ROYAL, bold=True)
+add_textbox(slide, Inches(1.6), Inches(0.72), Inches(10.5), Inches(0.35),
+            "Architecture de valeur, flux de revenus et leviers de viabilité économique", font_size=13, color=GRIS_CLAIR)
 
 canvas_items = [
-    ("Partenaires Clés", "Infirmiers diplômés\nFournisseurs médicaux\nAssurances (AMO)", Inches(0.6), Inches(1.2), Inches(2.5)),
-    ("Activités Clés", "Plateforme web\nMise en relation\nGestion ERP\nFacturation", Inches(3.2), Inches(1.2), Inches(2.5)),
-    ("Proposition de\nValeur", "Soins à domicile\ndigitalisés,\ntransparents\net sécurisés", Inches(5.8), Inches(1.2), Inches(2.2)),
-    ("Relation Client", "Application web\nNotifications\nDevis/Facture auto\nSupport", Inches(8.1), Inches(1.2), Inches(2.5)),
-    ("Segments Clients", "Patients chroniques\nPersonnes âgées\nPost-opératoires\nEntreprises", Inches(10.7), Inches(1.2), Inches(2.2)),
-    ("Ressources Clés", "Développeurs\nInfirmiers partenaires\nInfrastructure cloud", Inches(3.2), Inches(3.9), Inches(2.5)),
-    ("Canaux", "Site web\nRéférencement SEO\nRéseaux sociaux\nPartenariats", Inches(8.1), Inches(3.9), Inches(2.5)),
-    ("Structure de Coûts", "Hébergement cloud · Développement · Marketing · Support technique", Inches(0.6), Inches(5.8), Inches(5.8)),
-    ("Sources de Revenus", "Commission par intervention (15-20%) · Abonnements Premium · Vente de matériel médical", Inches(6.6), Inches(5.8), Inches(6.3)),
+    ("Partenaires Clés", "• Infirmiers diplômés d'État certifiés\n• Grossistes & Fournisseurs médicaux\n• Compagnies d'assurance (AMO/CNSS)\n• Cliniques & Laboratoires d'analyses", Inches(0.6), Inches(1.15), Inches(2.45), Inches(2.8)),
+    ("Activités Clés", "• Développement plateforme web/ERP\n• Dispatching & géolocalisation\n• Contrôle qualité & vérification diplômes\n• Facturation & support client 24/7", Inches(3.12), Inches(1.15), Inches(2.45), Inches(1.36)),
+    ("Ressources Clés", "• Infrastructure Cloud & API sécurisée\n• Réseau soignant qualifié\n• Algorithme d'affectation intelligente", Inches(3.12), Inches(2.58), Inches(2.45), Inches(1.37)),
+    ("Proposition de Valeur", "• Soins à domicile rapides et certifiés\n• Transparence des prix (devis clair)\n• Dossier patient & constantes partagés\n• ERP médical complet pour la gestion", Inches(5.64), Inches(1.15), Inches(2.4), Inches(2.8)),
+    ("Relations Clients", "• Suivi en temps réel de l'infirmier\n• Espace client sécurisé avec historique\n• Notifications instantanées\n• Support & assistance réactive", Inches(8.11), Inches(1.15), Inches(2.45), Inches(1.36)),
+    ("Canaux", "• Application Web Responsive\n• Référencement SEO & Réseaux sociaux\n• Recommandations médecins & cliniques\n• Bouche-à-oreille et partenariats", Inches(8.11), Inches(2.58), Inches(2.45), Inches(1.37)),
+    ("Segments Clients", "• Patients chroniques (diabète, HTA)\n• Seniors & personnes à mobilité réduite\n• Patients en convalescence post-opératoire\n• Entreprises (gardes & bilans santé)", Inches(10.63), Inches(1.15), Inches(2.2), Inches(2.8)),
 ]
 
-for title, body, x, y, w in canvas_items:
-    h = Inches(2.2) if y < Inches(5) else Inches(1.2)
+for title, body, x, y, w, h in canvas_items:
     box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x, y, w, h)
     box.fill.solid()
     box.fill.fore_color.rgb = BLANC
     box.line.color.rgb = RGBColor(0xBF, 0xDB, 0xFE)
     box.line.width = Pt(1.5)
     
-    add_textbox(slide, x + Inches(0.1), y + Inches(0.08), w - Inches(0.2), Inches(0.4),
+    # Header strip inside box
+    h_strip = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, x + Inches(0.06), y + Inches(0.06), w - Inches(0.12), Inches(0.32))
+    h_strip.fill.solid()
+    h_strip.fill.fore_color.rgb = RGBColor(0xEE, 0xF2, 0xFF)
+    h_strip.line.fill.background()
+    
+    add_textbox(slide, x + Inches(0.1), y + Inches(0.08), w - Inches(0.2), Inches(0.28),
                 title, font_size=10, color=BLEU_ROYAL, bold=True)
-    add_textbox(slide, x + Inches(0.1), y + Inches(0.48), w - Inches(0.2), h - Inches(0.55),
-                body, font_size=9, color=GRIS_FONCE)
+    add_textbox(slide, x + Inches(0.1), y + Inches(0.42), w - Inches(0.2), h - Inches(0.48),
+                body, font_size=8.8, color=GRIS_FONCE)
+
+# Bottom Row: Structure de coûts & Sources de revenus (High visual impact)
+cost_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.6), Inches(4.08), Inches(5.8), Inches(2.5))
+cost_box.fill.solid()
+cost_box.fill.fore_color.rgb = BLANC
+cost_box.line.color.rgb = ROUGE
+cost_box.line.width = Pt(1.5)
+
+add_textbox(slide, Inches(0.75), Inches(4.16), Inches(5.5), Inches(0.3),
+            "Structure de Coûts", font_size=12, color=ROUGE, bold=True)
+cost_points = [
+    "Hébergement Cloud haute disponibilité & sécurité des données",
+    "Maintenance applicative, développement continu et R&D",
+    "Marketing digital, acquisition client et communication B2B",
+    "Frais administratifs, assurance responsabilité civile et support"
+]
+add_bullet_list(slide, Inches(0.75), Inches(4.5), Inches(5.5), Inches(1.95), cost_points, font_size=9.5, color=GRIS_FONCE, bullet_color=ROUGE)
+
+rev_box = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(6.5), Inches(4.08), Inches(6.33), Inches(2.5))
+rev_box.fill.solid()
+rev_box.fill.fore_color.rgb = BLANC
+rev_box.line.color.rgb = VERT_EMERAUDE
+rev_box.line.width = Pt(1.5)
+
+add_textbox(slide, Inches(6.65), Inches(4.16), Inches(6.0), Inches(0.3),
+            "Sources de Revenus Multiples (Monétisation)", font_size=12, color=VERT_FONCE, bold=True)
+rev_points = [
+    "Commission par acte (15% à 20%) prélevée sur chaque soin validé",
+    "Abonnements Infirmiers Pro (visibilité prioritaire, modules ERP avancés)",
+    "Marge sur vente de matériel & consommables médicaux via ERP",
+    "Contrats de garde longue durée & forfaits santé pour entreprises (B2B)"
+]
+add_bullet_list(slide, Inches(6.65), Inches(4.5), Inches(6.0), Inches(1.95), rev_points, font_size=9.5, color=GRIS_FONCE, bullet_color=VERT_EMERAUDE)
 
 add_footer(slide)
-set_notes(slide, """Voici le Business Model Canvas de Dar-Soins, structuré selon les 9 blocs du modèle d'Alexander Osterwalder.
+set_notes(slide, """Voici la structure détaillée du Business Model Canvas de Dar-Soins.
 
-Nos Partenaires Clés sont les infirmiers diplômés d'État, les fournisseurs de matériel médical et, à terme, les compagnies d'assurance dans le cadre de l'AMO.
+Notre modèle repose sur 4 piliers de monétisation très complémentaires qui assurent la résilience et la rentabilité du projet :
+1. La commission sur les actes (15 à 20%), qui constitue le flux principal et croît proportionnellement au volume des soins réalisés.
+2. Les abonnements pour les soignants premium, offrant une visibilité renforcée et des outils de gestion avancés.
+3. La marge commerciale sur le matériel médical et les consommables gérés directement dans le module Stock de l'ERP.
+4. Les contrats de garde de nuit, longue durée et les partenariats d'entreprise pour les soins programmés.
 
-Nos Activités Clés sont le développement et la maintenance de la plateforme web, la mise en relation intelligente patient-infirmier, la gestion ERP et la facturation automatisée.
-
-Notre Proposition de Valeur est claire : offrir des soins à domicile digitalisés, transparents en termes de tarification, et sécurisés par des mécanismes d'authentification et de traçabilité.
-
-Nos Segments Clients cibles sont les patients chroniques nécessitant des soins réguliers, les personnes âgées à mobilité réduite, les patients en post-opératoire, et les entreprises souhaitant proposer des soins à domicile à leurs employés.
-
-Les Sources de Revenus reposent sur trois axes : une commission de 15 à 20% prélevée sur chaque intervention, des abonnements premium pour les infirmiers souhaitant une meilleure visibilité, et la vente de matériel médical via l'ERP intégré.
-
-La Structure de Coûts comprend l'hébergement cloud, le développement, le marketing digital et le support technique.""")
+Cette structure permet d'amortir rapidement les coûts d'infrastructure et de marketing pour atteindre un point mort financier dès la première année d'exploitation.""")
 
 # ════════════════════════════════════════════════════════════════════
 # DIAPO 11 — BUSINESS PLAN

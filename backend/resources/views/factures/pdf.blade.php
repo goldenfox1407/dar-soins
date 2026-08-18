@@ -333,13 +333,22 @@
 
 <div class="top-bar"></div>
 
+@php
+  $logoPath = public_path('images/logo.png');
+  $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+@endphp
+
 <div style="padding: 0 10px;">
 
   {{-- ══ EN-TÊTE ══ --}}
   <table class="header-table">
     <tr>
       <td style="width: 50%;">
-        <img src="{{ public_path('images/logo.png') }}" style="width: 130px; height: 130px;" alt="Dar-Soins Logo">
+        @if($logoBase64)
+          <img src="{{ $logoBase64 }}" style="width: 120px; height: 120px;" alt="Dar-Soins Logo">
+        @else
+          <div style="font-size: 20px; font-weight: bold; color: #2563EB;">DAR-SOINS</div>
+        @endif
       </td>
       <td style="width: 50%; text-align: right; vertical-align: top;">
         <div style="font-size: 22px; font-weight: bold; color: #2563EB; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Facture de soins</div>

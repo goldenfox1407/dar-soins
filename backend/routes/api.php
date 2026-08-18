@@ -140,6 +140,14 @@ Route::middleware(['auth:sanctum', 'throttle:api'])->group(function () {
         Route::get('notif-configs', [NotifConfigController::class, 'index']);
         Route::put('notif-configs/{notifConfig}', [NotifConfigController::class, 'update']);
         Route::patch('notif-configs/{notifConfig}/toggle', [NotifConfigController::class, 'toggle']);
+
+        // Rapports & IA Routes
+        Route::get('rapports/ai', [\App\Http\Controllers\RapportController::class, 'aiReports']);
+        Route::get('rapports/stock', [\App\Http\Controllers\RapportController::class, 'stockReport']);
+        Route::get('rapports/ventes', [\App\Http\Controllers\RapportController::class, 'ventesReport']);
+        Route::get('rapports/achats', [\App\Http\Controllers\RapportController::class, 'achatsReport']);
+        Route::get('rapports/commissions', [\App\Http\Controllers\RapportController::class, 'commissionsReport']);
     });
 });
+
 

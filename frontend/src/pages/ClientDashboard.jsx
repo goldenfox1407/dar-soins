@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { compressImage } from '../utils/imageCompressor';
-import { LogOut, Activity, Calendar, Clock, MapPin, CheckCircle, FileText, Syringe, HeartPulse, UploadCloud, Map, TrendingUp, CreditCard, AlertCircle, XCircle } from 'lucide-react';
+import { openOrDownloadPdf } from '../utils/pdfViewer';
+import { LogOut, Activity, Calendar, Clock, MapPin, CheckCircle, FileText, Syringe, HeartPulse, UploadCloud, Map, TrendingUp, CreditCard, AlertCircle, XCircle, Loader2 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Navbar from '../components/Navbar';
 
@@ -464,13 +465,8 @@ export default function ClientDashboard() {
                           <div className="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-100">
                             <span className="text-sm font-semibold text-blue-800 flex items-center gap-2"><FileText size={16}/> Devis de la prestation</span>
                             <button 
-                              onClick={async () => {
-                                try {
-                                  const response = await api.get(`/devis/${inter.devis?.id}/pdf`, { responseType: 'blob' });
-                                  const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-                                  window.open(url, '_blank');
-                                } catch (err) { alert('Erreur PDF'); }
-                              }}
+                              type="button"
+                              onClick={() => openOrDownloadPdf(`/devis/${inter.devis?.id}/pdf`, `devis_${inter.devis?.id}.pdf`)}
                               className="text-xs bg-white border border-blue-200 text-blue-600 hover:bg-blue-100 px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors"
                             >
                               Consulter le PDF
@@ -546,15 +542,7 @@ export default function ClientDashboard() {
                           {inter.facture && (
                             <button
                               type="button"
-                              onClick={async () => {
-                                try {
-                                  const response = await api.get(`/factures/${inter.facture.id}/pdf`, { responseType: 'blob' });
-                                  const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-                                  window.open(url, '_blank');
-                                } catch (err) {
-                                  alert('Erreur lors du téléchargement de la facture.');
-                                }
-                              }}
+                              onClick={() => openOrDownloadPdf(`/factures/${inter.facture.id}/pdf`, `facture_${inter.facture.reference || inter.facture.id}.pdf`)}
                               className="text-xs bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100 px-3 py-1.5 rounded-lg font-bold shadow-sm transition-colors flex items-center gap-1"
                             >
                               <FileText size={14}/> Télécharger Facture

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { X, Map, FileText, Send, UserCheck, AlertCircle, Calendar, User, Package, Coins } from 'lucide-react';
 import api from '../../services/api';
+import { openOrDownloadPdf } from '../../utils/pdfViewer';
 
 export default function VenteDetailsModal({ intervention, onClose, onRefresh }) {
   const [loading, setLoading] = useState(false);
@@ -87,14 +88,9 @@ export default function VenteDetailsModal({ intervention, onClose, onRefresh }) 
   };
 
   const consulterDocument = async (type, id) => {
-    try {
-      const endpoint = type === 'facture' ? `/factures/${id}/pdf` : `/devis/${id}/pdf`;
-      const response = await api.get(endpoint, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-    } catch (err) {
-      alert(`Erreur lors de la récupération du ${type} (PDF).`);
-    }
+    const endpoint = type === 'facture' ? `/factures/${id}/pdf` : `/devis/${id}/pdf`;
+    const filename = `${type}_${id}.pdf`;
+    await openOrDownloadPdf(endpoint, filename);
   };
 
   return (

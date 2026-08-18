@@ -56,6 +56,13 @@ import DevisesList from './pages/erp/DevisesList';
 import NumerotationSettings from './pages/erp/NumerotationSettings';
 import NotificationsSettings from './pages/erp/NotificationsSettings';
 
+// ERP Reports Imports — Fonctionnels
+import AiReportsPage from './pages/erp/reports/AiReportsPage';
+import RapportStockPage from './pages/erp/reports/RapportStockPage';
+import RapportVentesPage from './pages/erp/reports/RapportVentesPage';
+import RapportAchatsPage from './pages/erp/reports/RapportAchatsPage';
+import RapportCommissionsPage from './pages/erp/reports/RapportCommissionsPage';
+
 import APropos from './pages/APropos';
 import Faq from './pages/Faq';
 
@@ -145,7 +152,7 @@ function App() {
           <Route path="taches" element={<TachesList />} />
           <Route path="calendrier" element={<CalendrierPage />} />
           <Route path="reservations" element={<ErpComingSoon title="Réservations" />} />
-          <Route path="commissions" element={<ErpComingSoon title="Commissions" />} />
+          <Route path="commissions" element={<RapportCommissionsPage />} />
           
           {/* Paramètres — Actifs */}
           <Route path="parametres/systeme" element={<ParametresSysteme />} />
@@ -155,11 +162,11 @@ function App() {
           <Route path="parametres/numerotation" element={<NumerotationSettings />} />
           <Route path="parametres/notifications" element={<NotificationsSettings />} />
           
-          {/* Rapports — En développement */}
-          <Route path="ai-reports" element={<ErpComingSoon title="Rapports IA" description="Les rapports générés par intelligence artificielle seront bientôt disponibles." />} />
-          <Route path="rapports/stock" element={<ErpComingSoon title="Rapport de Stock" />} />
-          <Route path="rapports/ventes" element={<ErpComingSoon title="Rapport des Ventes" />} />
-          <Route path="rapports/achats" element={<ErpComingSoon title="Rapport des Achats" />} />
+          {/* Rapports & IA — Fonctionnels */}
+          <Route path="ai-reports" element={<AiReportsPage />} />
+          <Route path="rapports/stock" element={<RapportStockPage />} />
+          <Route path="rapports/ventes" element={<RapportVentesPage />} />
+          <Route path="rapports/achats" element={<RapportAchatsPage />} />
         </Route>
       </Routes>
     </Router>

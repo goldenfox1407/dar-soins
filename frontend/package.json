@@ -14,11 +14,14 @@
     "framer-motion": "^12.39.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.16.0",
+    "prop-types": "^15.8.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-is": "^19.2.8",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.15.1",
-    "react-signature-canvas": "^1.1.0-alpha.2"
+    "react-signature-canvas": "^1.1.0-alpha.2",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
