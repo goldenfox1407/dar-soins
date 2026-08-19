@@ -5,7 +5,10 @@
 <title>Devis DEV-{{ str_pad($devis->id, 5, '0', STR_PAD_LEFT) }}</title>
 <style>
   @page {
-    margin: 25px 30px 25px 30px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+    margin-left: 28px;
+    margin-right: 28px;
     size: A4 portrait;
   }
   
@@ -21,23 +24,36 @@
     font-size: 12px;
     line-height: 1.6;
     background: #fff;
+    padding-top: 24px;
+    padding-bottom: 20px;
   }
 
   .top-bar {
-    background: #2563EB;
+    position: fixed;
+    top: 0px;
+    left: -28px;
+    right: -28px;
     height: 7px;
-    width: 100%;
-    margin-bottom: 22px;
+    background: #2563EB;
+  }
+
+  .bottom-bar {
+    position: fixed;
+    bottom: 0px;
+    left: -28px;
+    right: -28px;
+    height: 6px;
+    background: #10B981;
   }
 
   .content-container {
-    padding: 0 10px;
+    padding: 0 6px;
   }
 
   .header-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
   .header-table td {
     vertical-align: middle;
@@ -69,7 +85,7 @@
     border-left: 4px solid #F97316;
     border-radius: 6px;
     padding: 10px 16px;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
     font-size: 11px;
     color: #9A3412;
     line-height: 1.5;
@@ -82,7 +98,7 @@
   .parties-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   .parties-table td {
     width: 50%;
@@ -117,7 +133,7 @@
   .items-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
   
   .items-table thead tr {
@@ -181,7 +197,7 @@
   .totals-wrapper {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 22px;
+    margin-bottom: 20px;
   }
   
   .totals-wrapper td.payment-col {
@@ -250,7 +266,7 @@
 
   .cachet-section {
     text-align: center;
-    margin: 18px 0 16px 0;
+    margin: 16px 0 14px 0;
   }
 
   .thank-you {
@@ -258,23 +274,16 @@
     font-size: 13px;
     font-weight: bold;
     color: #2563EB;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
 
   .legal {
-    padding-top: 14px;
+    padding-top: 12px;
     border-top: 1px solid #CBD5E1;
     font-size: 10px;
     color: #64748B;
     line-height: 1.6;
     text-align: center;
-  }
-
-  .bottom-bar {
-    background: #10B981;
-    height: 5px;
-    width: 100%;
-    margin-top: 16px;
   }
 </style>
 </head>
