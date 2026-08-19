@@ -484,9 +484,9 @@
 
   {{-- ══ CACHET SEUL ══ --}}
   <div class="cachet-section">
-    <div style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: #64748B; margin-bottom: 6px; letter-spacing: 0.5px;">Cachet &amp; Visa de l'entreprise</div>
+    <div style="font-size: 10px; font-weight: bold; text-transform: uppercase; color: #475569; margin-bottom: 6px; letter-spacing: 0.5px;">Cachet &amp; Visa de l'entreprise</div>
     @if($cachetB64)
-      <img src="{{ $cachetB64 }}" style="max-height: 55px; max-width: 140px; display: inline-block;" alt="Cachet Dar-Soins">
+      <img src="{{ $cachetB64 }}" style="max-height: 65px; max-width: 175px; display: inline-block;" alt="Cachet Dar-Soins">
     @endif
   </div>
 

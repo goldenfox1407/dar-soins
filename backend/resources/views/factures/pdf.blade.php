@@ -21,10 +21,10 @@
   body {
     font-family: Helvetica, Arial, sans-serif;
     color: #1E293B;
-    font-size: 11.5px;
-    line-height: 1.55;
+    font-size: 11px;
+    line-height: 1.5;
     background: #fff;
-    padding-top: 22px;
+    padding-top: 20px;
     padding-bottom: 18px;
   }
 
@@ -53,7 +53,7 @@
   .header-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .header-table td {
     vertical-align: middle;
@@ -66,7 +66,7 @@
     font-size: 11.5px;
   }
   .invoice-meta-table td {
-    padding: 3px 0;
+    padding: 2.5px 0;
   }
   .invoice-meta-table td.lbl {
     color: #64748B;
@@ -83,7 +83,7 @@
   .parties-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
   .parties-table td {
     width: 50%;
@@ -99,7 +99,7 @@
   .party-title {
     background: #2563EB;
     color: white;
-    padding: 7px 12px;
+    padding: 6px 12px;
     font-weight: bold;
     font-size: 11px;
     text-transform: uppercase;
@@ -107,8 +107,8 @@
   }
 
   .party-details {
-    padding: 10px 12px;
-    line-height: 1.6;
+    padding: 8px 12px;
+    line-height: 1.55;
     background: #F8FAFC;
     color: #334155;
     font-size: 11.5px;
@@ -118,7 +118,7 @@
   .items-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
   
   .items-table thead tr {
@@ -127,8 +127,8 @@
   }
   
   .items-table th {
-    padding: 9px 12px;
-    font-size: 10.5px;
+    padding: 8px 12px;
+    font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
     text-align: left;
@@ -146,7 +146,7 @@
   }
   
   .items-table td {
-    padding: 10px 12px;
+    padding: 8px 12px;
     vertical-align: middle;
   }
   
@@ -162,7 +162,7 @@
   .item-sub {
     font-size: 9.5px;
     color: #64748B;
-    margin-top: 2px;
+    margin-top: 1px;
   }
 
   .badge-tag {
@@ -183,7 +183,7 @@
   .totals-wrapper {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
   }
   
   .totals-wrapper td.payment-col {
@@ -204,7 +204,7 @@
     padding: 10px 14px;
     font-size: 11px;
     color: #334155;
-    line-height: 1.6;
+    line-height: 1.55;
   }
 
   .totals-table {
@@ -220,7 +220,7 @@
   }
   
   .totals-table td {
-    padding: 8px 14px;
+    padding: 7px 14px;
     font-size: 11.5px;
   }
   
@@ -244,10 +244,10 @@
     color: white;
     font-size: 13px;
     font-weight: bold;
-    padding: 10px 14px;
+    padding: 9px 14px;
   }
 
-  /* ── Signatures & Cachet ── */
+  /* ── Signatures & Cachet (AGRANDI) ── */
   .signatures-table {
     width: 100%;
     border-collapse: collapse;
@@ -259,37 +259,38 @@
   }
 
   .sig-box {
-    border: 1px dashed #CBD5E1;
-    border-radius: 7px;
-    padding: 8px 12px;
-    min-height: 60px;
+    border: 1.5px dashed #94A3B8;
+    border-radius: 8px;
+    padding: 10px 14px;
+    min-height: 90px;
     background: #F8FAFC;
     text-align: center;
   }
 
   .sig-label {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: bold;
     text-transform: uppercase;
-    color: #64748B;
-    margin-bottom: 4px;
+    color: #334155;
+    margin-bottom: 6px;
     text-align: left;
+    letter-spacing: 0.4px;
   }
 
   .thank-you {
     text-align: center;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: bold;
     color: #2563EB;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
 
   .legal {
-    padding-top: 10px;
+    padding-top: 8px;
     border-top: 1px solid #CBD5E1;
-    font-size: 9.5px;
+    font-size: 9px;
     color: #64748B;
-    line-height: 1.5;
+    line-height: 1.45;
     text-align: center;
   }
 </style>
@@ -359,7 +360,7 @@
   </table>
 
   {{-- ══ METADONNEES ══ --}}
-  <table class="header-table" style="margin-bottom: 14px;">
+  <table class="header-table" style="margin-bottom: 12px;">
     <tr>
       <td style="width: 50%; font-size: 10.5px; color: #475569; line-height: 1.5;">
         <strong style="font-size: 11.5px; color: #1E293B;">{{ $config->nom_entreprise ?? 'Dar Soins Medicaux SARL' }}</strong><br>
@@ -508,17 +509,17 @@
     </tr>
   </table>
 
-  {{-- ══ SIGNATURE PATIENT & CACHET ENTREPRISE ══ --}}
+  {{-- ══ SIGNATURE PATIENT & CACHET ENTREPRISE (AGRANDIS) ══ --}}
   <table class="signatures-table">
     <tr>
       <td style="padding-right: 10px;">
         <div class="sig-box">
           <div class="sig-label">Signature du Patient / Bénéficiaire</div>
           @if($intervention->signature_patient)
-            <img src="{{ $intervention->signature_patient }}" style="max-height: 40px; max-width: 140px; display: inline-block; margin-top: 1px;" alt="Signature Patient">
+            <img src="{{ $intervention->signature_patient }}" style="max-height: 65px; max-width: 175px; display: inline-block; margin-top: 2px;" alt="Signature Patient">
           @else
-            <div style="height: 38px; display: flex; align-items: center; justify-content: center;">
-              <span style="font-size: 10px; color: #16A34A; font-weight: bold;">✓ Émargé lors de la visite soignante</span>
+            <div style="height: 65px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 11px; color: #16A34A; font-weight: bold;">✓ Émargé et validé lors de la visite</span>
             </div>
           @endif
         </div>
@@ -527,9 +528,9 @@
         <div class="sig-box" style="background: #FFFFFF;">
           <div class="sig-label">Cachet &amp; Visa de l'entreprise</div>
           @if($cachetB64)
-            <img src="{{ $cachetB64 }}" style="max-height: 40px; max-width: 130px; display: inline-block; margin-top: 1px;" alt="Cachet Dar-Soins">
+            <img src="{{ $cachetB64 }}" style="max-height: 65px; max-width: 175px; display: inline-block; margin-top: 2px;" alt="Cachet Dar-Soins">
           @else
-            <div style="font-size: 9px; color: #94A3B8; padding-top: 10px;">Cachet officiel Dar-Soins</div>
+            <div style="font-size: 10px; color: #94A3B8; padding-top: 15px;">Cachet officiel Dar-Soins</div>
           @endif
         </div>
       </td>
