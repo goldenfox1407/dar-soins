@@ -21,11 +21,11 @@
   body {
     font-family: Helvetica, Arial, sans-serif;
     color: #1E293B;
-    font-size: 12px;
-    line-height: 1.6;
+    font-size: 11.5px;
+    line-height: 1.55;
     background: #fff;
-    padding-top: 24px;
-    padding-bottom: 20px;
+    padding-top: 22px;
+    padding-bottom: 18px;
   }
 
   .top-bar {
@@ -47,26 +47,26 @@
   }
 
   .content-container {
-    padding: 0 6px;
+    padding: 0 4px;
   }
 
   .header-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 18px;
+    margin-bottom: 14px;
   }
   .header-table td {
     vertical-align: middle;
   }
 
   .invoice-meta-table {
-    width: 290px;
+    width: 280px;
     margin-left: auto;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 11.5px;
   }
   .invoice-meta-table td {
-    padding: 4px 0;
+    padding: 3px 0;
   }
   .invoice-meta-table td.lbl {
     color: #64748B;
@@ -83,7 +83,7 @@
   .parties-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
   .parties-table td {
     width: 50%;
@@ -92,33 +92,33 @@
 
   .party-box {
     border: 1px solid #CBD5E1;
-    border-radius: 8px;
+    border-radius: 7px;
     overflow: hidden;
   }
   
   .party-title {
     background: #2563EB;
     color: white;
-    padding: 8px 14px;
+    padding: 7px 12px;
     font-weight: bold;
-    font-size: 11.5px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
 
   .party-details {
-    padding: 12px 14px;
-    line-height: 1.65;
+    padding: 10px 12px;
+    line-height: 1.6;
     background: #F8FAFC;
     color: #334155;
-    font-size: 12px;
+    font-size: 11.5px;
   }
 
   /* ── Prestations & Fournitures ── */
   .items-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 22px;
+    margin-bottom: 18px;
   }
   
   .items-table thead tr {
@@ -127,8 +127,8 @@
   }
   
   .items-table th {
-    padding: 11px 14px;
-    font-size: 11px;
+    padding: 9px 12px;
+    font-size: 10.5px;
     font-weight: bold;
     text-transform: uppercase;
     text-align: left;
@@ -146,7 +146,7 @@
   }
   
   .items-table td {
-    padding: 12px 14px;
+    padding: 10px 12px;
     vertical-align: middle;
   }
   
@@ -156,23 +156,23 @@
   .item-name {
     font-weight: bold;
     color: #0F172A;
-    font-size: 12px;
+    font-size: 11.5px;
   }
   
   .item-sub {
-    font-size: 10px;
+    font-size: 9.5px;
     color: #64748B;
     margin-top: 2px;
   }
 
   .badge-tag {
     display: inline-block;
-    font-size: 9px;
+    font-size: 8.5px;
     font-weight: bold;
-    padding: 2px 7px;
+    padding: 2px 6px;
     border-radius: 4px;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
   }
   
   .badge-soin { background: #DBEAFE; color: #1E40AF; }
@@ -183,13 +183,13 @@
   .totals-wrapper {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
   }
   
   .totals-wrapper td.payment-col {
     width: 50%;
     vertical-align: top;
-    padding-right: 20px;
+    padding-right: 16px;
   }
   
   .totals-wrapper td.totals-col {
@@ -200,18 +200,18 @@
   .payment-info-box {
     background: #F8FAFC;
     border: 1px solid #CBD5E1;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 11.5px;
+    border-radius: 7px;
+    padding: 10px 14px;
+    font-size: 11px;
     color: #334155;
-    line-height: 1.65;
+    line-height: 1.6;
   }
 
   .totals-table {
     width: 100%;
     border-collapse: collapse;
     border: 1px solid #CBD5E1;
-    border-radius: 8px;
+    border-radius: 7px;
     overflow: hidden;
   }
   
@@ -220,8 +220,8 @@
   }
   
   .totals-table td {
-    padding: 9px 16px;
-    font-size: 12px;
+    padding: 8px 14px;
+    font-size: 11.5px;
   }
   
   .totals-table td.lbl {
@@ -242,30 +242,54 @@
   .totals-table tr.grand-total td.lbl,
   .totals-table tr.grand-total td.val {
     color: white;
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: bold;
-    padding: 11px 16px;
+    padding: 10px 14px;
   }
 
-  .cachet-section {
+  /* ── Signatures & Cachet ── */
+  .signatures-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+  }
+  .signatures-table td {
+    width: 50%;
+    vertical-align: top;
+  }
+
+  .sig-box {
+    border: 1px dashed #CBD5E1;
+    border-radius: 7px;
+    padding: 8px 12px;
+    min-height: 60px;
+    background: #F8FAFC;
     text-align: center;
-    margin: 16px 0 14px 0;
+  }
+
+  .sig-label {
+    font-size: 9px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #64748B;
+    margin-bottom: 4px;
+    text-align: left;
   }
 
   .thank-you {
     text-align: center;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
     color: #2563EB;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
   }
 
   .legal {
-    padding-top: 12px;
+    padding-top: 10px;
     border-top: 1px solid #CBD5E1;
-    font-size: 10px;
+    font-size: 9.5px;
     color: #64748B;
-    line-height: 1.6;
+    line-height: 1.5;
     text-align: center;
   }
 </style>
@@ -320,14 +344,14 @@
     <tr>
       <td style="width: 50%;">
         @if($logoB64)
-          <img src="{{ $logoB64 }}" style="width: 120px; height: 120px;" alt="Dar-Soins Logo">
+          <img src="{{ $logoB64 }}" style="width: 110px; height: 110px;" alt="Dar-Soins Logo">
         @else
-          <div style="font-size: 24px; font-weight: bold; color: #2563EB;">DAR-SOINS</div>
+          <div style="font-size: 22px; font-weight: bold; color: #2563EB;">DAR-SOINS</div>
         @endif
       </td>
       <td style="width: 50%; text-align: right; vertical-align: top;">
-        <div style="font-size: 24px; font-weight: bold; color: #2563EB; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Facture de soins</div>
-        <div style="margin-top: 8px; display: inline-block; background: #F1F5F9; border: 1px solid #CBD5E1; padding: 4px 12px; border-radius: 5px; font-weight: bold; font-size: 12px; color: #1E293B;">
+        <div style="font-size: 22px; font-weight: bold; color: #2563EB; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1;">Facture de soins</div>
+        <div style="margin-top: 6px; display: inline-block; background: #F1F5F9; border: 1px solid #CBD5E1; padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; color: #1E293B;">
           {{ $facture->reference }}
         </div>
       </td>
@@ -335,10 +359,10 @@
   </table>
 
   {{-- ══ METADONNEES ══ --}}
-  <table class="header-table" style="margin-bottom: 16px;">
+  <table class="header-table" style="margin-bottom: 14px;">
     <tr>
-      <td style="width: 50%; font-size: 11px; color: #475569; line-height: 1.55;">
-        <strong style="font-size: 12px; color: #1E293B;">{{ $config->nom_entreprise ?? 'Dar Soins Medicaux SARL' }}</strong><br>
+      <td style="width: 50%; font-size: 10.5px; color: #475569; line-height: 1.5;">
+        <strong style="font-size: 11.5px; color: #1E293B;">{{ $config->nom_entreprise ?? 'Dar Soins Medicaux SARL' }}</strong><br>
         {{ $config->adresse ?? '123 Boulevard d\'Anfa' }}{{ $config->ville ? ', ' . $config->ville : ', Casablanca' }}<br>
         @if($config->telephone) ☎ {{ $config->telephone }} @endif
         @if($config->email_contact) &nbsp;|&nbsp; ✉ {{ $config->email_contact }} @endif
@@ -365,22 +389,22 @@
   {{-- ══ PARTIES COTE A COTE ══ --}}
   <table class="parties-table">
     <tr>
-      <td style="padding-right: 12px;">
+      <td style="padding-right: 10px;">
         <div class="party-box">
           <div class="party-title">Facturé à</div>
           <div class="party-details">
-            <strong style="color: #0F172A; font-size: 13px;">{{ $intervention->client->user->name ?? 'Patient' }}</strong><br>
+            <strong style="color: #0F172A; font-size: 12px;">{{ $intervention->client->user->name ?? 'Patient' }}</strong><br>
             @if(optional($intervention->client->user)->telephone)<strong>Tél :</strong> {{ $intervention->client->user->telephone }}<br>@endif
             @if(optional($intervention->client->user)->email)<strong>Email :</strong> {{ $intervention->client->user->email }}<br>@endif
             <strong>Adresse :</strong> {{ $intervention->localisation->adresse ?? 'Domicile du patient' }}
           </div>
         </div>
       </td>
-      <td style="padding-left: 12px;">
+      <td style="padding-left: 10px;">
         <div class="party-box">
           <div class="party-title">Intervention Réalisée</div>
           <div class="party-details">
-            <strong style="color: #0F172A; font-size: 13px;">{{ $intervention->produit->nom ?? 'Soin infirmier' }}</strong><br>
+            <strong style="color: #0F172A; font-size: 12px;">{{ $intervention->produit->nom ?? 'Soin infirmier' }}</strong><br>
             <strong>Type de prestation :</strong> {{ ucfirst(str_replace('_', ' ', $intervention->type)) }}<br>
             <strong>Soignant intervenant :</strong> {{ $intervention->infirmier->user->name ?? 'Soignant certifié Dar-Soins' }}<br>
             <strong>Date visite :</strong> {{ \Carbon\Carbon::parse($intervention->date_heure)->format('d/m/Y') }}
@@ -459,7 +483,7 @@
     <tr>
       <td class="payment-col">
         <div class="payment-info-box">
-          <strong style="text-transform: uppercase; font-size: 10.5px; display: block; margin-bottom: 6px; color: #1E293B;">Modalités de Règlement</strong>
+          <strong style="text-transform: uppercase; font-size: 10px; display: block; margin-bottom: 4px; color: #1E293B;">Modalités de Règlement</strong>
           Mode de règlement : <strong>{{ ucfirst($intervention->methode_paiement ?: 'Espèces / En ligne') }}</strong><br>
           Montant acquitté : <strong>{{ number_format($totalFactureTTC, 2, ',', ' ') }} {{ $devise }}</strong><br>
           Statut : <span style="color: #16A34A; font-weight: bold;">✓ Facture soldée</span>
@@ -484,13 +508,33 @@
     </tr>
   </table>
 
-  {{-- ══ CACHET SEUL ══ --}}
-  <div class="cachet-section">
-    <div style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: #64748B; margin-bottom: 6px; letter-spacing: 0.5px;">Cachet &amp; Visa de l'entreprise</div>
-    @if($cachetB64)
-      <img src="{{ $cachetB64 }}" style="max-height: 55px; max-width: 140px; display: inline-block;" alt="Cachet Dar-Soins">
-    @endif
-  </div>
+  {{-- ══ SIGNATURE PATIENT & CACHET ENTREPRISE ══ --}}
+  <table class="signatures-table">
+    <tr>
+      <td style="padding-right: 10px;">
+        <div class="sig-box">
+          <div class="sig-label">Signature du Patient / Bénéficiaire</div>
+          @if($intervention->signature_patient)
+            <img src="{{ $intervention->signature_patient }}" style="max-height: 40px; max-width: 140px; display: inline-block; margin-top: 1px;" alt="Signature Patient">
+          @else
+            <div style="height: 38px; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 10px; color: #16A34A; font-weight: bold;">✓ Émargé lors de la visite soignante</span>
+            </div>
+          @endif
+        </div>
+      </td>
+      <td style="padding-left: 10px;">
+        <div class="sig-box" style="background: #FFFFFF;">
+          <div class="sig-label">Cachet &amp; Visa de l'entreprise</div>
+          @if($cachetB64)
+            <img src="{{ $cachetB64 }}" style="max-height: 40px; max-width: 130px; display: inline-block; margin-top: 1px;" alt="Cachet Dar-Soins">
+          @else
+            <div style="font-size: 9px; color: #94A3B8; padding-top: 10px;">Cachet officiel Dar-Soins</div>
+          @endif
+        </div>
+      </td>
+    </tr>
+  </table>
 
   <div class="thank-you">Dar-Soins vous remercie de votre confiance. Prenez soin de vous !</div>
 
