@@ -3,6 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../services/api';
 import { compressImage } from '../utils/imageCompressor';
 import { openOrDownloadPdf } from '../utils/pdfViewer';
+import { formatMoney, formatDate, formatDateTime, formatTime } from '../utils/formatters';
+import StatusBadge from '../components/common/StatusBadge';
 import { LogOut, Activity, Calendar, Clock, MapPin, CheckCircle, FileText, Syringe, HeartPulse, UploadCloud, Map, TrendingUp, CreditCard, AlertCircle, XCircle, Loader2 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import Navbar from '../components/Navbar';
@@ -436,14 +438,14 @@ export default function ClientDashboard() {
                       
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <span className={`status-badge ${status.color} mb-2`}>
-                            <StatusIcon size={14} /> {status.label}
-                          </span>
+                          <div className="mb-2">
+                            <StatusBadge status={inter.statut} />
+                          </div>
                           <h3 className="text-lg font-bold text-[#1E293B]">{inter.produit?.nom || 'Soin Infirmier'}</h3>
                         </div>
                         <div className="text-right">
-                          <div className="text-lg font-bold text-blue-600">{new Date(inter.date_heure).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
-                          <div className="text-xs text-slate-400">{new Date(inter.date_heure).toLocaleDateString('fr-FR')}</div>
+                          <div className="text-lg font-bold text-blue-600">{formatTime(inter.date_heure)}</div>
+                          <div className="text-xs text-slate-400">{formatDate(inter.date_heure)}</div>
                         </div>
                       </div>
                       
@@ -515,17 +517,17 @@ export default function ClientDashboard() {
                         <div className={`absolute left-0 top-0 bottom-0 w-1 ${status.color === 'danger' ? 'bg-rose-400' : 'bg-slate-300'}`} />
                         <div className="flex justify-between items-start mb-2">
                           <div>
-                            <span className={`status-badge ${status.color} mb-2 inline-flex`}>
-                              <StatusIcon size={12} /> {status.label}
-                            </span>
+                            <div className="mb-2">
+                              <StatusBadge status={inter.statut} />
+                            </div>
                             <h3 className="text-lg font-bold text-[#1E293B]">{inter.produit?.nom || 'Soin Infirmier'}</h3>
                             <p className="text-xs text-slate-500 mt-1">
                               Soignant : {inter.infirmier?.user ? `${inter.infirmier.user.prenom || ''} ${inter.infirmier.user.nom}` : 'Non assigné'}
                             </p>
                           </div>
                           <div className="text-right">
-                            <div className="text-sm font-bold text-slate-700">{new Date(inter.date_heure).toLocaleDateString('fr-FR')}</div>
-                            <div className="text-xs text-slate-400">{new Date(inter.date_heure).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</div>
+                            <div className="text-sm font-bold text-slate-700">{formatDate(inter.date_heure)}</div>
+                            <div className="text-xs text-slate-400">{formatTime(inter.date_heure)}</div>
                           </div>
                         </div>
 

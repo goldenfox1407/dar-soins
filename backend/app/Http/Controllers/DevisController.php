@@ -22,13 +22,19 @@ class DevisController extends Controller
 
     public function telechargerPdf($id)
     {
-        $devis = Devis::with(['intervention.client.user', 'intervention.produit', 'intervention.localisation'])->findOrFail($id);
-        $config = Config::firstOrFail();
+        $devis = Devis::with(['intervention.client.user', 'intervention.produit', 'intervention.localisation', 'intervention.infirmier.user'])->findOrFail($id);
+        $config = Config::first() ?? new Config();
+        
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.devis', [
             'intervention' => $devis->intervention,
             'devis'        => $devis,
             'config'       => $config,
         ]);
+        
+        $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', false);
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', false);
+        $pdf->getDomPDF()->set_option('defaultFont', 'Helvetica');
+        
         return $pdf->download('devis_'.$devis->id.'.pdf');
     }
 

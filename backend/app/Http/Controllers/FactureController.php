@@ -48,8 +48,11 @@ class FactureController extends Controller
             return response()->json(['message' => 'Non autorisé'], 403);
         }
 
-        $config = Config::firstOrFail();
+        $config = Config::first() ?? new Config();
         $pdf = Pdf::loadView('factures.pdf', compact('facture', 'intervention', 'config'));
+        $pdf->getDomPDF()->set_option('isFontSubsettingEnabled', false);
+        $pdf->getDomPDF()->set_option('isRemoteEnabled', false);
+        $pdf->getDomPDF()->set_option('defaultFont', 'Helvetica');
         return $pdf->download('facture_' . $facture->reference . '.pdf');
     }
 }

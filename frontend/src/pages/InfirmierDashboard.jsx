@@ -11,6 +11,8 @@ import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import api from '../services/api';
 import { compressImage } from '../utils/imageCompressor';
 import { openOrDownloadPdf } from '../utils/pdfViewer';
+import { formatMoney, formatDate, formatDateTime, formatTime } from '../utils/formatters';
+import StatusBadge from '../components/common/StatusBadge';
 
 // Fix leaflet icon
 let DefaultIcon = L.icon({
@@ -492,18 +494,20 @@ export default function InfirmierDashboard() {
                       <div className="flex justify-between items-start mb-4">
                         <div>
                           <h3 className="font-bold text-lg text-slate-800">{mission.produit?.nom}</h3>
-                          <span className="inline-block bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold mt-1">Terminée</span>
+                          <div className="mt-1">
+                            <StatusBadge status={mission.statut || 'terminee'} />
+                          </div>
                         </div>
                         <div className="text-right">
-                          <span className="text-xs text-slate-400 font-medium">{new Date(mission.date_heure).toLocaleDateString('fr-FR')}</span>
+                          <span className="text-xs text-slate-400 font-medium">{formatDate(mission.date_heure)}</span>
                         </div>
                       </div>
                       <p className="text-sm text-slate-600 mb-2"><strong>Patient:</strong> {mission.client?.user?.name || 'Patient inconnu'}</p>
-                      <p className="text-sm text-slate-600 mb-3"><strong>Date:</strong> {new Date(mission.date_heure).toLocaleTimeString('fr-FR', {hour: '2-digit', minute:'2-digit'})}</p>
+                      <p className="text-sm text-slate-600 mb-3"><strong>Heure:</strong> {formatTime(mission.date_heure)}</p>
 
                       <div className="mt-2 p-3 bg-slate-50 rounded-lg border border-slate-100 mb-3">
                         <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Votre rémunération :</p>
-                        <p className="text-sm font-bold text-emerald-600">{mission.produit?.remuneration_soignant || 'N/A'} MAD</p>
+                        <p className="text-sm font-bold text-emerald-600">{formatMoney(mission.produit?.remuneration_soignant || 0)}</p>
                       </div>
 
                       {/* Zone Détails pliée/dépliée */}

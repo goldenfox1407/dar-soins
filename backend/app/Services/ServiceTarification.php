@@ -17,28 +17,31 @@ class ServiceTarification
      */
     private function calculerBaseSoin(Intervention $intervention, float $distanceKm = 0): array
     {
-        $config = Config::firstOrFail();
+        $config = Config::first() ?? new Config();
         
         $produit = $intervention->produit;
-        $prixSoin = $produit->prix_client;
+        $prixSoin = (float)($produit ? $produit->prix_client : 0);
         
         // Application de la remise
-        if ($produit->type_remise === 'percent') {
+        if ($produit && $produit->type_remise === 'percent' && $produit->valeur_remise > 0) {
             $prixSoin -= $prixSoin * ($produit->valeur_remise / 100);
-        } elseif ($produit->type_remise === 'fixed') {
-            $prixSoin -= $produit->valeur_remise;
+        } elseif ($produit && $produit->type_remise === 'fixed' && $produit->valeur_remise > 0) {
+            $prixSoin -= (float)$produit->valeur_remise;
         }
+        $prixSoin = max(0, $prixSoin);
 
-        $tarifKm = $intervention->tarif_km_manuel !== null ? $intervention->tarif_km_manuel : $config->tkmf_sm;
-        $fraisDeplacement = $distanceKm * $tarifKm;
-        
         // For garde_malade, multiply by hours
-        if ($intervention->type === 'garde_malade' && $intervention->duree_heures) {
-            $prixSoin *= $intervention->duree_heures;
+        if ($intervention->type === 'garde_malade' && $intervention->duree_heures > 0) {
+            $prixSoin *= (float)$intervention->duree_heures;
         }
 
-        $montantTTC = $prixSoin + $fraisDeplacement;
-        $montantHT = $montantTTC / (1 + ($config->tva / 100));
+        $tarifKm = (float)($intervention->tarif_km_manuel !== null ? $intervention->tarif_km_manuel : ($config->tkmf_sm ?? 2.5));
+        $fraisDeplacement = round((float)$distanceKm * $tarifKm, 2);
+        $prixSoin = round($prixSoin, 2);
+
+        $montantTTC = round($prixSoin + $fraisDeplacement, 2);
+        $tvaRate = (float)($config->tva ?? 20);
+        $montantHT = round($montantTTC / (1 + ($tvaRate / 100)), 2);
 
         return [
             'prix_soin' => $prixSoin,
@@ -54,15 +57,17 @@ class ServiceTarification
      */
     public function calculerDevis(Intervention $intervention, $distanceKm = 0)
     {
-        $calcul = $this->calculerBaseSoin($intervention, $distanceKm);
+        $calcul = $this->calculerBaseSoin($intervention, (float)$distanceKm);
 
-        $devis = Devis::create([
-            'intervention_id' => $intervention->id,
-            'montant_estime' => $calcul['montant_ttc'],
-            'frais_deplacement' => $calcul['frais_deplacement'],
-            'statut' => 'genere',
-            'date' => now()
-        ]);
+        $devis = Devis::updateOrCreate(
+            ['intervention_id' => $intervention->id],
+            [
+                'montant_estime' => $calcul['montant_ttc'],
+                'frais_deplacement' => $calcul['frais_deplacement'],
+                'statut' => 'genere',
+                'date' => now()
+            ]
+        );
 
         return $devis;
     }
