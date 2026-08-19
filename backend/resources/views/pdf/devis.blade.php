@@ -352,8 +352,8 @@
       <td style="width: 50%; font-size: 11px; color: #475569; line-height: 1.55;">
         <strong style="font-size: 12px; color: #1E293B;">{{ $config->nom_entreprise ?? 'Dar Soins Medicaux SARL' }}</strong><br>
         {{ $config->adresse ?? '123 Boulevard d\'Anfa' }}{{ $config->ville ? ', ' . $config->ville : ', Casablanca' }}<br>
-        @if($config->telephone) ☎ {{ $config->telephone }} @endif
-        @if($config->email_contact) &nbsp;|&nbsp; ✉ {{ $config->email_contact }} @endif
+        @if($config->telephone) Tél : {{ $config->telephone }} @endif
+        @if($config->email_contact) &nbsp;|&nbsp; Email : {{ $config->email_contact }} @endif
       </td>
       <td style="width: 50%; vertical-align: bottom;">
         <table class="invoice-meta-table">
@@ -376,7 +376,7 @@
 
   {{-- ══ BANDEAU ESTIMATIF ══ --}}
   <div class="estimate-banner">
-    <strong>⚠ Devis estimatif officiel</strong> — Ce document est établi selon votre demande de soin. Le montant définitif est calculé sur la base de l'intervention réalisée à domicile.
+    <strong>Devis estimatif officiel</strong> — Ce document est établi selon votre demande de soin. Le montant définitif est calculé sur la base de l'intervention réalisée à domicile.
   </div>
 
   {{-- ══ PARTIES COTE A COTE ══ --}}

@@ -346,17 +346,17 @@
   if ($isPaye) {
       $statutPaiement = 'Payé';
       $statutPaiementColor = '#16A34A';
-      $statutPaiementBadge = '✓ Payé';
+      $statutPaiementBadge = 'Payé';
       $montantAfficheRegle = $montantRecu > 0 ? $montantRecu : $montantTotalFacture;
   } elseif ($montantRecu > 0) {
       $statutPaiement = 'Paiement partiel';
       $statutPaiementColor = '#D97706';
-      $statutPaiementBadge = '⚠ Paiement partiel';
+      $statutPaiementBadge = 'Paiement partiel';
       $montantAfficheRegle = $montantRecu;
   } else {
       $statutPaiement = 'En attente de paiement';
       $statutPaiementColor = '#DC2626';
-      $statutPaiementBadge = '⏳ En attente';
+      $statutPaiementBadge = 'En attente';
       $montantAfficheRegle = 0;
   }
 @endphp
@@ -390,8 +390,8 @@
       <td style="width: 50%; font-size: 10.5px; color: #475569; line-height: 1.5;">
         <strong style="font-size: 11.5px; color: #1E293B;">{{ $config->nom_entreprise ?? 'Dar Soins Medicaux SARL' }}</strong><br>
         {{ $config->adresse ?? '123 Boulevard d\'Anfa' }}{{ $config->ville ? ', ' . $config->ville : ', Casablanca' }}<br>
-        @if($config->telephone) ☎ {{ $config->telephone }} @endif
-        @if($config->email_contact) &nbsp;|&nbsp; ✉ {{ $config->email_contact }} @endif
+        @if($config->telephone) Tél : {{ $config->telephone }} @endif
+        @if($config->email_contact) &nbsp;|&nbsp; Email : {{ $config->email_contact }} @endif
       </td>
       <td style="width: 50%; vertical-align: bottom;">
         <table class="invoice-meta-table">
@@ -544,7 +544,7 @@
             <img src="{{ $intervention->signature_patient }}" style="max-height: 65px; max-width: 175px; display: inline-block; margin-top: 2px;" alt="Signature Patient">
           @else
             <div style="height: 65px; display: flex; align-items: center; justify-content: center;">
-              <span style="font-size: 11px; color: #16A34A; font-weight: bold;">✓ Émargé et validé lors de la visite</span>
+              <span style="font-size: 11px; color: #16A34A; font-weight: bold;">Émargé et validé lors de la visite</span>
             </div>
           @endif
         </div>
