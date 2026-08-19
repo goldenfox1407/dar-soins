@@ -334,6 +334,31 @@
 
   $cachetFile = file_exists(public_path('images/cachet_opt.jpg')) ? public_path('images/cachet_opt.jpg') : public_path('images/cachet.jpg');
   $cachetB64 = file_exists($cachetFile) ? 'data:image/jpeg;base64,' . base64_encode(file_get_contents($cachetFile)) : '';
+
+  // Évaluation dynamique du statut de règlement
+  $montantTotalFacture = (float)$facture->montant_total;
+  $montantRecu = (float)($intervention->montant_recu ?? 0);
+  
+  $isPaye = ($montantRecu >= $montantTotalFacture) 
+         || ($intervention->statut === 'terminee') 
+         || (!empty($intervention->methode_paiement) && $montantRecu > 0);
+
+  if ($isPaye) {
+      $statutPaiement = 'Payé';
+      $statutPaiementColor = '#16A34A';
+      $statutPaiementBadge = '✓ Payé';
+      $montantAfficheRegle = $montantRecu > 0 ? $montantRecu : $montantTotalFacture;
+  } elseif ($montantRecu > 0) {
+      $statutPaiement = 'Paiement partiel';
+      $statutPaiementColor = '#D97706';
+      $statutPaiementBadge = '⚠ Paiement partiel';
+      $montantAfficheRegle = $montantRecu;
+  } else {
+      $statutPaiement = 'En attente de paiement';
+      $statutPaiementColor = '#DC2626';
+      $statutPaiementBadge = '⏳ En attente';
+      $montantAfficheRegle = 0;
+  }
 @endphp
 
 <div class="top-bar"></div>
@@ -379,8 +404,8 @@
             <td class="val">{{ \Carbon\Carbon::parse($intervention->date_heure)->format('d/m/Y à H:i') }}</td>
           </tr>
           <tr>
-            <td class="lbl">Statut :</td>
-            <td class="val" style="color: #16A34A;">Régularisé / Clôturé</td>
+            <td class="lbl">Statut facture :</td>
+            <td class="val" style="color: {{ $statutPaiementColor }}; font-weight: bold;">{{ $statutPaiement }}</td>
           </tr>
         </table>
       </td>
@@ -485,9 +510,9 @@
       <td class="payment-col">
         <div class="payment-info-box">
           <strong style="text-transform: uppercase; font-size: 10px; display: block; margin-bottom: 4px; color: #1E293B;">Modalités de Règlement</strong>
-          Mode de règlement : <strong>{{ ucfirst($intervention->methode_paiement ?: 'Espèces / En ligne') }}</strong><br>
-          Montant acquitté : <strong>{{ number_format($totalFactureTTC, 2, ',', ' ') }} {{ $devise }}</strong><br>
-          Statut : <span style="color: #16A34A; font-weight: bold;">✓ Facture soldée</span>
+          Mode de règlement : <strong>{{ ucfirst(str_replace('_', ' ', $intervention->methode_paiement ?: 'Espèces / En ligne')) }}</strong><br>
+          Montant réglé : <strong>{{ number_format($montantAfficheRegle, 2, ',', ' ') }} {{ $devise }}</strong><br>
+          Statut : <span style="color: {{ $statutPaiementColor }}; font-weight: bold;">{{ $statutPaiementBadge }}</span>
         </div>
       </td>
       <td class="totals-col">
