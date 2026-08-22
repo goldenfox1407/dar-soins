@@ -92,7 +92,6 @@ class UserFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'role' => 'gestionnaire',
         ])->afterCreating(function (User $user) {
-            Gestionnaire::factory()->create(['user_id' => $user->id]);
             $this->ensureRole($user, 'gestionnaire');
         });
     }

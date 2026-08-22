@@ -192,7 +192,7 @@ class RapportController extends Controller
      */
     public function stockReport(Request $request)
     {
-        $produits = Produit::with('materiels')->get();
+        $produits = Produit::all();
 
         $valeurAchatTotale = 0;
         $valeurVenteTotale = 0;

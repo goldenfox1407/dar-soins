@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Infirmier;
-use App\Models\Gestionnaire;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -95,8 +94,6 @@ class UserController extends Controller
             }
 
             Infirmier::create($infirmierData);
-        } elseif ($request->role === 'gestionnaire') {
-            Gestionnaire::create(['user_id' => $user->id]);
         }
 
         return response()->json($user->load('roles'), 201);

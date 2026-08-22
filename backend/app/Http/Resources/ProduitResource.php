@@ -29,7 +29,6 @@ class ProduitResource extends JsonResource
             'marque_id' => $this->marque_id,
             'unite_id' => $this->unite_id,
             'quantite_stock' => $this->stock_initial, // Temporary simple mapping, can be replaced by calculated stock
-            'materiels' => MaterielResource::collection($this->whenLoaded('materiels')),
             'created_at' => $this->created_at?->toISOString(),
         ];
     }

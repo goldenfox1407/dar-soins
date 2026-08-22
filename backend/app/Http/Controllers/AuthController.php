@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Infirmier;
-use App\Models\Gestionnaire;
 use App\Http\Resources\UserResource;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
@@ -37,8 +36,6 @@ class AuthController extends Controller
             ]);
         } elseif ($user->role === 'infirmier') {
             Infirmier::create(['user_id' => $user->id, 'specialite' => 'Polyvalent']);
-        } elseif ($user->role === 'gestionnaire') {
-            Gestionnaire::create(['user_id' => $user->id]);
         }
 
         // Assign Spatie role (creates it if missing)

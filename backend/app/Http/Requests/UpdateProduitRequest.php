@@ -31,9 +31,6 @@ class UpdateProduitRequest extends FormRequest
             'unite_id' => 'nullable|exists:unites,id',
             'gerer_stock' => 'nullable|boolean',
             'quantite_alerte' => 'nullable|integer|min:0',
-            'materiels' => 'nullable|array',
-            'materiels.*.materiel_id' => 'required_with:materiels|exists:materiels,id',
-            'materiels.*.quantite_requise' => 'nullable|integer|min:1',
         ];
     }
 

@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\User;
 use App\Models\Client;
 use App\Models\Infirmier;
-use App\Models\Gestionnaire;
 use App\Models\Produit;
 use App\Models\Materiel;
 use App\Models\Localisation;
@@ -34,7 +33,6 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@dar-soins.com'],
             ['nom' => 'Gestionnaire Dar-Soins', 'password' => Hash::make('password'), 'role' => 'gestionnaire']
         );
-        Gestionnaire::firstOrCreate(['user_id' => $admin->id]);
         $roleGestionnaire = Role::where('name', 'gestionnaire')->first();
         if ($roleGestionnaire && !$admin->hasRole('gestionnaire')) {
             $admin->assignRole($roleGestionnaire);

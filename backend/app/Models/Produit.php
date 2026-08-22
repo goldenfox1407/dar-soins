@@ -29,8 +29,4 @@ class Produit extends Model
         'gerer_stock',
         'quantite_alerte',
     ];
-
-    public function materiels() {
-        return $this->belongsToMany(Materiel::class, 'materiel_produit')->withPivot('quantite_requise');
-    }
 }

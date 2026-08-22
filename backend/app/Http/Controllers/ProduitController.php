@@ -17,7 +17,7 @@ class ProduitController extends Controller
     public function index()
     {
         $produits = CacheService::remember('produits:all', 3600, function () {
-            return ProduitResource::collection(Produit::with('materiels')->get());
+            return ProduitResource::collection(Produit::all());
         });
 
         return response()->json($produits);
@@ -28,7 +28,7 @@ class ProduitController extends Controller
      */
     public function show($id)
     {
-        $produit = Produit::with('materiels')->findOrFail($id);
+        $produit = Produit::findOrFail($id);
         return response()->json(['data' => new ProduitResource($produit)]);
     }
 
@@ -38,8 +38,7 @@ class ProduitController extends Controller
      */
     public function store(StoreProduitRequest $request)
     {
-
-        $data = $request->except(['materiels', 'image']);
+        $data = $request->except(['image']);
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('produits', 'public');
@@ -48,19 +47,11 @@ class ProduitController extends Controller
 
         $produit = Produit::create($data);
 
-        if ($request->has('materiels')) {
-            $syncData = [];
-            foreach ($request->materiels as $mat) {
-                $syncData[$mat['materiel_id']] = ['quantite_requise' => $mat['quantite_requise'] ?? 1];
-            }
-            $produit->materiels()->sync($syncData);
-        }
-
         CacheService::forget('produits:all');
 
         return response()->json([
             'message' => 'Produit créé avec succès',
-            'produit' => new ProduitResource($produit->load('materiels'))
+            'produit' => new ProduitResource($produit)
         ], 201);
     }
 
@@ -71,7 +62,7 @@ class ProduitController extends Controller
     {
         $produit = Produit::findOrFail($id);
 
-        $data = $request->except(['materiels', 'image']);
+        $data = $request->except(['image']);
         
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('produits', 'public');
@@ -80,19 +71,11 @@ class ProduitController extends Controller
 
         $produit->update($data);
 
-        if ($request->has('materiels')) {
-            $syncData = [];
-            foreach ($request->materiels as $mat) {
-                $syncData[$mat['materiel_id']] = ['quantite_requise' => $mat['quantite_requise'] ?? 1];
-            }
-            $produit->materiels()->sync($syncData);
-        }
-
         CacheService::forget('produits:all');
 
         return response()->json([
             'message' => 'Produit mis à jour avec succès',
-            'produit' => new ProduitResource($produit->load('materiels'))
+            'produit' => new ProduitResource($produit)
         ]);
     }
 
