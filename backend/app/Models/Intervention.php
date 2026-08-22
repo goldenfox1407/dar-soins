@@ -27,7 +27,27 @@ class Intervention extends Model
         'signature_patient',
         'distance_manuelle',
         'tarif_km_manuel',
+        'infirmiers_refuses_ids',
     ];
+
+    protected $casts = [
+        'infirmiers_refuses_ids' => 'array',
+    ];
+
+    public function ajouterInfirmierRefus(int $infirmierId): void
+    {
+        $refus = $this->infirmiers_refuses_ids ?? [];
+        if (!in_array($infirmierId, $refus)) {
+            $refus[] = $infirmierId;
+            $this->infirmiers_refuses_ids = $refus;
+            $this->save();
+        }
+    }
+
+    public function getIgnoredInfirmiersIds(): array
+    {
+        return $this->infirmiers_refuses_ids ?? [];
+    }
 
     public function client() {
         return $this->belongsTo(Client::class);
@@ -59,9 +79,5 @@ class Intervention extends Model
 
     public function facture() {
         return $this->hasOne(Facture::class);
-    }
-
-    public function infirmiers_refuses() {
-        return $this->belongsToMany(Infirmier::class, 'intervention_refus');
     }
 }

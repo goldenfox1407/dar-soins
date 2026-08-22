@@ -295,7 +295,7 @@ class InterventionController extends Controller
     {
         $intervention = Intervention::with('localisation')->findOrFail($id);
         
-        $ignoredIds = $intervention->infirmiers_refuses()->pluck('infirmiers.id')->toArray();
+        $ignoredIds = $intervention->infirmiers_refuses_ids ?? [];
         $infirmiers = \App\Models\Infirmier::where('est_disponible', true)
                         ->whereNotIn('id', $ignoredIds)
                         ->whereNotNull('latitude')
@@ -412,9 +412,7 @@ class InterventionController extends Controller
 
             return response()->json(['message' => 'Intervention acceptée avec succès. En attente du devis gestionnaire.']);
         } else {
-            if (method_exists($intervention, 'infirmiers_refuses')) {
-                $intervention->infirmiers_refuses()->syncWithoutDetaching([$user->infirmier->id]);
-            }
+            $intervention->ajouterInfirmierRefus($user->infirmier->id);
             $intervention->infirmier_id = null;
             $intervention->statut = 'en_attente_affectation'; // Return to manager map
             $intervention->save();
