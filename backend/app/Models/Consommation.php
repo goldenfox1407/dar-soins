@@ -16,7 +16,7 @@ class Consommation extends Model
     ];
 
     public function materiel() {
-        return $this->belongsTo(Materiel::class);
+        return $this->belongsTo(Produit::class, 'produit_id');
     }
 
     public function produit() {

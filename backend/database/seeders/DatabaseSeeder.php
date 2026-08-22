@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Models\Client;
 use App\Models\Infirmier;
 use App\Models\Produit;
-use App\Models\Materiel;
-use App\Models\Localisation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
@@ -55,10 +53,9 @@ class DatabaseSeeder extends Seeder
             ['email' => 'infirmier@dar-soins.com'],
             ['nom' => 'Karim Infirmier', 'password' => Hash::make('password'), 'role' => 'infirmier']
         );
-        Localisation::firstOrCreate(['latitude' => 34.020882, 'longitude' => -6.841650]);
         Infirmier::firstOrCreate(
             ['user_id' => $infUser->id],
-            ['specialite' => 'Polyvalent', 'est_disponible' => true]
+            ['specialite' => 'Polyvalent', 'est_disponible' => true, 'latitude' => 34.020882, 'longitude' => -6.841650]
         );
         $roleInfirmier = Role::where('name', 'infirmier')->first();
         if ($roleInfirmier && !$infUser->hasRole('infirmier')) {
@@ -69,9 +66,9 @@ class DatabaseSeeder extends Seeder
         Produit::firstOrCreate(['nom' => 'Pansement complexe'], ['type' => 'soin', 'prix_client' => 100, 'remuneration_soignant' => 60]);
         Produit::firstOrCreate(['nom' => 'Garde-malade (Nuit)'], ['type' => 'garde', 'prix_client' => 400, 'remuneration_soignant' => null]);
 
-        Materiel::firstOrCreate(['nom' => 'Compresses Stériles'], ['stock_actuel' => 450, 'prix_unitaire' => 2]);
-        Materiel::firstOrCreate(['nom' => 'Gants latex'], ['stock_actuel' => 120, 'prix_unitaire' => 5]);
-        Materiel::firstOrCreate(['nom' => 'Seringues 5ml'], ['stock_actuel' => 12, 'prix_unitaire' => 3]);
+        Produit::firstOrCreate(['nom' => 'Compresses Stériles'], ['type' => 'consommable', 'prix_client' => 2, 'prix_achat' => 1, 'stock_initial' => 450, 'gerer_stock' => true]);
+        Produit::firstOrCreate(['nom' => 'Gants latex'], ['type' => 'consommable', 'prix_client' => 5, 'prix_achat' => 3, 'stock_initial' => 120, 'gerer_stock' => true]);
+        Produit::firstOrCreate(['nom' => 'Seringues 5ml'], ['type' => 'consommable', 'prix_client' => 3, 'prix_achat' => 1.5, 'stock_initial' => 12, 'gerer_stock' => true]);
     }
 }
 

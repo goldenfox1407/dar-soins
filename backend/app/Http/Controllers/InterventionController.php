@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Intervention;
-use App\Models\Localisation;
-use App\Models\Materiel;
 use App\Models\Consommation;
 use App\Models\ConstanteMedicale;
 use App\Models\User;
@@ -49,7 +47,7 @@ class InterventionController extends Controller
                 ->get();
             return response()->json($interventions);
         } elseif ($user->hasRole('infirmier')) {
-            $interventions = Intervention::with(['client.user', 'produit', 'devis', 'localisation', 'facture', 'constantes', 'consommations.produit'])
+            $interventions = Intervention::with(['client.user', 'produit', 'devis', 'facture', 'constantes', 'consommations.produit'])
                 ->where('infirmier_id', $user->infirmier->id)
                 ->orderBy('created_at', 'desc')
                 ->get();
@@ -71,25 +69,19 @@ class InterventionController extends Controller
             $path = $request->file('fichier_joint')->store('interventions', 'public');
         }
 
-        $intervention = DB::transaction(function () use ($user, $request, $path) {
-            $localisation = Localisation::create([
-                'latitude'  => $request->latitude,
-                'longitude' => $request->longitude,
-            ]);
-
-            return Intervention::create([
-                'client_id'           => $user->client->id,
-                'infirmier_id'        => null,
-                'produit_id'          => $request->produit_id,
-                'localisation_id'     => $localisation->id,
-                'date_heure'          => $request->date_heure,
-                'type'                => $request->type,
-                'duree_heures'        => $request->duree_heures,
-                'statut'              => 'en_attente_affectation',
-                'description_probleme'=> $request->description_probleme,
-                'fichier_joint'       => $path,
-            ]);
-        });
+        $intervention = Intervention::create([
+            'client_id'           => $user->client->id,
+            'infirmier_id'        => null,
+            'produit_id'          => $request->produit_id,
+            'latitude'            => $request->latitude,
+            'longitude'           => $request->longitude,
+            'date_heure'          => $request->date_heure,
+            'type'                => $request->type,
+            'duree_heures'        => $request->duree_heures,
+            'statut'              => 'en_attente_affectation',
+            'description_probleme'=> $request->description_probleme,
+            'fichier_joint'       => $path,
+        ]);
 
         // Notifier tous les gestionnaires / admins
         try {

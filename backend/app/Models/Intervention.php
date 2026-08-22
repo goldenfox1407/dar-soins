@@ -14,7 +14,8 @@ class Intervention extends Model
         'client_id',
         'infirmier_id',
         'produit_id',
-        'localisation_id',
+        'latitude',
+        'longitude',
         'date_heure',
         'type',
         'duree_heures',
@@ -32,7 +33,24 @@ class Intervention extends Model
 
     protected $casts = [
         'infirmiers_refuses_ids' => 'array',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
+
+    protected $appends = ['localisation'];
+
+    /**
+     * Virtual accessor for seamless backwards compatibility
+     * Allows $intervention->localisation->latitude / longitude / adresse everywhere
+     */
+    public function getLocalisationAttribute()
+    {
+        return (object)[
+            'latitude'  => $this->latitude,
+            'longitude' => $this->longitude,
+            'adresse'   => $this->client?->adresse ?? 'Domicile du patient',
+        ];
+    }
 
     public function ajouterInfirmierRefus(int $infirmierId): void
     {
@@ -59,10 +77,6 @@ class Intervention extends Model
 
     public function produit() {
         return $this->belongsTo(Produit::class);
-    }
-
-    public function localisation() {
-        return $this->belongsTo(Localisation::class);
     }
 
     public function consommations() {
